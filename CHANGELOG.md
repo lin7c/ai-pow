@@ -7,6 +7,7 @@
 - Redesign reports with dark slate surfaces, orange/white contrast, angular controls, and compact typography.
 - Show the exact previous-total + commit-score = new-total calculation in iteration reports.
 - Refresh English documentation, interactive demos, and browser checks.
+- Retry transient event-writer lock contention with a stable event ID and a bounded retry count.
 
 ## 0.2.0
 

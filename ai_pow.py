@@ -403,6 +403,16 @@ class Recorder:
         return True
 
     def record(self, kind, data, source="generic", event_id=None):
+        event_id = event_id or uuid.uuid4().hex
+        for attempt in range(3):
+            try:
+                return self._record_once(kind, data, source, event_id)
+            except sqlite3.OperationalError as exc:
+                if attempt == 2 or not any(word in str(exc).lower() for word in ("locked", "busy")):
+                    raise
+                time.sleep(.02 * (attempt + 1))
+
+    def _record_once(self, kind, data, source, event_id):
         with self.connection() as db:
             self._boundary(db, automatic=True)
             if kind == "model.usage":

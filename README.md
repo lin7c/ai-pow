@@ -196,6 +196,10 @@ The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is
 | Wrapper | Samples every two seconds; no permanent daemon |
 | Git commands | Output bounds and ten-second per-command timeout |
 
+Concurrent event writers retry a transient SQLite busy/locked error at most twice,
+using the same event ID. Each lock wait is bounded to one second; persistent
+contention still surfaces as a recording failure rather than blocking indefinitely.
+
 The database cap excludes SQLite journals, explicit exports, and reports. Scoring memory is bounded by selected events and fingerprints, but is not a hard process-RSS cap. Commit scoring can invoke multiple Git commands; large repositories may take longer. Run `python scripts/benchmark.py` on your workload. Raise database capacity with `aipow quota --max-mib 128`; this does not recover previously missed events.
 
 Built-in adapters retain hashes, sizes, and metadata, not prompt/source bodies, tool arguments/output, or reasoning. Reports include commit subjects and dates. Hashes are not anonymization. Generic event payloads are caller-controlled. Review exports before sharing; see [SECURITY.md](SECURITY.md).

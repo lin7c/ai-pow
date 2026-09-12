@@ -9,6 +9,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 import ai_pow as pow
 
@@ -96,6 +97,25 @@ class ProtocolTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.rec.record("tool.call", {"name": "other"}, event_id="one")
         self.assertEqual(len(self.events()), 1)
+
+    def test_busy_writer_retries_same_event_identity(self):
+        original = self.rec._record_once
+        identities = []
+        def busy_then_write(kind, data, source, event_id):
+            identities.append(event_id)
+            if len(identities) < 3:
+                raise sqlite3.OperationalError("database is locked")
+            return original(kind, data, source, event_id)
+        with patch.object(self.rec, "_record_once", side_effect=busy_then_write):
+            self.assertTrue(self.rec.record("tool.call", {"name": "shell"}))
+        self.assertEqual(len(set(identities)), 1)
+        self.assertEqual(len(self.events()), 1)
+
+    def test_busy_writer_retry_is_bounded(self):
+        with patch.object(self.rec, "_record_once", side_effect=sqlite3.OperationalError("database is locked")) as call:
+            with self.assertRaises(sqlite3.OperationalError):
+                self.rec.record("tool.call", {"name": "shell"})
+            self.assertEqual(call.call_count, 3)
 
     def test_concurrent_writers(self):
         errors = []
