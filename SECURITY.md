@@ -1,6 +1,8 @@
 # Security policy
 
-AI-PoW v0.1 is an experimental local recorder. It is not a trusted-execution environment or a tamper-proof audit service.
+AI-PoW is an experimental local recorder. It is not a trusted-execution environment or a tamper-proof audit service.
+
+Application 0.2 HTML reports embed commit subjects, dates, resource metadata, and scoring evidence. Iteration reports additionally embed up to 30 previous commit summaries; switching to latest mode only hides that data. Export with `--view latest` to omit history entirely. Reports escape embedded data, use a script-hash Content Security Policy, and fetch no external resources. Review explicit exports before publishing them. Local consistency and a high process score do not imply secure or correct software.
 
 ## Trust model
 

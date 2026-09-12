@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 AI-PoW contributors
-"""AI-PoW 0.1: dependency-free, local provenance (not proof of honest work).
+"""AI-PoW 0.2: dependency-free process scoring and local provenance.
 
 This file is also vendored into laintas-cli. No daemon, network or model calls.
 """
@@ -25,6 +25,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -129,6 +130,16 @@ def validate_event(kind, data):
         if method == "utf8-bytes/4-estimate":
             if type(data.get("bytes")) is not int or data.get("tokens") != (data["bytes"] + 3) // 4:
                 raise ValueError("Byte-based token estimate is inconsistent")
+    if kind == "task.change" and "status" in data:
+        if data["status"] not in {"active", "completed", "dropped"} or not isinstance(data.get("task_id"), str) or not 1 <= len(data["task_id"]) <= 256:
+            raise ValueError("A task needs a stable task_id and active/completed/dropped status")
+        if not isinstance(data.get("evidence", []), list) or len(data.get("evidence", [])) > 32 or any(not isinstance(p, str) or len(p) != 64 or any(c not in "0123456789abcdef" for c in p) for p in data.get("evidence", [])):
+            raise ValueError("Task evidence must contain SHA-256 path identifiers")
+    if kind == "file.observed" and "units_before" in data:
+        for key in ("units_before", "units_after"):
+            units = data.get(key)
+            if not isinstance(units, list) or len(units) > 64 or any(not isinstance(p, str) or len(p) != 64 or any(c not in "0123456789abcdef" for c in p) for p in units):
+                raise ValueError("Artifact units must be bounded SHA-256 identifiers")
     if kind == "model.usage":
         if not data.get("model") or data.get("measurement") not in {"provider_reported", "estimated"}:
             raise ValueError("Model usage needs model and measurement")
@@ -332,7 +343,7 @@ class Recorder:
         finally:
             db.close()
 
-    def init(self, max_mib=64):
+    def init(self, max_mib=64, report_view="iteration"):
         if not 4 <= max_mib <= 4096:
             raise ValueError("Quota must be between 4 and 4096 MiB")
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -353,7 +364,7 @@ class Recorder:
             for k, v in {"version": VERSION, "max_bytes": str(max_mib * 1024**2),
                          "epoch": uuid.uuid4().hex, "base": head(self.root) or "",
                          "started_ms": str(time.time_ns() // 1000000), "last_hash": ZERO,
-                         "sampled": "0"}.items():
+                         "sampled": "0", "report_view": report_view}.items():
                 db.execute("INSERT INTO meta VALUES (?,?)", (k, v))
             db.commit()
         finally:
@@ -530,6 +541,7 @@ class Recorder:
                          "File observations are sampled; intermediate writes may be missed",
                          "Events are interval-associated, not causally attributed to staged changes",
                          "Worktrees are independent; imported work is not re-counted"]}
+        p["score"] = self.evaluate(db, p)
         p["proof_hash"] = digest(p)
         db.execute("INSERT INTO proofs VALUES (?,?)", (current, canonical(p).decode()))
         self.put(db, "base", current)
@@ -540,12 +552,102 @@ class Recorder:
     def seal(self):
         with self.connection() as db:
             p = self._boundary(db)
-            if p:
-                return p
-            old = db.execute("SELECT body FROM proofs WHERE commit_id=?", (head(self.root),)).fetchone()
-            if old:
-                return json.loads(old[0])
-            raise ValueError("No new commit to seal (the starting commit predates recording)")
+            if not p:
+                old = db.execute("SELECT body FROM proofs WHERE commit_id=?", (head(self.root),)).fetchone()
+                if not old:
+                    raise ValueError("No new commit to seal (the starting commit predates recording)")
+                p = json.loads(old[0])
+        # Report failures do not roll back a valid proof or the user's commit.
+        try:
+            path = self.html_report(p["commit"])
+            print("AI-PoW " + (p.get("score") or {}).get("value", "unscored") + " | " + str(path), file=sys.stderr)
+        except Exception as exc:
+            record_error(self, exc)
+            print("AI-PoW: proof sealed; HTML report could not be written", file=sys.stderr)
+        return p
+
+    def evaluate(self, db, proof):
+        return evaluate_score(self.root, proof, self._events(db, proof["epoch"]))
+
+    def report_data(self, ref="HEAD", view="iteration"):
+        from ai_pow_scoring import history_stats, ladder_step
+        if view not in {"iteration", "latest"}:
+            raise ValueError("Report view must be iteration or latest")
+        current = self.proof(ref)
+        current_sealed_score = current.get("score")
+        verification = self.verify(ref)
+        with self.connection() as db:
+            if not current.get("score"):
+                current = {**current, "score": self.evaluate(db, current)}
+            def decorate(proof):
+                subject = git(self.root, "show", "-s", "--format=%s%n%cI", proof["commit"]).decode("utf-8", "replace").splitlines()
+                return {"commit": proof["commit"], "title": subject[0][:240], "date": subject[-1],
+                        "score": proof.get("score"), "summary": proof["summary"], "proof_hash": proof["proof_hash"]}
+            history = []
+            iteration = None
+            if view == "iteration":
+                # Replay the entire bounded first-parent lineage, not just the
+                # visible 30 rows. Never reset ratings as rows leave the view.
+                lineage = git(self.root, "rev-list", "--first-parent", current["commit"]).decode().splitlines()
+                ancestors = lineage[1:31]
+                visible = set(lineage[:31])
+                ratings = {}
+                for commit in reversed(lineage):
+                    row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
+                    saved = json.loads(row[0]).get("score") if row else None
+                    if commit == current["commit"]:
+                        saved = current_sealed_score
+                    if saved and saved["algorithm"] != current["score"]["algorithm"]:
+                        saved = None
+                    iteration = ladder_step(iteration, saved)
+                    if commit in visible:
+                        ratings[commit] = iteration
+                for commit in ancestors:
+                    row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
+                    if row:
+                        history.append(decorate(json.loads(row[0])))
+                    else:
+                        subject = git(self.root, "show", "-s", "--format=%s%n%cI", commit).decode("utf-8", "replace").splitlines()
+                        history.append({"commit": commit, "title": subject[0][:240], "date": subject[-1], "score": None})
+                    history[-1]["iteration"] = ratings[commit]
+            return {"project": self.root.name, "view": view, "current": decorate(current), "history": history,
+                    "iteration": iteration,
+                    "statistics": history_stats(current["score"], history) if view == "iteration" else None,
+                    "verification": verification, "demo": False}
+
+    def html_report(self, ref="HEAD", view=None, destination=None):
+        from ai_pow_report import render
+        if view is None:
+            with self.connection() as db:
+                row = db.execute("SELECT value FROM meta WHERE key='report_view'").fetchone()
+                view = row[0] if row else "iteration"
+        data = self.report_data(ref, view)
+        html = render(data).encode("utf-8")
+        if len(html) > 8 * 1024 * 1024:
+            raise ValueError("HTML report exceeds 8 MiB")
+        if destination:
+            with open(destination, "xb") as out:
+                os.chmod(destination, 0o600)
+                out.write(html)
+            return Path(destination)
+        directory = self.directory / "reports"
+        if directory.is_symlink():
+            raise ValueError("Report directory must not be a symlink")
+        directory.mkdir(mode=0o700, exist_ok=True)
+        path = directory / (data["current"]["commit"] + ".html")
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "wb") as out:
+            out.write(html)
+        # Only remove this recorder's generated HTML cache, never proofs or exports.
+        owned = sorted((p for p in directory.iterdir() if p.suffix == ".html" and len(p.stem) in {40, 64}
+                        and all(c in "0123456789abcdef" for c in p.stem) and p.is_file() and not p.is_symlink()),
+                       key=lambda p: p.stat().st_mtime_ns, reverse=True)
+        size = 0
+        for index, cached in enumerate(owned):
+            size += cached.stat().st_size
+            if cached != path and (index >= 20 or size > 16 * 1024 * 1024):
+                cached.unlink()
+        return path
 
     def reset_boundary(self):
         with self.connection() as db:
@@ -555,13 +657,19 @@ class Recorder:
             self.put(db, "base", head(self.root) or "")
             self.put(db, "sampled", "0")
             db.execute("DELETE FROM files")
+            if db.execute("SELECT 1 FROM sqlite_master WHERE name='file_units'").fetchone():
+                db.execute("DELETE FROM file_units")
         return {"reset": True, "unsealed_events": "retained in previous epoch"}
 
     def sample(self):
+        from ai_pow_scoring import fingerprints
         with self.connection() as db:
             self._boundary(db, automatic=True)
             paths = git(self.root, "ls-files", "-c", "-o", "--exclude-standard", "-z").split(b"\0")
             old_rows = {row[0]: (row[1], row[2]) for row in db.execute("SELECT path,hash,signature FROM files")}
+            db.execute("CREATE TABLE IF NOT EXISTS file_units(path TEXT PRIMARY KEY, units TEXT NOT NULL)")
+            old_units = dict(db.execute("SELECT path,units FROM file_units"))
+            new_units = {}
             seen, observed, signatures, skipped, read_bytes = set(), {}, {}, 0, 0
             new_paths = 0
             safe_parents = {self.root: True}
@@ -600,9 +708,11 @@ class Recorder:
                             continue
                         new_paths += 1
                     signature = f"{info.st_dev}:{info.st_ino}:{info.st_size}:{info.st_mtime_ns}:{info.st_ctime_ns}"
-                    if old_rows.get(path_id, (None, None))[1] == signature:
+                    if old_rows.get(path_id, (None, None))[1] == signature and path_id in old_units:
                         observed[path_id] = old_rows[path_id][0]
                         signatures[path_id] = signature
+                        if path_id in old_units:
+                            new_units[path_id] = json.loads(old_units[path_id])
                         continue
                     fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0))
                     with os.fdopen(fd, "rb") as stream:
@@ -619,6 +729,7 @@ class Recorder:
                     # Content hashes deliberately omit source text and file names from exported traces.
                     observed[path_id] = hashlib.sha256(content).hexdigest()
                     signatures[path_id] = signature
+                    new_units[path_id] = fingerprints(content, name)
                 except FileNotFoundError:
                     continue
                 except OSError:
@@ -629,12 +740,25 @@ class Recorder:
             for path_id in sorted(set(observed) | (set(old) if not skipped else set())):
                 before, after = old.get(path_id), observed.get(path_id)
                 if before != after and not initial:
-                    self._append(db, "file.observed", {"path_hash": path_id, "before": before, "after": after}, "sampler")
+                    data = {"path_hash": path_id, "before": before, "after": after}
+                    previous_units = json.loads(old_units[path_id]) if path_id in old_units else None
+                    following_units = new_units.get(path_id)
+                    if (before is None or previous_units is not None) and (after is None or following_units is not None):
+                        data.update(units_before=(previous_units or {}).get("units", []),
+                                    units_after=(following_units or {}).get("units", []),
+                                    unit_kind=(following_units or previous_units or {}).get("kind", "content-blocks"),
+                                    units_truncated=bool((previous_units or {}).get("truncated") or (following_units or {}).get("truncated")))
+                    self._append(db, "file.observed", data, "sampler")
                 if after:
                     if old_rows.get(path_id) != (after, signatures[path_id]):
                         db.execute("INSERT OR REPLACE INTO files VALUES (?,?,?)", (path_id, after, signatures[path_id]))
                 elif not skipped:
                     db.execute("DELETE FROM files WHERE path=?", (path_id,))
+                    db.execute("DELETE FROM file_units WHERE path=?", (path_id,))
+                if path_id in new_units:
+                    packed = canonical(new_units[path_id]).decode()
+                    if old_units.get(path_id) != packed:
+                        db.execute("INSERT OR REPLACE INTO file_units VALUES (?,?)", (path_id, packed))
             if skipped:
                 last_gap = db.execute("SELECT value FROM meta WHERE key='last_scan_skipped'").fetchone()
                 if not last_gap or last_gap[0] != str(skipped):
@@ -680,6 +804,59 @@ class Recorder:
         return {"exported": str(destination), "proof_hash": p["proof_hash"]}
 
 
+SCORING_TYPES = {"human.message", "file.observed", "task.change", "coverage.gap"}
+
+
+def evaluate_score(root, proof, events):
+    from ai_pow_scoring import collect_evidence, fingerprints, score
+    selected = []
+    for event in events:
+        if event["type"] in SCORING_TYPES:
+            selected.append(event)
+            if len(selected) > 4096:
+                break
+    truncated = len(selected) > 4096
+    selected = selected[:4096]
+    wanted = set()
+    for event in selected:
+        if event["type"] == "file.observed":
+            wanted.add(event["data"]["path_hash"])
+        elif event["type"] == "task.change":
+            wanted.update(event["data"].get("evidence", []))
+    # Only inspect bounded blobs from the committed tree, never the worktree.
+    args = ("diff", "--name-only", "--no-renames", "-z", proof["base"], proof["commit"]) if proof["base"] else (
+        "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "-z", proof["commit"])
+    changed = {p for p in git(root, *args).split(b"\0") if p}
+    units, known_paths = {}, set()
+    scope_units, read_bytes, inspected = 0, 0, 0
+    limited = truncated
+    for entry in git(root, "ls-tree", "-r", "-l", "-z", proof["commit"]).split(b"\0"):
+        if not entry:
+            continue
+        metadata, raw_path = entry.split(b"\t", 1)
+        mode, kind, oid, size = metadata.split()
+        path_id = hashlib.sha256(raw_path).hexdigest()
+        known_paths.add(path_id)
+        if path_id not in wanted and raw_path not in changed:
+            continue
+        if (kind != b"blob" or mode not in {b"100644", b"100755"} or int(size) > MAX_FILE
+                or read_bytes + int(size) > SCAN_BYTES or inspected >= 128):
+            limited = True
+            continue
+        content = git(root, "cat-file", "blob", oid.decode(), limit=MAX_FILE)
+        read_bytes += len(content)
+        inspected += 1
+        result = fingerprints(content, os.fsdecode(raw_path))
+        limited = limited or result["truncated"]
+        units[path_id] = result["units"]
+        if raw_path in changed:
+            scope_units += len(result["units"])
+    for path_id in wanted - known_paths:
+        units[path_id] = []  # A verified deletion is a surviving outcome too.
+    evidence = collect_evidence(selected, units, scope_units, len(changed), limited)
+    return score(evidence, proof["summary"])
+
+
 def verify_proof(root, proof, events):
     p = dict(proof)
     h = p.pop("proof_hash")
@@ -692,6 +869,7 @@ def verify_proof(root, proof, events):
     if (p["parents"][:1] or [None])[0] != p["base"]:
         raise ValueError("Proof base does not match first parent")
     previous, sequence, count = p["anchor"], p["first_seq"], 0
+    scoring_events = []
     def checked():
         nonlocal previous, sequence, count
         for item in events:
@@ -704,12 +882,17 @@ def verify_proof(root, proof, events):
             previous = eh
             sequence += 1
             count += 1
+            if p.get("score") and e["type"] in SCORING_TYPES and len(scoring_events) < 4097:
+                scoring_events.append(e)
             yield e
     totals = summary(checked(), algorithm=p["summary"].get("algorithm", "observed-v1"))
     if previous != p["trace_root"] or (sequence - 1 if count else None) != p["last_seq"]:
         raise ValueError("Trace missing or truncated")
     if bool(count) != (p["first_seq"] is not None) or totals != p["summary"]:
         raise ValueError("Summary/range mismatch")
+    if p.get("score"):
+        if evaluate_score(root, p, scoring_events) != p["score"]:
+            raise ValueError("Score calculation/version mismatch")
     return {"integrity_verified": True, "git_tree_verified": True, "events": count,
             "proof_hash": h, "trust": "local-self-reported", "completeness_verified": False,
             "work_authenticity_verified": False, "quality_verified": False}
@@ -857,11 +1040,12 @@ def record_error(recorder, exc):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cwd", default=os.environ.get("AIPOW_ROOT", "."))
-    parser.add_argument("--version", action="version", version=VERSION)
+    parser.add_argument("--version", action="version", version=APP_VERSION)
     sub = parser.add_subparsers(dest="action", required=True)
     init = sub.add_parser("init")
     init.add_argument("--max-mib", type=int, default=64)
     init.add_argument("--no-hook", action="store_true")
+    init.add_argument("--view", choices=("iteration", "latest"), default="iteration")
     for name in ("status", "sample", "seal", "reset-boundary", "install-hook", "hook-claude"):
         sub.add_parser(name)
     for name in ("report", "verify", "export"):
@@ -871,6 +1055,16 @@ def main(argv=None):
             p.add_argument("--bundle")
         if name == "export":
             p.add_argument("destination")
+        if name == "report":
+            p.add_argument("--html", action="store_true", help="Generate a self-contained HTML report")
+            p.add_argument("--view", choices=("iteration", "latest"))
+            p.add_argument("--output", help="Export HTML to a new file; existing files are preserved")
+    config = sub.add_parser("report-config")
+    config.add_argument("--view", choices=("iteration", "latest"), required=True)
+    task = sub.add_parser("task")
+    task.add_argument("task_id")
+    task.add_argument("--status", choices=("active", "completed", "dropped"), required=True)
+    task.add_argument("--evidence", nargs="*", default=[], help="Repository-relative committed artifact paths")
     emit = sub.add_parser("emit")
     emit.add_argument("type", choices=sorted(TYPES))
     emit.add_argument("--source", default="generic")
@@ -890,7 +1084,7 @@ def main(argv=None):
         recorder = Recorder(args.cwd)
         action = args.action
         if action == "init":
-            result = recorder.init(args.max_mib)
+            result = recorder.init(args.max_mib, args.view)
             if not args.no_hook:
                 result["hook"] = install_hook(recorder)
         elif action == "install-hook":
@@ -905,10 +1099,23 @@ def main(argv=None):
             result = recorder.import_claude_usage(args.path)
         elif action == "quota":
             result = recorder.set_quota(args.max_mib)
+        elif action == "report-config":
+            with recorder.connection() as db:
+                recorder.put(db, "report_view", args.view)
+            result = {"report_view": args.view}
+        elif action == "task":
+            evidence = []
+            for name in args.evidence:
+                path = Path(name)
+                if path.is_absolute() or ".." in path.parts:
+                    raise ValueError("Evidence paths must be repository-relative")
+                evidence.append(hashlib.sha256(os.fsencode(path.as_posix())).hexdigest())
+            result = {"recorded": recorder.record("task.change", {"task_id": args.task_id,
+                       "status": args.status, "evidence": evidence}, "task-cli")}
         elif action in {"status", "sample", "seal", "reset-boundary"}:
             result = getattr(recorder, action.replace("-", "_"))()
         elif action == "report":
-            result = recorder.proof(args.commit)
+            result = {"report": str(recorder.html_report(args.commit, args.view, args.output))} if args.html or args.output else recorder.proof(args.commit)
         elif action == "verify":
             result = verify_bundle(recorder.root, args.bundle) if args.bundle else recorder.verify(args.commit)
         elif action == "export":

@@ -1,90 +1,144 @@
-# Metrics and scoring
+# Scoring specification: balanced-v1
 
-AI-PoW v0.1 measures observed resource use and provenance. It deliberately provides no universal score.
+AI-PoW 0.2 ships a **process score**, separate from immutable event measurements. It expresses a preference: retain more observed work while using fewer resources for a similar-sized outcome. It does not measure correctness, developer ability, or commercial value.
 
-## Why the original efficiency formula is insufficient
+Missing evidence is neutral, not perfect. Small samples stay near 50. More tools, Skills, sub-agents, tokens, or edits do not directly earn points.
 
-The proposed expression was:
+## Weights and direction
 
-```text
-E = (human_survival^0.4 * artifact_survival^0.4 * task_survival^0.2)
-    / normalized_work
-```
+| Component | Weight | Higher when |
+| --- | ---: | --- |
+| Input retention | 28% | More edits linked to human messages survive |
+| Artifact survival | 28% | More observed structural/content operations survive |
+| Task fulfillment | 14% | More declared attempts finish with committed evidence |
+| Resource discipline | 30% | Scope-adjusted input, output, compute, and tool pressure is lower |
 
-It has no defensible interpretation until each numerator term, the work denominator, the quality requirement, and capture requirements are defined.
+The original 40:40:20 retention proportions remain inside a 70% retention share. These are explicit policy choices, not empirically established universal weights.
 
-| Problem | Counterexample | Consequence |
-| --- | --- | --- |
-| Survival is not quality | Removing vulnerable code lowers surviving edits | A successful repair can score worse |
-| Exploration has value | A test disproves an approach and is later removed | Discarded work may be necessary evidence |
-| Output quality is absent | A cheap incomplete solution uses fewer resources | Cost alone can reward failure |
-| Units are incompatible | Tokens, dollars, and tool calls are added directly | The denominator has no meaningful unit |
-| Missing capture looks efficient | One adapter misses half the model calls | A less complete recorder can appear better |
-| Task granularity is mutable | One requirement is split into ten tasks | Counts change without a different outcome |
-| Commit boundaries are mutable | A developer squashes or splits commits | Per-commit rankings become manipulable |
-| Zero and unknown differ | There were no measured artifact operations | The survival ratio is undefined, not 100% |
-| Costs vary by baseline | Providers change list prices or discount a tier | A price change can masquerade as an efficiency change |
-| Weighted products have edge cases | One survival term is zero | A useful result receives a zero numerator |
+## Evidence definitions
 
-Even a fixed weighted score expresses preferences rather than an objective measure of developer ability. The protocol must not silently choose those preferences.
+**Artifact operations.** Python files use top-level AST fingerprints. Other UTF-8 files use groups of eight nonempty, stripped lines. Binary files use 4 KiB blocks. Each sampled file retains at most 64 unique fingerprints. These are structural/content proxies, not interchangeable semantic work units. Modification counts as removal plus addition. Identical units are deduplicated.
 
-## Corrections implemented in observed-v2
+The first observed before-state is compared with the actual committed after-state. Only observed operations in that final difference survive. A full revert retains zero operations; deletion of existing code can survive. Latest lineage prevents repeated additions from counting as multiple surviving additions. Renames currently appear as deletion plus addition.
 
-### Text accounting
+**Input retention.** A file event belongs to its explicit prompt_id, if supplied, or the most recent human message. Each linked prompt's retained/raw operation fraction is token-weighted (minimum weight one). This is a temporal attribution proxy, **not semantic information survival**. Unlinked prompts reduce confidence. Concurrent work can make attribution wrong.
 
-The built-in heuristic is `ceil(UTF-8 bytes / 4)`. It is language-dependent and is not an exact tokenizer or a measurement of human reading time.
+**Task fulfillment.** Stable task IDs carry active, completed, or dropped statuses. Reopening a completed/dropped task starts another attempt. Completion counts only with a nonempty evidence list whose paths contain inspectable, nonempty committed units. Existence is not an acceptance test. Task granularity and completion are local claims. Pure-deletion tasks need another evidence artifact, such as a committed test, in this version.
 
-Previously, displaying eight one-byte chunks yielded eight estimated tokens, while displaying the same eight bytes at once yielded two. The new summary aggregates bytes within each text direction and estimation method before rounding. Event counts still reflect the actual number of observations.
+**Scope.** Final structural/content units in changed files, or retained operations if larger. This is size, not complexity. Editing one line in a large existing file may increase the resource allowance. Cohorts: small <8, medium <32, large <128, extensive otherwise. Cross-language and cross-project rankings are unsupported.
 
-Different tokenizer/method totals remain visible in `methods`. `unknown_token_events` and `tokens_complete` identify missing text accounting. Convenience token subtotals are not evidence that different tokenizers are comparable.
+## Smoothing and confidence
 
-### Missing model usage
-
-If one observed call reports 10 input tokens and another omits its input usage, the total is:
-
-```json
-{
-  "input_tokens": null,
-  "known_token_subtotals": {"input_tokens": 10},
-  "missing_field_calls": {"input_tokens": 1}
-}
-```
-
-The known subtotal is a partial observation, not the true total. Reported and estimated usage use different model buckets. Neither capture absence nor a null value should be converted to zero when ranking systems.
-
-### Reference pricing
-
-Prices are frozen per event. Pricing arithmetic has an explicit decimal precision rather than inheriting an embedding application's decimal settings. Cache reads and reasoning remain subsets, not extra tokens.
-
-`reference_usd_by_measurement` separates prices calculated from provider-reported usage and estimated usage. Completeness applies only to observed calls; it does not prove that all calls were captured. A provider-reported value read from a local transcript is not a signed provider receipt.
-
-### Versioned interpretation
-
-New summaries include `algorithm: observed-v2`. The original `observed-v1` reducer remains available for proofs without that field, so an existing proof is not silently rewritten under a newer metric definition.
-
-## A better benchmark layer
-
-This is a proposal for future benchmark tooling, not a feature shipped in v0.1.
-
-1. Define the task and immutable starting state, including accepted inputs and allowed tools.
-2. Define a quality gate with acceptance tests and explicit failure/security criteria. Compare resources only for results meeting it.
-3. Declare required capture capabilities and reject runs missing required measurements. `complete_for_observed_calls` alone is insufficient.
-4. Use a fixed evaluation window across commits, with run IDs, provenance links, and a non-duplicating allocation policy.
-5. Report a resource vector first: human input, visible text, reference cost, elapsed time, and any independently measured human time. Display unknown components explicitly.
-6. Compare tradeoffs using Pareto dominance: one result dominates another only if it is no worse on every comparable resource and strictly better on at least one.
-7. If a benchmark needs a scalar, publish positive normalization baselines, non-negative weights, a quality definition, and a missing-data policy in a versioned specification before evaluating runs.
-
-A possible benchmark-specific scalar is:
+For retained count k out of n observations:
 
 ```text
-normalized_cost = sum(weight[j] * resource[j] / baseline[j])
-efficiency = quality / (1 + normalized_cost)
+raw ratio  = k / n                    # null when n = 0
+quality    = (k + 2) / (n + 4)        # Beta(2,2) smoothing
+confidence = n / (n + 4) * reliability
 ```
 
-All required resources must be known, `baseline[j] > 0`, weights sum to one, and quality is independently defined on a fixed scale. Runs failing the quality gate are ineligible, not cheap winners. This is one policy choice, not a standard AI-PoW score. Report sensitivity to weights and do not charge correlated dimensions twice without justification.
+Input confidence uses linked prompt count, not token mass; effective k is its token-weighted ratio times that count. Input reliability is 0.7 times linked/all prompts. Artifact reliability is checked/observed operations, multiplied by 0.8 when capture limits apply. Task reliability is one for the declared evidence basis, not objective task truth.
 
-## Future survival analysis
+For resources, scale = max(1, sqrt(scope_units)):
 
-Human survival requires stable requirement identities and evidence links through split, merge, revision, and withdrawal. Artifact survival requires a declared unit, rename/delete/revert semantics, and provenance through transformations. Task survival requires fixed granularity.
+| Resource | Pressure denominator | Resource share |
+| --- | --- | ---: |
+| Human input tokens | 800 × scale | 25% |
+| User-visible tokens | 1,200 × scale | 15% |
+| Reference USD | 0.5 × scale | 45% |
+| Tool calls | 12 × scale | 15% |
 
-Keep observations separate from inferences. Publish the algorithm/version, denominator, coverage, uncertainty, and correction history. A zero denominator yields `null`. Never equate “not retained” with “not useful,” and keep survival out of a quality score unless the benchmark can justify that relationship.
+If pricing is incomplete but observed model input/output buckets are complete, model tokens use 40,000 × scale instead. Cache creation is included once; reasoning is already in output. Different measurement/pricing bases mean even same-scope comparisons are descriptive, not controlled benchmarks.
+
+```text
+resource_quality = 1 / (1 + pressure^0.7)
+efficiency_quality = sum(available_share * resource_quality)
+                   + 0.5 * missing_share
+efficiency_confidence = available_share_total * min(1, scope_units / 8)
+```
+
+No observed events means unknown, not zero cost. Completeness covers observed calls only. Missing dimensions keep their weights at neutral quality with zero confidence. Every explicit gap divides all component confidences by 1 + gap_count.
+
+```text
+L = 0.5 + sum(weight * confidence * (quality - 0.5))
+score = 100 / (1 + exp(-5 * (L - 0.5)))
+```
+
+The result is rounded to one decimal. The theoretical outer envelope is approximately 7.6–92.4; conservative attribution narrows practical reach. Zero and 100 are not intended milestones. Missing evidence starts at 50, meaning **uncertain**, not average-quality code. Aggregate confidence below 65% is labeled provisional. Confidence is a policy-based indicator, not a calibrated probability.
+
+Grades: S ≥90, A ≥80, B ≥65, C ≥50, D ≥35, E below35. These are descriptive bands, not population percentiles.
+
+## Reproducible examples
+
+Run `python scripts/build_demo.py`. Explicitly synthetic fixtures use the production algorithm:
+
+| Retention input | Reference cost | Score | Grade |
+| ---: | ---: | ---: | --- |
+| 40% | $14 | 43.6 | D |
+| 62% | $10 | 58.7 | C |
+| 76% | $7 | 68.2 | B |
+| 85% | $5 | 74.0 | B |
+| 98% | $2.40 | 81.4 | A |
+
+Scope and other resources are held fixed; task counts are rounded. These demonstrate the policy, not a measured real-world score distribution. With other inputs fixed, higher cost lowers the score and higher retention raises it. Deleting a faulty feature may lower retention while improving the software: never keep faulty code to protect a score.
+
+## History and verification
+
+Iteration reports include up to 30 previous first-parent commits. Averages exclude this commit, unscored commits, and other algorithms. Same-scope averages additionally match the scope cohort. Local percentile requires at least three matching prior commits and uses midpoint ranks for ties. It is not a global ranking.
+
+Proofs include the algorithm, score, components, and evidence in their hash. Verification rebuilds measurements from the trace, evidence against Git blobs, and the score. It does not trust a supplied evidence subtotal. Scoring analyzes up to 4,096 relevant events and 128 bounded committed blobs; limits are explicit. The complete trace is still verified.
+
+Application 0.2 retains protocol 0.1 and accounting reducer observed-v2. Legacy observed-v1 proofs verify without adding a score to their sealed data. Viewing a legacy proof may calculate a separate provisional display score; that score was not sealed by the old release.
+
+## Project iteration ladder: ladder-v1
+
+The per-commit score above remains 0–100. Iteration reports additionally replay
+the full available first-parent history of locally stored, matching-algorithm
+scores to derive a project rating. Its initial value is 1,000. Unscored commits
+and commits with no checked artifact operations or no scope do not move it.
+
+```text
+target = 1000 + 25 * (commit_score - 50)
+scope_factor = min(1, scope_units / 8)
+delta = 40 * tanh((target - previous_rating) / 300)
+           * confidence^2 * scope_factor
+rating = round(previous_rating + delta, 1)
+```
+
+Each iteration moves by at most 40 points. Small or uncertain observations have
+very little influence; missing artifact evidence has none. Strong repeated
+results move toward a target with diminishing gains. A weaker result can lower
+an established rating even if its single-commit score is above 50. There is no
+automatic participation bonus and no permanent guarantee of upward movement.
+
+Tiers: Bronze below 1,100; Silver from 1,100; Gold from 1,300; Platinum from
+1,500; Diamond from 1,750. These are product thresholds, not calibrated skill
+bands. With an identical commit score of 80, confidence of 0.8, and scope at
+least eight, successive updates start near +25.3, +25.2, and +25.1; eventually
+they approach a rating of 1,750 rather than growing without bound.
+
+This is not Elo because there are no opponents or match outcomes. Ratings are
+derived report data, not an extra claim sealed inside the single-commit proof.
+Reproducing one requires the relevant local historical proofs, not only the
+latest exported bundle. Missing proofs freeze updates and restoring historical
+proofs can change the derived rating. History rewrites likewise change its
+input lineage. Oversized Git-history output fails explicitly rather than
+silently resetting the baseline. Only 30 historical rows are displayed; the
+calculation does not discard earlier available scores.
+
+Current-commit verification rebuilds its evidence and score. Historical rating
+inputs are locally stored sealed scores, not external attestations. Cross-project
+ratings are not comparable. Commit/task splitting and selective capture remain
+gaming risks; the ladder is a progress indicator, not a reward currency.
+
+## Accounting remains separate
+
+Unknown usage totals are null with known subtotals. Estimates retain their basis. Text estimates aggregate UTF-8 bytes before rounding by four, avoiding stream-chunk inflation. Reference prices are frozen per event, use explicit decimal precision, and separate estimated from provider-reported usage. Cached input and reasoning are subsets, not extra parent-bucket tokens. Price is money, not measured intelligence or physical computation.
+
+The raw summary's legacy overall_score and efficiency fields remain null for compatibility. The implemented score is at `proof.score.value`. Ranking eligibility remains false because this is not a controlled benchmark.
+
+## Limitations
+
+Local operators can omit events or fabricate a history. Selective missingness can move a poor score toward neutral; hashes cannot prevent that. Splitting tasks or commits, padding files, choosing price snapshots, or missing rapid writes can change scores without improving work. More observations can move scores away from the prior at an unchanged ratio. No local score makes gaming impossible.
+
+Competitive ranking or payment requires fixed tasks, starting states, acceptance tests, capture capabilities, prices, and external attestations. This release does not claim those. Future scoring changes must use a new algorithm ID and preserve old sealed scores.

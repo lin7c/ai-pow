@@ -1,36 +1,36 @@
 # AI-PoW
 
-**A verifiable work history for AI-assisted software.**
+### Work, made visible.
+
+A versioned process score and a verifiable work journal for every Git commit.
 
 [![Tests](https://github.com/lin7c/ai-pow/actions/workflows/tests.yml/badge.svg)](https://github.com/lin7c/ai-pow/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-AI-PoW records the human input, model usage, agent activity, and file versions observed during development, then binds that history to a Git commit. Another person can verify that an exported trace, its reported measurements, and the referenced Git objects agree.
+**[Explore the interactive report](https://lin7c.github.io/ai-pow/demo/)** · **[Latest-only example](https://lin7c.github.io/ai-pow/demo/latest.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
 
-It answers **“What work was observed while this version was being made?”** It does not assign developers a productivity score or claim that a local log proves honest execution.
+[![AI-PoW commit report: score, evidence, and iteration history](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
 
-**Status:** v0.1, an experimental local recorder and protocol. Python 3.10+ and Git are required. There are no third-party runtime dependencies, hosted services, or background scoring models.
+*The preview uses clearly labeled synthetic history evaluated by the production scoring algorithm.*
 
-## Why AI-PoW?
+## The idea
 
-A Git diff shows the result. It usually does not show the prompts, repeated attempts, model usage, tool calls, or intermediate file versions that preceded it. A chat transcript captures some of that history, but is often detached from the version it helped produce.
+A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent activity, and sampled artifact revisions. It binds those observations to the resulting commit, computes a transparent process score, and creates an offline HTML report.
 
-AI-PoW brings those observations together without reducing them to an arbitrary number:
+**v0.2 includes:**
 
-| Dimension | Recorded observations |
-| --- | --- |
-| Human input | Message counts, text metadata, explicitly labeled token estimates |
-| Visible AI output | User-facing text, including progress updates |
-| Machine work | Model calls, reported or estimated usage, optional reference prices |
-| Agent activity | Tool calls and results, MCP identifiers, Skill context use, parent/child events |
-| Artifacts and tasks | Sampled file-version transitions and explicitly supplied task events |
+- A smooth 0–100 score with four visible components, evidence confidence, and explicit uncertainty.
+- A designed commit report with grade, resource breakdown, scoring explanations, and proof identity.
+- Two views: **Iteration history** and **Latest commit**.
+- A cumulative project ladder starting at 1,000, with tiers, bounded rating changes, and a switchable rating/commit-score chart.
+- Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
+- A bounded local recorder, hash-chained export, and verification against actual Git objects.
+- A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
 
-The implementation includes a bounded SQLite event store, a SHA-256 event chain, per-commit proofs, streaming export and verification, a Claude Code adapter, and a generic command wrapper. The same core is bundled into the development version of laintas-cli.
+Python 3.10+ and Git. **No third-party runtime dependencies, hosted account, permanent daemon, background model calls, or telemetry.**
 
-## Quick start
-
-Install from this repository into a virtual environment:
+## Start recording
 
 ```bash
 python3 -m venv .venv
@@ -38,188 +38,207 @@ python3 -m venv .venv
 python -m pip install "git+https://github.com/lin7c/ai-pow.git"
 
 cd /path/to/your/git-project
-aipow init
+aipow init --view iteration
 aipow claude
 ```
 
-Work normally, then commit and inspect the proof:
+Work normally and commit:
 
 ```bash
 git add src/app.py
 git commit -m "Implement the feature"
+```
 
+The post-commit hook seals the proof and prints the score and local HTML report path. Open that file in your browser. It works offline and does not need a preview server.
+
+Existing or shared hooks are never replaced. If automatic hook installation is unavailable, integrate the printed command yourself or run `aipow seal` after each commit. For explicitly manual operation, initialize with `aipow init --no-hook`.
+
+## Choose the report you want
+
+```bash
+# Latest commit remains the focus; include up to 30 prior commits.
+aipow report --html --view iteration
+
+# Only this commit. No historical commit data is embedded.
+aipow report --html --view latest
+
+# Change the default for future commit reports.
+aipow report-config --view latest
+
+# Export a shareable standalone page; existing files are not overwritten.
+aipow report --html --view iteration --output /path/outside/project/report.html
+
+# Machine-readable proof and independent verification.
 aipow report
 aipow verify
 aipow export /path/outside/project/commit-proof.jsonl
 ```
 
-`init` installs a post-commit hook when it can do so without replacing an existing or shared hook. Otherwise, it prints the command to integrate manually. Use `aipow init --no-hook` for manual sealing, followed by `aipow seal` after each commit.
+Iteration reports can switch views interactively. A latest-only export disables history mode because it contains no history. Reports include keyboard focus states, mobile layouts, a commit-detail dialog, and Print / PDF.
 
-No data is recorded for a project until it is initialized. Proofs are stored in the worktree's Git metadata directory, not in the application source tree.
+History follows the current commit's first-parent ancestry, not all branches. Averages exclude the current commit and incompatible scoring algorithms. Same-scope comparisons match the approximate scope cohort; the local percentile requires at least three prior peers. “Same grade” means the same score band, not a global skill ranking.
 
-### Use another agent or capture manual edits
+Reports are generated after committing and remain outside the tracked source tree. They are **not automatically uploaded to GitHub**. Share an explicit export only after reviewing its contents.
+
+### Two scores, two different questions
+
+**Latest commit: 0–100.** How did this observed development interval perform?
+
+**Iteration history: project rating, starting at 1,000.** How has the project's recorded process developed over successive versions?
+
+The project ladder rises gradually after strong, well-evidenced iterations and can fall after weaker ones. Each update is bounded to 40 points and scaled by evidence confidence squared and scope. Missing artifact evidence freezes the rating. Repeating the same performance approaches a target rather than yielding unlimited points for more commits.
+
+| Project tier | Rating |
+| --- | --- |
+| Bronze | Below 1,100 |
+| Silver | 1,100–1,299.9 |
+| Gold | 1,300–1,499.9 |
+| Platinum | 1,500–1,749.9 |
+| Diamond | 1,750+ |
+
+Rating uses the complete locally available first-parent score history, even when only 30 rows are visible. It is project-local and separately versioned as `ladder-v1`: **not opponent-based Elo, a global rank, or proof that code gets better with age**. The latest-only export contains neither historical rows nor a cumulative rating.
+
+## What makes the score higher?
+
+| Component | Weight | Higher score |
+| --- | ---: | --- |
+| Input retention | 28% | More observed edits linked to human messages remain |
+| Artifact survival | 28% | Less observed rewriting is discarded before the commit |
+| Task fulfillment | 14% | More declared attempts finish with committed artifact evidence |
+| Resource discipline | 30% | Lower scope-adjusted input, visible output, compute, and tool pressure |
+
+The retention weights preserve the original 40:40:20 proportions within their 70% share. Installing more Skills or spawning more agents does not earn points.
+
+Small samples are smoothed toward **50**, and missing evidence stays neutral rather than receiving 100%. A smooth logistic curve avoids easy extremes. Evidence confidence below 65% is marked **provisional**.
+
+| Grade | Score |
+| --- | --- |
+| S | 90+ |
+| A | 80–89.9 |
+| B | 65–79.9 |
+| C | 50–64.9 |
+| D | 35–49.9 |
+| E | Below 35 |
+
+The included calibration examples range from **43.6** for low retention and high resource pressure to **81.4** for strong retention and modest resource pressure at the same scope. These are examples, not a claim about the distribution of real developers.
+
+**This is a process score, not a code-quality score.** A necessary experiment can reduce survival. Removing bad code can improve the software. Temporal prompt attribution is not semantic understanding, file units are only structural/content proxies, and declared task completion is not a passed acceptance test. Never retain bad code to improve a number.
+
+Read the [complete formulas, normalization anchors, missing-data policy, and limitations](docs/METRICS.md). Raw measurements remain separate; the score is stored at `proof.score.value`.
+
+### Record task outcomes explicitly
 
 ```bash
+aipow task checkout --status active
+# Work on the task...
+aipow task checkout --status completed --evidence src/checkout.py tests/test_checkout.py
+```
+
+Use stable IDs. Reopening a completed or dropped task starts another attempt. Evidence paths must be repository-relative and exist with inspectable content in the final commit. Tasks are not silently inferred by a paid scoring model.
+
+## Use your preferred agent
+
+```bash
+aipow claude
 aipow run -- your-agent
 aipow run -- bash
-# Or capture a single file observation without a wrapper:
 aipow sample
 ```
 
-The generic wrapper captures run boundaries and file samples. It does **not** infer prompts, token usage, or tool calls from terminal output. Agent authors can provide those through the event API.
+| Integration | Capture | Limits |
+| --- | --- | --- |
+| Claude Code | Prompt/display hooks, tool and sub-agent events, incremental model-usage metadata | Hook/transcript fields vary by version; late events can cross boundaries |
+| laintas-cli development integration | Native input/display, usage, tools, Skill injection, child creation | Requires a build bundling this integration; auxiliary workflows may leave gaps |
+| Generic wrapper | Run boundaries and sampled files | Detailed prompt, token, and tool accounting needs an adapter |
+| Manual editing | File samples through a wrapped shell or sample command | Rapid/unobserved writes cannot be recovered |
 
-### Use the bundled laintas-cli integration
+For a compatible laintas-cli build:
 
 ```bash
 laintas-cli pow init
 laintas-cli
-laintas-cli pow report
+laintas-cli pow report --html
 laintas-cli pow verify
 ```
 
-This requires a laintas-cli build containing AI-PoW. Its native adapter and the standalone command share the same per-worktree store. The standalone project can be used independently of laintas-cli.
+Both frontends share the per-worktree store. AI-PoW is independent of laintas-cli. Claude settings are invocation-scoped; the adapter does not change global settings or tool permissions. There is no dedicated Codex/OpenCode transcript parser in this release.
 
-## What verification means
-
-A successful verification returns fields such as:
-
-```json
-{
-  "integrity_verified": true,
-  "git_tree_verified": true,
-  "trust": "local-self-reported",
-  "completeness_verified": false,
-  "work_authenticity_verified": false,
-  "quality_verified": false
-}
-```
-
-The verifier checks the proof hash, event sequence and hash chain, recomputed measurements and prices, commit metadata, and Git object integrity. An exported bundle can be checked against a repository containing the referenced commit:
+## What verification proves
 
 ```bash
 aipow verify --bundle /path/to/commit-proof.jsonl
 ```
 
-**A local operator can fabricate or omit events and rebuild the entire chain.** Hash consistency is not proof of execution, accurate timestamps, complete capture, or useful work. AI-PoW is not a consensus proof-of-work mechanism and should not be used as an unqualified basis for payments or rankings.
+Verification checks the proof hash, event chain and sequence, recomputed measurements and prices, Git commit/tree/parents, and the score rebuilt from trace evidence and committed blobs.
 
-## Measurements, not a universal score
+It proves **local consistency**, not truthful execution, complete capture, accurate timestamps, or correct software. An operator can fabricate an entire local chain. Unqualified payment systems and developer leaderboards should not rely on it.
 
-AI-PoW deliberately leaves `overall_score`, `efficiency`, and Human/Artifact/Task Survival unset in v0.1. `ranking_eligible` is false.
+The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is separately versioned as `balanced-v1`; changing policy must not silently rewrite old sealed scores.
 
-Dividing a weighted survival score by “normalized work” has several unresolved problems: survival is not quality; the weights and denominator need an external definition; incomplete capture can look efficient; and splitting tasks or commits can change the result without changing the work.
+## Storage, privacy, and overhead
 
-The current accounting rules are:
+```text
+<worktree-git-directory>/ai-pow/
+  events.sqlite3
+  reports/
+    <commit>.html
+  recording-error       # present after an observed recorder failure
+```
 
-- **Unknown is not zero.** Incomplete model-token totals are `null`, with separate known subtotals and missing-field counts.
-- **Estimates stay identifiable.** Model usage is grouped by model and measurement basis. Text counts retain their tokenizer or estimation method.
-- **Streaming does not inflate byte estimates.** The built-in UTF-8 bytes/4 heuristic rounds after aggregating bytes, rather than rounding every display chunk independently. It remains a rough estimate, not the provider's tokenizer.
-- **Reasoning and cached input are subsets.** They are not added a second time to their parent token buckets.
-- **Price is not intelligence.** Reference USD reflects the supplied price snapshot, not physical compute, output quality, or agent capability. Estimated and provider-reported pricing subtotals remain separate.
-- **Activity is not an achievement score.** Extra tools, agents, calls, or edits do not earn points.
+| Resource | Bound / behavior |
+| --- | --- |
+| Event database | 64 MiB default per worktree; no automatic evidence deletion |
+| Event payload | Approximately 16 KiB |
+| File scan | 2,000 candidates; 256 KiB/file; 16 MiB content/scan |
+| Fingerprints | Up to 64 units/file; unchanged-file metadata cache |
+| Scoring | Up to 4,096 relevant events and 128 committed blobs |
+| HTML cache | Newest 20 reports, up to 16 MiB; one report at most 8 MiB |
+| History | Up to 30 previous first-parent commits |
+| Wrapper | Samples every two seconds; no permanent daemon |
+| Git commands | Output bounds and ten-second per-command timeout |
 
-For fair comparisons, first fix the task, starting state, acceptance tests, measurement requirements, and pricing basis. Compare resource tradeoffs among results that meet the quality threshold. See [Metrics and scoring](docs/METRICS.md) for the proposed benchmark layer and worked counterexamples.
+The database cap excludes SQLite journals, explicit exports, and reports. Scoring memory is bounded by selected events and fingerprints, but is not a hard process-RSS cap. Commit scoring can invoke multiple Git commands; large repositories may take longer. Run `python scripts/benchmark.py` on your workload. Raise database capacity with `aipow quota --max-mib 128`; this does not recover previously missed events.
 
-## Agent support
+Built-in adapters retain hashes, sizes, and metadata, not prompt/source bodies, tool arguments/output, or reasoning. Reports include commit subjects and dates. Hashes are not anonymization. Generic event payloads are caller-controlled. Review exports before sharing; see [SECURITY.md](SECURITY.md).
 
-| Integration | Available capture | Important limits |
-| --- | --- | --- |
-| Claude Code | Prompt and display hooks, tool events, sub-agent events, incremental transcript usage | Fields vary by version; late usage can cross commit boundaries |
-| laintas-cli development integration | Native inputs, interactive visible text, usage-tracker records, tool events, Skill context injection, child creation | Auxiliary workflows and missing provider fields can leave gaps |
-| Other agents | Run boundaries and file sampling through `aipow run` | Detailed accounting requires explicit events; no dedicated Codex/OpenCode parser is included |
-| Manual work | File samples inside a wrapped shell or through `aipow sample` | Unobserved intermediate writes cannot be reconstructed |
+Amend, rebase, checkout, and missed intervals can make attribution ambiguous. Use `aipow reset-boundary` when requested; old events are retained, not reassigned. Worktrees are independent. Partial staging is checked against committed blobs, but interval association is not proof of causal ownership.
 
-Claude is configured with invocation-scoped `--settings`; AI-PoW does not modify global Claude settings or relax tool permissions. The adapter uses [official Claude Code hooks](https://code.claude.com/docs/en/hooks). Transcript imports collect usage metadata, not conversation text. Existing transcript content is skipped at session start; rows predating recorder initialization are excluded.
+## Reference prices and event API
 
-## Reference pricing
-
-Pricing is opt-in. Supply a snapshot for the exact model and applicable pricing tier:
+Prices are opt-in snapshots; no live rates are bundled. Replace the fictional rates in [the example](examples/price.example.json) before running:
 
 ```bash
-aipow price-set /path/to/ai-pow/examples/price.example.json
+aipow price-set /path/to/price.json
 ```
 
-The example contains **fictional rates**. Replace them with the appropriate rates and source before use. No current provider prices are bundled or fetched automatically.
+Reference cost is list-price accounting, not actual payment or measured intelligence. Missing usage stays unknown. Estimated usage stays distinguishable. Cached input and reasoning are not counted twice.
 
-```text
-reference USD = (
-    (input - cached input) * input rate
-  + cached input * cache-read rate
-  + cache creation * cache-write rate
-  + output * output rate
-) / 1,000,000
-```
-
-The full snapshot and its hash are embedded in each priced event. Missing usage buckets leave the call unpriced. Cache creation is separate from normalized input; reasoning is already included in output. Multi-tier, batch, region, or cache-TTL pricing must be represented correctly by the adapter or left unpriced.
-
-## Storage and overhead
-
-Data is stored at:
-
-```text
-<git rev-parse --absolute-git-dir>/ai-pow/
-  events.sqlite3
-  recording-error       # Present after an observed recorder failure
-```
-
-| Resource | Default behavior |
-| --- | --- |
-| Database | 64 MiB per worktree; no automatic evidence deletion |
-| Event payload | Approximately 16 KiB maximum |
-| File sampling | Up to 2,000 candidates, 256 KiB per file, 16 MiB content per scan |
-| Unchanged files | Metadata cache avoids repeated content reads |
-| Command wrapper | Samples every two seconds; no permanent daemon |
-| SQLite | Short transactions, one-second write-lock timeout, FULL synchronization |
-| Git subprocesses | Bounded output and a ten-second timeout |
-| Transcript importer | Incremental offsets; approximately 8 MiB per pass and 1 MiB per row |
-
-SQLite's rollback journal and exported bundles require additional disk space: **the database cap is not a cap on total disk use**. Increase the quota with `aipow quota --max-mib 128`. Previous recording failures remain visible; raising the quota does not recover lost events.
-
-One local 1,000-event benchmark measured a 14.2 ms median write, a 138 ms scan of 1,000 unchanged files with zero source bytes reread, and a 0.84 MiB database including file state. These are workload-specific measurements, not performance guarantees. See [Validation](docs/VALIDATION.md), or run `python scripts/benchmark.py` yourself.
-
-## Privacy and boundaries
-
-Built-in adapters store text hashes, sizes, usage, and bounded event metadata. They do not retain prompt bodies, source contents, tool arguments, tool output, or reasoning text. File paths are hashed. Hashes are not anonymization: short text or known paths may be guessed. Generic `emit` payloads are caller-controlled; inspect a bundle before sharing it.
-
-Common dependency/build directories, environment files, key files, symlinks, and special files are excluded. Exclusions and limits mean capture is partial. See [Security](SECURITY.md).
-
-Proofs are generated **after** a commit and bind its actual commit, tree, and parent hashes. This avoids embedding a proof containing a commit's own hash inside that same commit.
-
-The supported interval is the recorder's observed base to its direct successor. Merge commits retain all parents and use the first parent as the base. Ambiguous history changes such as amend, rebase, or missed commits require `aipow reset-boundary`; old events are retained.
-
-**Window association is not causal attribution.** Unstaged work, concurrent edits, and late usage may belong to a different logical task than the staged diff. Separate worktrees have separate stores; child work is not automatically charged again when merged. File transitions are sampled revisions, not semantic edit units.
-
-## Event API
-
-Python integrations can emit metadata directly:
+Adapters can emit metadata directly:
 
 ```python
 from ai_pow import Recorder, text_meta
 
 recorder = Recorder("/path/to/repository")
 recorder.record("human.message", text_meta("Implement search"), source="my-agent")
-recorder.record(
-    "tool.call",
-    {"name": "test-runner", "call_id": "call-42"},
-    source="my-agent",
-    event_id="my-agent:session-7:call-42",
-)
+recorder.record("tool.call", {"name": "test-runner"}, source="my-agent")
 ```
 
-`aipow emit TYPE --source NAME` accepts a JSON payload on standard input. Stable event IDs deduplicate identical retries and reject conflicting replays. The [protocol specification](docs/PROTOCOL-v0.1.md) defines event types, token normalization, serialization, pricing, and verification.
+`aipow emit TYPE --source NAME` also accepts JSON on stdin. Stable event IDs deduplicate identical retries and reject conflicting replays. See the [protocol](docs/PROTOCOL-v0.1.md).
 
-## Development
+## Develop and contribute
 
 ```bash
 git clone https://github.com/lin7c/ai-pow.git
 cd ai-pow
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/build_demo.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/benchmark.py
 ```
 
-Tests create temporary repositories and clean them up. GitHub Actions runs the standalone tests across supported Python versions. No provider credentials or paid model calls are required.
+Browser checks are optional development tooling: install Playwright and Chromium, then run `node scripts/test_report_browser.cjs`. Set CHROME_PATH to use an existing Chrome binary. Reports themselves have no dependencies.
 
-Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md); protocol and measurement changes should include counterexamples and compatibility tests. The roadmap includes richer adapters, semantic provenance with explicit uncertainty, linked worktree proofs, signed external checkpoints, and benchmark-specific evaluation.
+Tests clean up temporary repositories and processes. See [validation](docs/VALIDATION.md) and [contribution guidelines](CONTRIBUTING.md). Useful next contributions include stronger adapters, explicit requirement provenance, cross-worktree links, external attestations, and controlled quality benchmarks.
 
 ## License
 
-[MIT](LICENSE). AI-PoW can be embedded into other agents without depending on laintas-cli.
+[MIT](LICENSE). Embed it in your own agent, or use it independently.

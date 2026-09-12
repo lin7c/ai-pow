@@ -84,6 +84,7 @@ class ProtocolTests(unittest.TestCase):
         proof = self.rec.seal()
         with self.rec.connection() as db:
             proof["summary"] = pow.summary(self.rec._events(db, proof["epoch"]), "observed-v1")
+            proof.pop("score")  # Legacy releases did not seal a score.
             proof.pop("proof_hash")
             proof["proof_hash"] = pow.digest(proof)
             self.assertTrue(pow.verify_proof(self.root, proof, self.rec._events(db, proof["epoch"]))["integrity_verified"])

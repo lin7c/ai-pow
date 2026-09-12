@@ -31,12 +31,25 @@ def main():
             latencies.append((time.perf_counter() - start) * 1000)
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
+        ai_pow.git(root, "config", "user.name", "AI-PoW benchmark")
+        ai_pow.git(root, "config", "user.email", "benchmark@example.invalid")
+        ai_pow.git(root, "add", ".")
+        ai_pow.git(root, "commit", "-qm", "Benchmark snapshot")
+        tracemalloc.start()
+        start = time.perf_counter()
+        proof = rec.seal()
+        seal_ms = (time.perf_counter() - start) * 1000
+        _, report_peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
         print(json.dumps({"events": 1000, "files": 1000, "sample_ms": round(scan_ms, 2),
                           "unchanged_sample_bytes_read": sample["bytes_read"],
                           "record_p50_ms": round(statistics.median(latencies), 2),
                           "record_p95_ms": round(sorted(latencies)[949], 2),
                           "python_current_kib": round(current / 1024, 2),
                           "python_peak_kib": round(peak / 1024, 2),
+                          "seal_and_report_ms": round(seal_ms, 2),
+                          "seal_python_peak_kib": round(report_peak / 1024, 2),
+                          "report_bytes": (rec.directory / "reports" / (proof["commit"] + ".html")).stat().st_size,
                           "database_bytes": rec.database.stat().st_size,
                           "threads_after": threading.active_count()}, indent=2))
 

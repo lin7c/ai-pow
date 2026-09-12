@@ -127,18 +127,38 @@ Verifier MUST:
 4. Stream the event range, recomputing each hash and checking sequence, epoch and previous-hash linkage.
 5. Check terminal hash and exact range; reject a missing suffix/prefix.
 6. Recompute summaries and reference prices; compare them with the proof.
+   For proofs carrying the optional application-0.2 `score` extension, rebuild
+   scoring evidence from trace events and committed blobs, and compare the
+   versioned score as well. Unknown score algorithms fail verification.
 7. Report integrity separately from authenticity, completeness, task quality and efficiency.
 
 The anchor of a partial exported range is self-reported. Without a trusted previous proof/signature or external
 publication, rewriting the entire proof and trace is undetectable. Full local consistency MUST NOT be rendered as
 remote attestation, timestamp proof, proof of non-omission, or measured useful computation.
 
-## 5. Deferred analysis
+## 5. Application 0.2 scoring extension
 
-H/A token counts are attention proxies. Survival needs provenance across normalized requirements or syntax
-nodes, including split/merge/rename/revert/delete semantics and uncertainty. File states are not semantic units.
-No universal task-size scale or scorer is supplied. AST analysis, task mapping, human review, external receipts,
-signed checkpoints, Git notes publication, interactive HTML reports and benchmark ranking are future layers.
+Protocol version remains 0.1.0. New proofs optionally include `score`, covered by
+the existing proof hash. Its `algorithm` is `balanced-v1`; decimal quantities use
+strings, preserving canonical JSON rules. Legacy proofs without this extension
+remain verifiable without being rewritten.
+
+`file.observed` may include `units_before`, `units_after` (up to 64 SHA-256 hashes
+each), `unit_kind`, `units_truncated`, and an explicit `prompt_id`. Python units
+are top-level AST fingerprints; other files use content blocks. These are
+bounded proxies, not universal semantic edit units. Samples omit source text.
+
+`task.change` may include a stable `task_id`, `status` (active/completed/dropped),
+and `evidence` (up to 32 hashed repository-relative paths). Task completion
+requires committed artifact evidence but does not attest acceptance tests.
+
+See [the scoring specification](METRICS.md) for formulas, limits, confidence,
+scope cohorts, history rules, and the missing-data policy. HTML reports are
+derived application artifacts, not an additional source of proof authority.
+
+Semantic requirement provenance, robust rename/move attribution, external
+receipts, signed checkpoints, and controlled quality benchmarks remain future
+layers. H/A text counts are attention proxies, not measured human time.
 
 ## References
 
