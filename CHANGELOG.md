@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+- Split the single tabbed report into two pages: `reports/<commit>.html` proves one commit, `index.html` summarises the repository. Both are written after every commit.
+- Open both pages with the same five recorded quantities. No composite score appears on a first screen; the retention score moves into the artifact section, labelled derived.
+- Lay the commit proof out in a fixed order: identity and verification, human, machine, agent, artifact, timeline, result, provenance.
+- Add per-file work with real paths (edits, writes, overwritten edits, re-additions, survival) and the most reworked files, derived from the trace and the committed tree.
+- Add a timeline of sessions, declared tasks and rework, and a result section read from Git (files added/modified/removed, lines, test files touched).
+- Add machine work by model with share bars, and state the AWC convention (1 AWC = $1 at the recorded list price) next to what was actually paid.
+- Add repository trends per commit and a descriptive development style with its thresholds printed.
+- Add an observed / derived / inferred provenance map so estimates are never read as measurements.
+- New CLI command `aipow index`; `report-config` and the report view switch are removed.
+
 ## 0.5.0
 
 - Record and show the facts a process record needs and the report was dropping: elapsed interval between the first and last recorded event, sessions and wrapped runs, non-zero exits, failed tool results, coverage gaps, cache-read tokens, and what was actually paid next to the reference price (summary reducer observed-v4).

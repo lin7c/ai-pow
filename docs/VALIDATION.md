@@ -26,8 +26,10 @@ The standalone suite covers:
 - Agent-structure reduction: parent links, depth, per-tool counts, node/name bounds, repeated spawns, and reported parent cycles.
 - Interval windows, session/run counting across separate id namespaces, failed tool results, non-zero exits, coverage gaps, and amounts actually paid kept separate from reference prices.
 - Commit diff statistics read from Git, and older reducers left unchanged by the newer one.
+- Page separation: the commit proof carries no history or cumulative total, the repository summary carries no per-commit derived detail, and the derived score is never in a first screen.
+- Per-file breakdown: real paths resolved from the committed tree, write events, overwritten edits and survival.
 
-The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the eight proof-vector panels, the three scored dimensions, the agent structure drawn as a tree, the interval and payment facts, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
+The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the five headline quantities on both pages, the fixed commit-proof section order, the agent tree, the per-file table, the timeline, the provenance map, the trend lines, and the position of every derived score below the first screen, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
 
 Run the current suite with:
 

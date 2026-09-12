@@ -8,9 +8,9 @@ A versioned process score and a verifiable work journal for every Git commit.
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[Explore the interactive report](https://lin7c.github.io/ai-pow/demo/)** · **[Latest-only example](https://lin7c.github.io/ai-pow/demo/latest.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
+**[Repository summary](https://lin7c.github.io/ai-pow/demo/)** · **[Commit proof](https://lin7c.github.io/ai-pow/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
 
-[![AI-PoW commit report: score, evidence, and iteration history](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
+[![AI-PoW commit proof: recorded quantities, per-file work and provenance](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
 
 *The preview uses clearly labeled synthetic history evaluated by the production scoring algorithm.*
 
@@ -18,16 +18,16 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent architecture, and sampled artifact revisions. It binds those observations to the resulting commit as a **proof vector**, derives a transparent process score from the part that can be checked against the commit, and writes an offline HTML report.
 
-**v0.5 includes:**
+**v0.6 includes:**
 
-- An eight-part proof vector per commit: the interval, human input, AI visible output, machine work, agent architecture, artifact work, task work, and the proof identity.
-- The facts a process record needs and most tools drop: **elapsed time** between the first and last recorded event, **sessions and wrapped runs**, **what was actually paid** next to the reference price, cache-read and reasoning tokens, failed tool results, coverage gaps, and the commit's own Git diff.
-- A smooth 0–100 retention score with three visible dimensions, evidence confidence, and explicit uncertainty.
-- Two separated views, each with a single headline number: **Latest commit** shows the 0–100 commit score, **Project iterations** shows the cumulative project total. Neither view shows the other's number.
-- A zero-based cumulative project score: the exact sum of recorded commit scores, with the running total per commit.
-- Pooled repository totals whose ratios are recomputed from the pooled quantities, not averaged per commit.
-- The observed agent structure drawn as a tree: spawns, reported parent links, depth, and per-tool call counts.
-- Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
+- **Two pages, two questions.** `reports/<commit>.html` proves how one commit came to be; `index.html` summarises the project's long-term human/machine structure. Neither is a tab of the other.
+- **Quantities first, always.** Both pages open with the same five recorded numbers — human input, AI visible output, machine work in AWC, agent calls, artifact survival. No composite score appears on a first screen.
+- A commit proof laid out in fixed order: identity and verification, human, machine, agent, artifact, timeline, result, and an observed / derived / inferred provenance map.
+- Per-file work with real paths: edits, write events, overwritten edits, re-additions and survival, plus the most reworked files.
+- A timeline of sessions, declared tasks and rework in recorded order.
+- Machine work by model with a share bar, reference compute (1 AWC = $1 at the recorded list price) kept separate from what was actually paid.
+- The agent execution graph as a tree, with per-tool call counts.
+- Repository trends per commit (human tokens, AWC, survival, rework, agent calls, duration) and a descriptive development style with its thresholds shown.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
 
@@ -41,7 +41,7 @@ python3 -m venv .venv
 python -m pip install "git+https://github.com/lin7c/ai-pow.git"
 
 cd /path/to/your/git-project
-aipow init --view iteration
+aipow init
 aipow claude
 ```
 
@@ -52,42 +52,41 @@ git add src/app.py
 git commit -m "Implement the feature"
 ```
 
-The post-commit hook seals the proof and prints the score and local HTML report path. Open that file in your browser. It works offline and does not need a preview server.
+The post-commit hook seals the proof and writes two pages under `.git/ai-pow/`: the commit proof at `reports/<commit>.html` and the repository summary at `index.html`. It prints the proof path. Both work offline and need no preview server.
 
 Existing or shared hooks are never replaced. If automatic hook installation is unavailable, integrate the printed command yourself or run `aipow seal` after each commit. For explicitly manual operation, initialize with `aipow init --no-hook`.
 
-## Choose the report you want
+## The two pages
 
 ```bash
-# Latest commit remains the focus; include up to 30 prior commits.
-aipow report --html --view iteration
+# This commit: identity, human, machine, agent, artifact, timeline, result, provenance.
+aipow report --html
 
-# Only this commit. No historical commit data is embedded.
-aipow report --html --view latest
-
-# Change the default for future commit reports.
-aipow report-config --view latest
+# The repository: pooled totals, trends, development style, every recorded commit.
+aipow index --html
 
 # Export a shareable standalone page; existing files are not overwritten.
-aipow report --html --view iteration --output /path/outside/project/report.html
+aipow report --html --output /path/outside/project/commit-proof.html
+aipow index --html --output /path/outside/project/history.html
 
 # Machine-readable proof and independent verification.
 aipow report
+aipow index
 aipow verify
 aipow export /path/outside/project/commit-proof.jsonl
 ```
 
-Iteration reports can switch views interactively. A latest-only export disables history mode because it contains no history. Reports include keyboard focus states, mobile layouts, a commit-detail dialog, and Print / PDF.
+The commit proof embeds only its own interval; the repository summary embeds one compact row per commit and links to each proof. Both include keyboard focus states, mobile layouts and Print / PDF.
 
 History follows the current commit's first-parent ancestry, not all branches. Averages exclude the current commit and incompatible scoring algorithms. Same-scope comparisons match the approximate scope cohort; the local percentile requires at least three prior peers. “Same grade” means the same score band, not a global skill ranking.
 
 Reports are generated after committing and remain outside the tracked source tree. They are **not automatically uploaded to GitHub**. Share an explicit export only after reviewing its contents.
 
-### Two scores, two different questions, two separate views
+### Two pages, two different questions
 
-The report never mixes them on one screen: the **Latest commit** view answers the first question, the **Project iterations** view answers the second.
+`.git/ai-pow/reports/<commit>.html` answers "what happened between the last commit and this one". `.git/ai-pow/index.html` answers "how has this project used AI over its lifetime". The commit page is the core record; the repository page is a summary of many of them.
 
-**Latest commit: 0–100.** How much of the observed work survived into this commit? That view also carries the interval, the proof vector and the proof identity.
+**Commit page: quantities first, score last.** The five recorded numbers open the page; the 0–100 retention score sits inside the artifact section, labelled derived. A first screen that leads with one composite number invites gaming it.
 
 **Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 
@@ -100,7 +99,7 @@ No separate code-line scoring, additional weighting, deductions, tiers, or upper
 
 The total uses the complete locally available first-parent score history, even when only 30 rows are visible. Unscored commits add nothing; their scores are not invented. Refreshing or regenerating a report never adds a commit twice. Historical scores are used as originally recorded, including older score algorithms. The cumulative policy is `commit-sum-v1`; it is a total, not a quality ranking. The latest-only export contains neither historical rows nor a cumulative score.
 
-Upgrading does not change sealed commit scores. Run `aipow report --html --view iteration` to regenerate an existing report with the new design and cumulative total.
+Upgrading does not change sealed commit scores. Run `aipow report --html` to regenerate a commit proof and `aipow index --html` to regenerate the repository summary.
 
 ## What makes the score higher?
 

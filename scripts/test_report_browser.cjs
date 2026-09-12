@@ -1,5 +1,6 @@
-// Development-only browser checks. Runtime reports have no dependencies.
+// Development-only browser checks. The generated pages have no dependencies.
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 const path = require('node:path');
 const {pathToFileURL} = require('node:url');
 const {chromium} = require('playwright');
@@ -13,77 +14,67 @@ const {chromium} = require('playwright');
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => {if (/^https?:/.test(request.url())) requests.push(request.url());});
     const folder = path.resolve(process.argv[2] || 'docs/demo');
-    const data = () => page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent));
+    const reports = fs.readdirSync(path.join(folder, 'reports')).filter(f => f.endsWith('.html'));
+    assert.ok(reports.length >= 2, 'one proof page per commit');
+    const below = async (selector, reference) => {
+      const a = await page.locator(selector).first().boundingBox();
+      const b = await page.locator(reference).first().boundingBox();
+      return a && b && a.y > b.y + b.height;
+    };
 
+    // ---- Repository summary -------------------------------------------------
     await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
-    await page.locator('#view-iteration').waitFor();
-    // Each view carries exactly one headline: the commit score or the project total.
-    assert.equal(await page.locator('#view-latest').isVisible(), false, 'iteration view hides the commit score');
-    assert.equal(await page.locator('#view-iteration').isVisible(), true);
-    assert.equal(await page.locator('#view-iteration .total-figure').count(), 1);
-    assert.equal(await page.locator('#view-iteration .score-figure').count(), 0, 'no commit score here');
+    await page.locator('.five').waitFor();
     assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
-    assert.equal(await page.locator('.row').count(), 7, 'latest commit plus its history');
-    assert.equal(await page.locator('.row.is-latest').count(), 1);
-    assert.equal(await page.locator('#view-iteration .panel').count(), 8, 'pooled repository totals');
-
+    assert.equal(await page.locator('.five div').count(), 5, 'five pooled quantities first');
+    assert.equal(await page.locator('.chart-cell svg path').count(), 6, 'six trend lines');
+    assert.equal(await page.locator('.level').count(), 3, 'development style levels');
+    assert.equal(await page.locator('.row').count(), reports.length, 'one row per recorded commit');
+    assert.ok(await below('.total-figure', '.five'), 'the cumulative score is never the first screen');
     const totals = await page.evaluate(() => {
       const d = JSON.parse(document.querySelector('#report-data').textContent);
-      const rows = [d.current, ...d.history];
-      const ops = rows.reduce((t, p) => t + p.score.evidence.artifact.operations, 0);
-      const kept = rows.reduce((t, p) => t + p.score.evidence.artifact.retained, 0);
-      return {sum: rows.reduce((t, p) => t + Number(p.score.value), 0), total: Number(d.iteration.value),
+      const ops = d.history.reduce((t, p) => t + p.operations, 0);
+      const kept = d.history.reduce((t, p) => t + p.retained, 0);
+      return {sum: d.history.reduce((t, p) => t + Number(p.score.value), 0), total: Number(d.iteration.value),
               pooled: kept / ops, reported: Number(d.lifetime.artifact_survival),
-              mean: rows.reduce((t, p) => t + p.score.evidence.artifact.retained / p.score.evidence.artifact.operations, 0) / rows.length};
+              mean: d.history.reduce((t, p) => t + p.retained / p.operations, 0) / d.history.length};
     });
     assert.ok(Math.abs(totals.sum - totals.total) < 1e-6, 'the total is the exact sum of commit scores');
     assert.ok(Math.abs(totals.pooled - totals.reported) < 1e-4, 'lifetime ratios are pooled');
     assert.ok(Math.abs(totals.mean - totals.reported) > 1e-4, 'pooled is not the mean of per-commit ratios');
 
+    // ---- Commit proof -------------------------------------------------------
+    const href = await page.locator('.row').first().getAttribute('href');
     await page.locator('.row').first().click();
-    assert.equal(await page.locator('#commit-dialog').isVisible(), true);
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('#commit-dialog').isVisible(), false);
-    await page.selectOption('#grade-filter', 'S');
-    assert.equal(await page.locator('.row').count(), 0);
-    await page.selectOption('#grade-filter', 'all');
-
-    await page.locator('#tab-latest').click();
-    assert.equal(await page.locator('#view-iteration').isVisible(), false, 'latest view hides the project total');
-    assert.equal(await page.locator('#view-latest').isVisible(), true);
-    assert.equal(await page.locator('#view-latest .score-figure').count(), 1);
-    assert.equal(await page.locator('#view-latest .total-figure').count(), 0, 'no project total here');
-    assert.equal(await page.locator('#view-latest .panel').count(), 8, 'proof vector plus proof identity');
-    assert.equal(await page.locator('.dim').count(), 3, 'retention-v2 scores three dimensions');
-    assert.equal(await page.locator('.strip div').count(), 5, 'commit, diff, interval, human, machine');
-    const tree = await page.locator('#view-latest .tree').first().textContent();
+    await page.locator('.five').waitFor();
+    assert.ok(href.includes('reports/'), 'each row opens that commit proof');
+    assert.equal(await page.locator('.five div').count(), 5, 'five recorded quantities first');
+    assert.equal(await page.locator('.ident div').count(), 6, 'identity: commit, parent, time, duration, proof, trace');
+    assert.equal(await page.locator('.total-figure').count(), 0, 'no project total on a commit page');
+    assert.ok(await below('.derived-score', '.five'), 'the score is never the first screen');
+    assert.equal(await page.locator('.prov div').count(), 3, 'observed / derived / inferred');
+    assert.ok(await page.locator('.timeline .tl').count() > 0, 'the timeline is drawn');
+    assert.ok(await page.locator('table.files tbody tr').count() > 0, 'per-file work is listed');
+    const tree = await page.locator('.tree').first().textContent();
     assert.ok(/├─|└─/.test(tree), 'the agent structure is drawn as a tree');
-    assert.ok(!/…/.test(tree), 'no truncation marker when nothing was truncated');
-    const facts = await page.locator('#view-latest').textContent();
-    for (const label of ['Interval', 'Actually paid', 'Failed tool results', 'Sessions', 'Of which cache reads'])
-      assert.ok(facts.includes(label), `the vector shows ${label}`);
+    const text = await page.locator('#content').textContent();
+    for (const heading of ['Human', 'Machine', 'Agent', 'Artifact', 'Timeline', 'Result', 'Verification'])
+      assert.ok(text.includes(heading), `section ${heading}`);
+    for (const label of ['Duration', 'Actual cost', 'Unique sessions', 'Failed results', 'Of which cache reads'])
+      assert.ok(text.includes(label), `the proof shows ${label}`);
     if (process.env.REPORT_SCREENSHOT) await page.screenshot({path: process.env.REPORT_SCREENSHOT, fullPage: true});
 
     for (const width of [375, 720, 1024]) {
       await page.setViewportSize({width, height: 900});
-      for (const tab of ['#tab-iteration', '#tab-latest']) {
-        await page.locator(tab).click();
-        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
-                     `Overflow at ${width}px`);
-      }
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
+                   `commit page overflow at ${width}px`);
+      await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
+                   `index page overflow at ${width}px`);
+      await page.goto(pathToFileURL(path.join(folder, 'reports', reports[0])).href);
     }
-
-    await page.setViewportSize({width: 1440, height: 1060});
-    await page.goto(pathToFileURL(path.join(folder, 'latest.html')).href);
-    await page.locator('#view-latest').waitFor();
-    assert.equal(await page.locator('#tab-iteration').isDisabled(), true, 'a latest-only export cannot show a total');
-    assert.equal(await page.locator('#view-iteration').isVisible(), false);
-    const latest = await data();
-    assert.equal(latest.history.length, 0);
-    assert.equal(latest.iteration, null);
-    assert.equal(latest.lifetime, null);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
-    console.log('Report browser checks passed: separated views, vector, totals, filters, dialog, privacy, offline.');
+    console.log('Report browser checks passed: two pages, quantities first, provenance, privacy, offline.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

@@ -1,14 +1,4 @@
-# SPDX-License-Identifier: MIT
-"""Self-contained, offline pages: one proof per commit, one summary per repository.
-
-No fonts, scripts or telemetry are fetched. Neither page opens with a composite
-score: the first screen is always the recorded quantities.
-"""
-import base64
-import hashlib
-import json
-
-CSS = r"""
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-AxRNu3ewQRaU2jmMvld0JSPZYoNqnvFTuxS4Hrp+g58='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230e141d&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Commit proof</title><style>
 :root{--paper:#141a24;--card:#1e2836;--raised:#243040;--line:#3a4759;--hair:#2a3543;--ink:#f2f5f9;--muted:#a9b8cb;--dim:#7c8ca1;--accent:#ff9c31;--good:#63d29a;--bad:#ff7a6b;--paper-ink:#16202c;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;--sans:'Lato','Trebuchet MS','Segoe UI',Arial,sans-serif;--display:'Lato','Arial Narrow',Arial,sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 var(--sans)}
@@ -134,9 +124,7 @@ body{background:#fff;color:#16202c}.ghost,.acts,.banner{display:none}
 .kv,.legend,.foot,.lede,.tl .detail{color:#4b5563}.section,.box,.row{break-inside:avoid}
 .wrap{max-width:none;padding:0 12px}
 }
-"""
-
-HELPERS = r"""
+</style></head><body><a class="skip" href="#content">Skip to content</a><header class="mast"><div class="wrap"><div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW<span class="edition"> / commit proof</span></div><div class="acts"><a class="ghost" href="../index.html">Repository history</a><button class="ghost" id="print">Print</button></div></div></header><main class="wrap" id="content"></main><noscript>This page requires JavaScript to display its embedded data. Use the aipow CLI for the JSON form.</noscript><footer class="wrap foot"><span class="id">AI-PoW · ai-pow</span><span>Process record. Not a measure of code quality.</span></footer><script id="report-data" type="application/json">{"project":"ai-pow","kind":"commit","demo":true,"current":{"commit":"a6b3c471f9178afdfe415ef1ba4b3e9bc52357c5","title":"Score retention only and make the proof vector the report body","date":"2026-09-12T13:32:57+00:00","score":{"algorithm":"retention-v2","value":"78.6","grade":"B","confidence":"0.8112","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.848214","quality":"0.842105","confidence":"0.982456","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.850000","quality":"0.818182","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.833333","quality":"0.772727","confidence":"0.818182","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":190,"operations":224,"checked_operations":224},"human":{"retained_weight":"3400.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":15,"attempts":18,"declared":18,"basis":"declared-with-committed-evidence"},"scope":{"units":112,"files":16},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"summary":{"human":{"events":40,"methods":{"tokenizer":{"tokens":4080,"bytes":0,"events":40}},"unknown_token_events":0,"messages":40,"tokens_estimated":0,"tokens_measured":4080,"tokens_complete":true,"attention_seconds":null},"visible_ai":{"events":22,"methods":{"tokenizer":{"tokens":1848,"bytes":0,"events":22}},"unknown_token_events":0,"tokens_estimated":0,"tokens_measured":1848,"tokens_complete":true,"attention_seconds":null},"models":{"example-small/provider_reported":{"calls":14,"input_tokens":72800,"output_tokens":12600,"cached_input_tokens":25200,"reasoning_tokens":3640,"cache_write_tokens":5600,"unknown_fields":[],"known_token_subtotals":{"input_tokens":72800,"output_tokens":12600,"cached_input_tokens":25200,"reasoning_tokens":3640,"cache_write_tokens":5600},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}},"example-large/provider_reported":{"calls":24,"input_tokens":124800,"output_tokens":21600,"cached_input_tokens":43200,"reasoning_tokens":6240,"cache_write_tokens":9600,"unknown_fields":[],"known_token_subtotals":{"input_tokens":124800,"output_tokens":21600,"cached_input_tokens":43200,"reasoning_tokens":6240,"cache_write_tokens":9600},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}}},"reference_usd_known_subtotal":"5.000002","priced_calls":38,"unpriced_calls":0,"tools_used":["apply_patch","mcp__docs__lookup","read_file","search","shell"],"skills_used":["frontend-design","release","review","testing"],"mcp_used":["docs"],"event_counts":{"run.start":2,"human.message":40,"assistant.visible":22,"model.usage":38,"tool.call":73,"tool.result":72,"run.stop":2,"skill.used":4,"agent.spawn":4},"human_survival":null,"artifact_survival":null,"task_survival":null,"semantic_edits":null,"quality":null,"algorithm":"observed-v4","reference_usd_by_measurement":{"provider_reported":{"known_subtotal":"5.000002","complete_for_observed_calls":true,"priced":38,"unpriced":0}},"reference_cost_complete_for_observed_calls":true,"overall_score":null,"efficiency":null,"ranking_eligible":false,"agent":{"spawns":4,"stops":0,"nodes":4,"parents_known":3,"max_depth":3,"graph":[["planner",""],["builder","planner"],["reviewer","builder"],["tester","planner"]],"tool_calls_by_name":[["apply_patch",18],["read_file",18],["search",18],["shell",18],["mcp__docs__lookup",1]],"other_tool_calls":0,"truncated":false},"window":{"first_ms":1789036856250,"last_ms":1789051256250,"span_ms":14400000,"basis":"local-observation-times"},"activity":{"runs":2,"run_stops":2,"nonzero_exits":0,"sessions":2,"sessions_truncated":false,"failed_tool_calls":6,"coverage_gaps":0},"actual_usd_known_subtotal":"2.749984","actual_priced_calls":38},"proof_hash":"458e329da97346dbce980d1c632cbdce5d4bb67d52ab64415d4a5c4220e14768","parent":"8d4c45f5952572bd431d975e056946de8a6b14d4","tree":"acdcbdddd1e4c2502ef4700726b412fd0f8049cdb5e3e68ad65ba4d5d3ad397a","trace_root":"9471e72963bc193f997f990d01e42e4ad5c4a5a082fa738af821a540cad770a7","boundary":"head-observed-after-commit"},"verification":{"integrity_verified":false,"git_tree_verified":false,"events":257,"trust":"local-self-reported"},"derived":{"files":[{"path":"ai_pow_scoring.py","id":"c633670516","writes":13,"operations":41,"retained":35,"checked":true,"overwritten":6,"reintroduced":0},{"path":"docs/METRICS.md","id":"280bd60b3f","writes":12,"operations":38,"retained":34,"checked":true,"overwritten":4,"reintroduced":0},{"path":"tests/test_scoring.py","id":"639d4ed944","writes":8,"operations":24,"retained":22,"checked":true,"overwritten":2,"reintroduced":0},{"path":"ai_pow.py","id":"7a9be7b206","writes":6,"operations":19,"retained":16,"checked":true,"overwritten":3,"reintroduced":0},{"path":"scripts/build_demo.py","id":"155ea379c1","writes":5,"operations":16,"retained":14,"checked":true,"overwritten":2,"reintroduced":0},{"path":"docs/demo/index.html","id":"3bbb8d3e64","writes":4,"operations":14,"retained":13,"checked":true,"overwritten":1,"reintroduced":0},{"path":"docs/demo/latest.html","id":"cb885e8b27","writes":4,"operations":14,"retained":12,"checked":true,"overwritten":2,"reintroduced":0},{"path":"ai_pow_report.py","id":"944f6255f2","writes":4,"operations":14,"retained":12,"checked":true,"overwritten":2,"reintroduced":0},{"path":"docs/PROTOCOL-v0.1.md","id":"5cbd7a3379","writes":3,"operations":9,"retained":8,"checked":true,"overwritten":1,"reintroduced":0},{"path":"README.md","id":"b335630551","writes":2,"operations":7,"retained":6,"checked":true,"overwritten":1,"reintroduced":0},{"path":"tests/test_protocol.py","id":"5fe853b980","writes":2,"operations":7,"retained":6,"checked":true,"overwritten":1,"reintroduced":0},{"path":"docs/VALIDATION.md","id":"81cf95d5c0","writes":2,"operations":6,"retained":6,"checked":true,"overwritten":0,"reintroduced":0},{"path":"scripts/test_report_browser.cjs","id":"7eec37aea0","writes":1,"operations":3,"retained":3,"checked":true,"overwritten":0,"reintroduced":0},{"path":"CHANGELOG.md","id":"06572a96a5","writes":1,"operations":2,"retained":2,"checked":true,"overwritten":0,"reintroduced":0},{"path":"scripts/check_package.py","id":"51241b3883","writes":1,"operations":2,"retained":2,"checked":true,"overwritten":0,"reintroduced":0},{"path":"pyproject.toml","id":"50c86b7ed8","writes":1,"operations":2,"retained":2,"checked":true,"overwritten":0,"reintroduced":0}],"files_total":16,"timeline":[{"at":1789036856250,"kind":"session","label":"session started","detail":"laintas-cli"},{"at":1789037362500,"kind":"rework","label":"ai_pow_scoring.py","detail":"6 earlier edits overwritten"},{"at":1789037362500,"kind":"task","label":"catalog page","detail":"active","repeat":1},{"at":1789037925000,"kind":"rework","label":"docs/METRICS.md","detail":"4 earlier edits overwritten"},{"at":1789037925000,"kind":"task","label":"catalog page","detail":"completed","repeat":1},{"at":1789038487500,"kind":"rework","label":"tests/test_scoring.py","detail":"2 earlier edits overwritten"},{"at":1789038487500,"kind":"task","label":"checkout retry","detail":"active","repeat":1},{"at":1789039050000,"kind":"rework","label":"ai_pow.py","detail":"3 earlier edits overwritten"},{"at":1789039050000,"kind":"task","label":"checkout retry","detail":"completed","repeat":1},{"at":1789039612500,"kind":"rework","label":"scripts/build_demo.py","detail":"2 earlier edits overwritten"},{"at":1789039612500,"kind":"task","label":"release notes","detail":"active","repeat":1},{"at":1789040175000,"kind":"rework","label":"docs/demo/index.html","detail":"1 earlier edits overwritten"},{"at":1789040175000,"kind":"task","label":"release notes","detail":"completed","repeat":1},{"at":1789040737500,"kind":"rework","label":"docs/demo/latest.html","detail":"2 earlier edits overwritten"},{"at":1789041300000,"kind":"rework","label":"ai_pow_report.py","detail":"2 earlier edits overwritten"},{"at":1789041862500,"kind":"rework","label":"docs/PROTOCOL-v0.1.md","detail":"1 earlier edits overwritten"},{"at":1789042425000,"kind":"rework","label":"README.md","detail":"1 earlier edits overwritten"},{"at":1789042987500,"kind":"rework","label":"tests/test_protocol.py","detail":"1 earlier edits overwritten"},{"at":1789043775000,"kind":"session","label":"session ended","detail":"exit 0"},{"at":1789043831250,"kind":"session","label":"session started","detail":"laintas-cli"},{"at":1789050750000,"kind":"session","label":"session ended","detail":"exit 0"}],"timeline_omitted":0,"mcp_calls":1,"tool_results":72,"result":{"added":3,"modified":13,"removed":0,"renamed":0,"tests":2}},"diff":{"files":16,"insertions":717,"deletions":179},"links":{"index":"../index.html"}}</script><script>
 const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -170,9 +158,7 @@ function sparkline(values,host){
   host.innerHTML=`<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">`
     +`<path d="${path}" fill="none" stroke="#ff9c31" stroke-width="2"/>${dots}</svg>`;
 }
-"""
 
-JS_COMMIT = HELPERS + r"""
 const c=data.current,s=c.score,m=c.summary,e=s.evidence,d=data.derived,v=data.verification;
 const counts=m.event_counts||{},models=m.models||{},agent=m.agent||null,act=m.activity||null,win=m.window||null;
 const modelSum=f=>{let t=0;for(const b of Object.values(models)){if(b[f]===null||b[f]===undefined)return null;t+=b[f]}return t};
@@ -361,156 +347,5 @@ $('#content').innerHTML=`
     <div><h4>Inferred</h4><ul><li>Prompt-to-edit attribution</li><li>Task equivalence and churn</li><li>Intent graph <em>(not implemented)</em></li></ul><p>Estimates. They carry lower confidence and must not be read as measurements.</p></div>
   </div>
 </div>`;
-"""
 
-JS_INDEX = HELPERS + r"""
-const lt=data.lifetime,total=data.iteration,rows=data.history,stats=data.statistics||{};
-document.title=data.project+' · AI-PoW history';
-if(data.demo){const b=document.createElement('div');b.className='banner';b.textContent='Demonstration · real commits from this repository, synthetic evidence';document.body.insertBefore(b,document.body.children[1])}
-const dayCount=data.span.first&&data.span.last?Math.max(1,Math.round((new Date(data.span.last.date)-new Date(data.span.first.date))/86400000)):null;
-const days=dayCount===null?unknown:n(dayCount)+(dayCount===1?' day':' days');
-const perOperation=lt.artifact_operations?lt.human_tokens/lt.artifact_operations:null;
-const awcPerOperation=lt.artifact_operations&&lt.reference_usd_known_subtotal!==null?Number(lt.reference_usd_known_subtotal)/lt.artifact_operations:null;
-const rework=lt.artifact_survival===null?null:1-Number(lt.artifact_survival);
-const level=(value,high,low)=>value===null||value===undefined?['unknown','—']:value>=high?['high','HIGH']:value<=low?['low','LOW']:['medium','MEDIUM'];
-const human=level(perOperation,40,15),machine=level(awcPerOperation,.05,.02),churn=level(rework,.4,.2);
-const pattern=human[0]==='high'&&machine[0]==='low'?'Human-guided / low-cost AI'
-  :human[0]==='low'&&machine[0]==='high'?'Autonomous / high-compute'
-  :human[0]==='unknown'||machine[0]==='unknown'?'Not enough recorded history':'Balanced';
-
-$('#content').innerHTML=`
-<div class="ident">
-  <div><span>Project</span><b>${esc(data.project)}</b></div>
-  <div><span>Commits with proof</span><b>${n(lt.scored_commits)} of ${n(data.commits_in_history)}</b></div>
-  <div><span>Development span</span><b>${esc(days)}</b></div>
-  <div><span>Recorded time</span><b>${esc(span(lt.span_ms))}</b></div>
-  <div><span>Sessions</span><b>${n(lt.sessions)}</b></div>
-  <div><span>Algorithms</span><b>${esc(lt.algorithms.join(', ')||unknown)}</b></div>
-</div>
-<h1 class="title">${esc(data.project)} · AI development history</h1>
-<p class="lede">Pooled quantities over every commit that carries a proof. Ratios are recomputed from the pooled totals, never averaged per commit, and unknown values stay unknown instead of counting as zero.</p>
-<div class="five">
-  <div><span>Human input</span><b class="num">${short(lt.human_tokens)}</b><small>tokens · ${n(lt.prompts)} prompts</small></div>
-  <div><span>AI visible output</span><b class="num">${short(lt.visible_tokens)}</b><small>tokens · ${n(lt.visible_events)} messages</small></div>
-  <div><span>Machine work</span><b class="num">${lt.priced_calls?awc(lt.reference_usd_known_subtotal):unknown}</b><small>AWC · ${n(lt.model_calls)} model calls</small></div>
-  <div><span>Agent calls</span><b class="num">${n(lt.tool_calls+lt.sub_agents)}</b><small>${n(lt.sub_agents)} sub-agents</small></div>
-  <div><span>Artifact survival</span><b class="num">${lt.artifact_operations?pct(lt.artifact_survival):unknown}</b><small>${n(lt.artifact_retained)} of ${n(lt.artifact_operations)} edits</small></div>
-</div>
-
-<div class="section">
-  <div class="section-head"><h2>Trends</h2><span class="note">Per commit · oldest to newest · ${n(rows.length)} shown</span></div>
-  <div class="charts" id="charts"></div>
-  <p class="legend">A project that matures should need fewer human tokens and less rework for the same amount of surviving work. These lines are the evidence for that question, not an answer to it.</p>
-</div>
-
-<div class="section">
-  <div class="section-head"><h2>Development style</h2><span class="note">Descriptive · not a score</span></div>
-  <div class="style-card">
-    <div class="pattern"><span class="edition">Pattern</span><b>${esc(pattern)}</b>
-      <p>Derived from the pooled ratios on the right. It describes how this project uses AI, not how well it does.</p></div>
-    <div class="levels">
-      <div class="level"><span>Human input</span><span class="tag ${human[0]}">${human[1]}</span>
-        <span class="why">${perOperation===null?unknown:n(perOperation)+' prompt tokens per semantic edit · high ≥ 40, low ≤ 15'}</span></div>
-      <div class="level"><span>Machine compute</span><span class="tag ${machine[0]}">${machine[1]}</span>
-        <span class="why">${awcPerOperation===null?unknown:awc(awcPerOperation)+' AWC per semantic edit · high ≥ 0.05, low ≤ 0.02'}</span></div>
-      <div class="level"><span>Rework</span><span class="tag ${churn[0]}">${churn[1]}</span>
-        <span class="why">${rework===null?unknown:pct(rework,0)+' of observed edits did not survive · high ≥ 40%, low ≤ 20%'}</span></div>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-head"><h2>Pooled totals</h2><span class="note">Unknown stays unknown</span></div>
-  <div class="cols">
-    ${box('Machine',[kv('Reference compute',lt.priced_calls?awc(lt.reference_usd_known_subtotal)+' AWC':null,true),
-      kv('Actual cost',lt.actual_priced_calls?money(lt.actual_usd_known_subtotal):null),
-      kv('Model tokens',short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens)),
-      kv('Reasoning tokens',short(lt.reasoning_tokens)),kv('Model calls',n(lt.model_calls))])}
-    ${box('Agent',[kv('Tool calls',n(lt.tool_calls),true),kv('Failed tool results',n(lt.failed_tool_calls)),
-      kv('Sub-agents',n(lt.sub_agents)),kv('Skills / MCP',`${n(lt.skills_used)} / ${n(lt.mcp_used)}`),
-      kv('Wrapped runs',n(lt.runs)),kv('Coverage gaps',n(lt.coverage_gaps))])}
-    ${box('Artifact and tasks',[kv('Semantic edits',n(lt.artifact_operations),true),kv('Surviving edits',n(lt.artifact_retained)),
-      kv('Artifact survival',lt.artifact_operations?pct(lt.artifact_survival):null),
-      kv('Rework',rework===null?null:pct(rework)),
-      kv('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment):null)])}
-  </div>
-</div>
-
-${total?`<div class="section">
-  <div class="section-head"><h2>Cumulative score</h2><span class="note">Derived · ${esc(total.algorithm)}</span></div>
-  <div class="total-card">
-    <div><span class="eyebrow">Project total</span>
-      <p class="total-figure num">${points(total.value)}<small>+${points(total.delta)} LATEST</small></p>
-      <p class="total-meta" style="font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase">${n(total.rated_commits)} scored commits · started at 0</p></div>
-    <div style="align-self:center"><p class="equation num">${points(total.previous)} + ${points(total.delta)} = ${points(total.value)}</p>
-      <p class="blurb">Every recorded commit score, added once and unchanged. It grows with the number of recorded commits, so it measures accumulated recorded work, not quality. Average commit score ${points(stats.average)}.</p></div>
-  </div>
-</div>`:''}
-
-<div class="section">
-  <div class="section-head"><h2>Recorded commits</h2><span class="note">Newest first · open one for its full proof</span></div>
-  <div class="rows">${rows.map((p,i)=>`<a class="row${i===0?' is-latest':''}" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">
-    <span class="hash">${esc(p.commit.slice(0,7))}</span><span class="subject">${esc(p.title)}</span>
-    <span class="when">${esc(day(p.date))}</span>
-    <span class="delta">${p.span_ms===null||p.span_ms===undefined?'':esc(span(p.span_ms))}${p.awc?' · '+awc(p.awc)+' AWC':''}</span>
-    <span class="total num">${p.operations?pct(ratio(p.retained,p.operations),0):'—'}</span></a>`).join('')||'<p class="empty">No commits recorded yet.</p>'}</div>
-  <p class="legend">The right-hand column is artifact survival for that commit. Duration and AWC come from its own proof.</p>
-</div>`;
-
-const series=[...rows].reverse();
-const percent=v=>v===null?unknown:Math.round(v)+'%';
-const charts=[['Human tokens / commit',series.map(p=>p.human_tokens),short],
-  ['AWC / commit',series.map(p=>p.awc===null||p.awc===undefined?null:Number(p.awc)),awc],
-  ['Artifact survival',series.map(p=>p.operations?100*p.retained/p.operations:null),percent],
-  ['Rework ratio',series.map(p=>p.operations?100*(1-p.retained/p.operations):null),percent],
-  ['Agent calls / commit',series.map(p=>p.tool_calls+p.sub_agents),n],
-  ['Duration / commit',series.map(p=>p.span_ms===null||p.span_ms===undefined?null:p.span_ms),span]];
-const latestOf=values=>{for(let i=values.length-1;i>=0;i--)if(values[i]!==null&&values[i]!==undefined)return values[i];return null};
-$('#charts').innerHTML=charts.map((c,i)=>`<div class="chart-cell"><span>${esc(c[0])}</span><b>${esc(c[2](latestOf(c[1])))}<em>latest</em></b><div id="spark-${i}"></div></div>`).join('');
-function draw(){charts.forEach((c,i)=>sparkline(c[1],document.getElementById('spark-'+i)))}
-draw();
-let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(draw,150)});
-"""
-
-FAVICON = ("data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E"
-           "%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230e141d&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E"
-           "%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E"
-           "%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E")
-
-
-def _text(value):
-    return (str(value or "").replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace('"', "&quot;")[:120])
-
-
-def _page(data, script, title, edition, action):
-    payload = json.dumps(data, ensure_ascii=True, separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    # Hash exactly what is embedded, including the shared footer behaviour.
-    script = script + "\ndocument.getElementById('print').addEventListener('click',()=>window.print());"
-    script_hash = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
-    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-            + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'sha256-' + script_hash
-            + '\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'">'
-            + '<link rel="icon" href="' + FAVICON + '">'
-            + "<title>" + title + "</title><style>" + CSS + "</style></head><body>"
-            + '<a class="skip" href="#content">Skip to content</a><header class="mast"><div class="wrap">'
-            + '<div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW'
-            + '<span class="edition"> / ' + edition + '</span></div>'
-            + '<div class="acts">' + action + '<button class="ghost" id="print">Print</button></div></div></header>'
-            + '<main class="wrap" id="content"></main><noscript>This page requires JavaScript to display its embedded data. Use the aipow CLI for the JSON form.</noscript>'
-            + '<footer class="wrap foot"><span class="id">AI-PoW · ' + _text(data.get("project")) + '</span>'
-            + '<span>Process record. Not a measure of code quality.</span></footer>'
-            + '<script id="report-data" type="application/json">' + payload + '</script><script>' + script
-            + "</script></body></html>")
-
-
-def render(data):
-    """The commit proof page."""
-    link = (data.get("links") or {}).get("index")
-    action = '<a class="ghost" href="' + link + '">Repository history</a>' if link else ""
-    return _page(data, JS_COMMIT, "AI-PoW · Commit proof", "commit proof", action)
-
-
-def render_index(data):
-    """The repository summary page."""
-    return _page(data, JS_INDEX, "AI-PoW · Repository history", "repository history", "")
+document.getElementById('print').addEventListener('click',()=>window.print());</script></body></html>

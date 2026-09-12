@@ -94,8 +94,9 @@ Reference cost varies across these fixtures and does not move the score. The 89%
 
 ## Repository totals
 
-The report separates the two levels into two views: the commit score appears only in the
-latest-commit view, and the project total only in the iteration view. Iteration reports
+The report separates the two levels into two pages: the commit score appears only in the
+commit proof, the project total only in the repository summary, and neither is the first
+thing either page shows. Iteration reports
 show two repository-level numbers, and they answer different questions.
 
 **Cumulative project score (commit-sum-v1)** starts at **0** and adds each recorded commit

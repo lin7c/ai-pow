@@ -26,7 +26,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.6.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -434,7 +434,7 @@ class Recorder:
         finally:
             db.close()
 
-    def init(self, max_mib=64, report_view="iteration"):
+    def init(self, max_mib=64):
         if not 4 <= max_mib <= 4096:
             raise ValueError("Quota must be between 4 and 4096 MiB")
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -455,7 +455,7 @@ class Recorder:
             for k, v in {"version": VERSION, "max_bytes": str(max_mib * 1024**2),
                          "epoch": uuid.uuid4().hex, "base": head(self.root) or "",
                          "started_ms": str(time.time_ns() // 1000000), "last_hash": ZERO,
-                         "sampled": "0", "report_view": report_view}.items():
+                         "sampled": "0"}.items():
                 db.execute("INSERT INTO meta VALUES (?,?)", (k, v))
             db.commit()
         finally:
@@ -661,6 +661,7 @@ class Recorder:
         # Report failures do not roll back a valid proof or the user's commit.
         try:
             path = self.html_report(p["commit"])
+            self.html_index(p["commit"])
             print("AI-PoW " + (p.get("score") or {}).get("value", "unscored") + " | " + str(path), file=sys.stderr)
         except Exception as exc:
             record_error(self, exc)
@@ -684,65 +685,76 @@ class Recorder:
             numbers[field] = int(match.group(1)) if match else 0
         return numbers
 
-    def report_data(self, ref="HEAD", view="iteration"):
-        from ai_pow_scoring import history_stats, ladder_step, lifetime_add, lifetime_finish, lifetime_start
-        if view not in {"iteration", "latest"}:
-            raise ValueError("Report view must be iteration or latest")
+    def commit_meta_row(self, commit):
+        subject = git(self.root, "show", "-s", "--format=%s%n%cI", commit).decode("utf-8", "replace").splitlines()
+        return {"commit": commit, "title": subject[0][:240], "date": subject[-1]}
+
+    def report_data(self, ref="HEAD"):
+        """One commit: identity, the proof vector, and derived detail for it."""
+        from ai_pow_scoring import ALGORITHM, score
         current = self.proof(ref)
-        current_sealed_score = current.get("score")
         verification = self.verify(ref)
         with self.connection() as db:
+            inputs = score_inputs(self.root, current, self._events(db, current["epoch"]))
             if not current.get("score"):
-                current = {**current, "score": self.evaluate(db, current)}
-            def decorate(proof):
-                subject = git(self.root, "show", "-s", "--format=%s%n%cI", proof["commit"]).decode("utf-8", "replace").splitlines()
-                return {"commit": proof["commit"], "title": subject[0][:240], "date": subject[-1],
-                        "score": proof.get("score"), "summary": proof["summary"], "proof_hash": proof["proof_hash"]}
-            history = []
-            iteration = None
-            totals = None
-            if view == "iteration":
-                # Replay the entire bounded first-parent lineage, not just the
-                # visible 30 rows. Never reset ratings as rows leave the view.
-                lineage = git(self.root, "rev-list", "--first-parent", current["commit"]).decode().splitlines()
-                ancestors = lineage[1:31]
-                visible = set(lineage[:31])
-                ratings = {}
-                # One pass: the ladder and the pooled lifetime totals share the
-                # same population, and neither keeps the proof bodies in memory.
-                totals = lifetime_start()
-                for commit in reversed(lineage):
-                    row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
-                    body = json.loads(row[0]) if row else None
-                    saved = body.get("score") if body else None
-                    if commit == current["commit"]:
-                        saved = current_sealed_score
-                    if body:
-                        lifetime_add(totals, {**body, "score": saved})
-                    iteration = ladder_step(iteration, saved)
-                    if commit in visible:
-                        ratings[commit] = iteration
-                for commit in ancestors:
-                    row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
-                    if row:
-                        history.append(decorate(json.loads(row[0])))
-                    else:
-                        subject = git(self.root, "show", "-s", "--format=%s%n%cI", commit).decode("utf-8", "replace").splitlines()
-                        history.append({"commit": commit, "title": subject[0][:240], "date": subject[-1], "score": None})
-                    history[-1]["iteration"] = ratings[commit]
-            return {"project": self.root.name, "view": view, "current": decorate(current), "history": history,
-                    "iteration": iteration, "lifetime": lifetime_finish(totals) if totals else None,
-                    "diff": self.diff_stats(current),
-                    "statistics": history_stats(current["score"], history) if view == "iteration" else None,
-                    "verification": verification, "demo": False}
+                current = {**current, "score": score(inputs["evidence"], current["summary"], ALGORITHM)}
+            facts = derived_facts(self.root, current, inputs, self._events(db, current["epoch"]))
+        parents = current.get("parents") or []
+        return {"project": self.root.name, "kind": "commit", "demo": False,
+                "current": {**self.commit_meta_row(current["commit"]), "score": current.get("score"),
+                            "summary": current["summary"], "proof_hash": current["proof_hash"],
+                            "parent": parents[0] if parents else None, "tree": current.get("tree"),
+                            "trace_root": current.get("trace_root"), "boundary": current.get("boundary")},
+                "verification": verification, "derived": facts, "diff": self.diff_stats(current)}
 
-    def html_report(self, ref="HEAD", view=None, destination=None):
+    def index_data(self, ref="HEAD", rows=60):
+        """The repository: pooled totals, per-commit trends and the cumulative score."""
+        from ai_pow_scoring import history_stats, ladder_step, lifetime_add, lifetime_finish, lifetime_start
+        head_commit = git(self.root, "rev-parse", ref).decode().strip()
+        lineage = git(self.root, "rev-list", "--first-parent", head_commit).decode().splitlines()
+        visible = set(lineage[:rows])
+        totals, iteration, series = lifetime_start(), None, {}
+        with self.connection() as db:
+            for commit in reversed(lineage):
+                proof = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
+                body = json.loads(proof[0]) if proof else None
+                if body:
+                    lifetime_add(totals, body)
+                iteration = ladder_step(iteration, body.get("score") if body else None)
+                if commit in visible:
+                    series[commit] = (body, iteration)
+        history = []
+        for commit in lineage[:rows]:
+            body, running = series[commit]
+            metrics = (body or {}).get("summary") or {}
+            evidence = ((body or {}).get("score") or {}).get("evidence") or {}
+            artifact = evidence.get("artifact") or {}
+            window, activity = metrics.get("window") or {}, metrics.get("activity") or {}
+            history.append({**self.commit_meta_row(commit), "score": (body or {}).get("score"),
+                            "total": running["value"], "span_ms": window.get("span_ms"),
+                            "human_tokens": (metrics.get("human") or {}).get("tokens_measured", 0)
+                                            + (metrics.get("human") or {}).get("tokens_estimated", 0) if metrics else None,
+                            "prompts": (metrics.get("human") or {}).get("messages"),
+                            "visible_tokens": (metrics.get("visible_ai") or {}).get("tokens_measured", 0)
+                                              + (metrics.get("visible_ai") or {}).get("tokens_estimated", 0) if metrics else None,
+                            "awc": metrics.get("reference_usd_known_subtotal"),
+                            "model_calls": sum((b.get("calls") or 0) for b in (metrics.get("models") or {}).values()),
+                            "tool_calls": (metrics.get("event_counts") or {}).get("tool.call", 0),
+                            "sub_agents": (metrics.get("event_counts") or {}).get("agent.spawn", 0),
+                            "sessions": activity.get("sessions"),
+                            "operations": artifact.get("operations"), "retained": artifact.get("retained")})
+        latest = history[0] if history else None
+        first, last = (self.commit_meta_row(lineage[-1]), self.commit_meta_row(lineage[0])) if lineage else (None, None)
+        return {"project": self.root.name, "kind": "index", "demo": False,
+                "lifetime": lifetime_finish(totals), "iteration": iteration, "history": history,
+                "commits_in_history": len(lineage),
+                "statistics": history_stats(latest["score"], history[1:]) if latest and latest.get("score") else None,
+                "span": {"first": first, "last": last}}
+
+    def html_report(self, ref="HEAD", destination=None):
         from ai_pow_report import render
-        if view is None:
-            with self.connection() as db:
-                row = db.execute("SELECT value FROM meta WHERE key='report_view'").fetchone()
-                view = row[0] if row else "iteration"
-        data = self.report_data(ref, view)
+        data = self.report_data(ref)
+        data["links"] = {"index": "../index.html"}
         html = render(data).encode("utf-8")
         if len(html) > 8 * 1024 * 1024:
             raise ValueError("HTML report exceeds 8 MiB")
@@ -768,6 +780,26 @@ class Recorder:
             size += cached.stat().st_size
             if cached != path and (index >= 20 or size > 16 * 1024 * 1024):
                 cached.unlink()
+        return path
+
+    def html_index(self, ref="HEAD", destination=None):
+        from ai_pow_report import render_index
+        data = self.index_data(ref)
+        data["links"] = {"commit": "reports/"}
+        html = render_index(data).encode("utf-8")
+        if len(html) > 8 * 1024 * 1024:
+            raise ValueError("HTML index exceeds 8 MiB")
+        if destination:
+            with open(destination, "xb") as out:
+                os.chmod(destination, 0o600)
+                out.write(html)
+            return Path(destination)
+        path = self.directory / "index.html"
+        if path.is_symlink():
+            raise ValueError("Index path must not be a symlink")
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "wb") as out:
+            out.write(html)
         return path
 
     def reset_boundary(self):
@@ -928,8 +960,9 @@ class Recorder:
 SCORING_TYPES = {"human.message", "file.observed", "task.change", "coverage.gap"}
 
 
-def evaluate_score(root, proof, events, algorithm=None):
-    from ai_pow_scoring import ALGORITHM, collect_evidence, fingerprints, score
+def score_inputs(root, proof, events):
+    """Shared by scoring and by the derived report breakdown: one blob pass."""
+    from ai_pow_scoring import collect_evidence, fingerprints
     selected = []
     for event in events:
         if event["type"] in SCORING_TYPES:
@@ -948,7 +981,7 @@ def evaluate_score(root, proof, events, algorithm=None):
     args = ("diff", "--name-only", "--no-renames", "-z", proof["base"], proof["commit"]) if proof["base"] else (
         "diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "-z", proof["commit"])
     changed = {p for p in git(root, *args).split(b"\0") if p}
-    units, known_paths = {}, set()
+    units, known_paths, names = {}, set(), {}
     scope_units, read_bytes, inspected = 0, 0, 0
     limited = truncated
     for entry in git(root, "ls-tree", "-r", "-l", "-z", proof["commit"]).split(b"\0"):
@@ -958,6 +991,8 @@ def evaluate_score(root, proof, events, algorithm=None):
         mode, kind, oid, size = metadata.split()
         path_id = hashlib.sha256(raw_path).hexdigest()
         known_paths.add(path_id)
+        if path_id in wanted or raw_path in changed:
+            names[path_id] = os.fsdecode(raw_path)
         if path_id not in wanted and raw_path not in changed:
             continue
         if (kind != b"blob" or mode not in {b"100644", b"100755"} or int(size) > MAX_FILE
@@ -975,7 +1010,127 @@ def evaluate_score(root, proof, events, algorithm=None):
     for path_id in wanted - known_paths:
         units[path_id] = []  # A verified deletion is a surviving outcome too.
     evidence = collect_evidence(selected, units, scope_units, len(changed), limited)
-    return score(evidence, proof["summary"], algorithm or ALGORITHM)
+    return {"selected": selected, "units": units, "names": names, "evidence": evidence}
+
+
+def evaluate_score(root, proof, events, algorithm=None):
+    from ai_pow_scoring import ALGORITHM, score
+    inputs = score_inputs(root, proof, events)
+    return score(inputs["evidence"], proof["summary"], algorithm or ALGORITHM)
+
+
+MAX_TIMELINE = 28
+MAX_FILE_ROWS = 40
+
+
+def derived_facts(root, proof, inputs, events):
+    """Report-only detail: per-file survival, a timeline and the commit contents.
+
+    Everything here is derived from the sealed trace and from Git at view time.
+    None of it is part of the proof, and the report labels it as derived.
+    """
+    from collections import Counter
+    selected, units, names = inputs["selected"], inputs["units"], inputs["names"]
+    baseline, operations, writes = {}, Counter(), Counter()
+    overwritten, reintroduced, lineage, seen = Counter(), Counter(), set(), {}
+    timeline, extra = [], 0
+    for event in selected:
+        if event["type"] != "file.observed":
+            continue
+        data = event["data"]
+        if "units_before" not in data or "units_after" not in data:
+            continue
+        path = data["path_hash"]
+        before, after = set(data["units_before"]), set(data["units_after"])
+        baseline.setdefault(path, before)
+        added, removed = after - before, before - after
+        if added or removed:
+            writes[path] += 1
+        operations[path] += len(added) + len(removed)
+        for unit in added:
+            history = seen.setdefault((path, unit), [])
+            if history and history[-1] == "remove":
+                reintroduced[path] += 1
+            history.append("add")
+            lineage.add((path, "add", unit))
+        replaced = 0
+        for unit in removed:
+            history = seen.setdefault((path, unit), [])
+            if "add" in history:
+                replaced += 1
+            history.append("remove")
+            lineage.add((path, "remove", unit))
+        overwritten[path] += replaced
+        if replaced:
+            timeline.append({"at": event.get("time_ms"), "kind": "rework",
+                             "label": names.get(path, path[:10]),
+                             "detail": str(replaced) + " earlier edits overwritten"})
+    retained = Counter()
+    for path, before in baseline.items():
+        if path not in units:
+            continue
+        after = set(units[path])
+        for action, changed in (("add", after - before), ("remove", before - after)):
+            for unit in changed:
+                if (path, action, unit) in lineage:
+                    retained[path] += 1
+    files = [{"path": names.get(path), "id": path[:10], "writes": writes[path],
+              "operations": operations[path], "retained": retained[path],
+              "checked": path in units, "overwritten": overwritten[path],
+              "reintroduced": reintroduced[path]}
+             for path in operations]
+    files.sort(key=lambda row: (-row["operations"], row["path"] or row["id"]))
+    mcp_calls, tool_results, tasks = 0, 0, {}
+    for event in events:
+        kind, data = event["type"], event["data"]
+        when = event.get("time_ms")
+        if kind == "tool.call" and data.get("mcp_server"):
+            mcp_calls += 1
+        elif kind == "tool.result":
+            tool_results += 1
+        elif kind == "run.start":
+            timeline.append({"at": when, "kind": "session", "label": "session started",
+                             "detail": str(data.get("command") or "")[:40]})
+        elif kind == "run.stop":
+            timeline.append({"at": when, "kind": "session", "label": "session ended",
+                             "detail": "exit " + str(data.get("exit_code"))})
+        elif kind == "task.change" and data.get("task_id"):
+            key = data["task_id"]
+            tasks[key] = tasks.get(key, 0) + 1
+            timeline.append({"at": when, "kind": "task", "label": key[:48],
+                             "detail": str(data.get("status") or ""),
+                             "repeat": tasks[key]})
+    timeline = [item for item in timeline if item["at"] is not None]
+    timeline.sort(key=lambda item: item["at"])
+    if len(timeline) > MAX_TIMELINE:
+        extra = len(timeline) - MAX_TIMELINE
+        timeline = timeline[:MAX_TIMELINE // 2] + timeline[-(MAX_TIMELINE - MAX_TIMELINE // 2):]
+    return {"files": files[:MAX_FILE_ROWS], "files_total": len(files),
+            "timeline": timeline, "timeline_omitted": extra,
+            "mcp_calls": mcp_calls, "tool_results": tool_results,
+            "result": commit_result(root, proof)}
+
+
+def commit_result(root, proof):
+    """What the commit itself contains, read from Git."""
+    try:
+        args = ("diff", "--name-status", "-z", proof["base"], proof["commit"]) if proof["base"] else (
+            "diff-tree", "--root", "--no-commit-id", "--name-status", "-r", "-z", proof["commit"])
+        fields = [f for f in git(root, *args).split(b"\0") if f]
+    except Exception:
+        return None
+    counts = {"added": 0, "modified": 0, "removed": 0, "renamed": 0, "tests": 0}
+    index = 0
+    while index < len(fields):
+        status = fields[index].decode("utf-8", "replace")
+        step = 3 if status[:1] in {"R", "C"} else 2
+        path = fields[min(index + step - 1, len(fields) - 1)].decode("utf-8", "replace")
+        counts[{"A": "added", "M": "modified", "D": "removed",
+                "R": "renamed", "C": "added"}.get(status[:1], "modified")] += 1
+        if re.search(r"(^|/)(tests?|spec|__tests__)/|(_test|\.test|\.spec)\.", path):
+            counts["tests"] += 1
+        index += step
+    return counts
 
 
 def verify_proof(root, proof, events):
@@ -1168,7 +1323,6 @@ def main(argv=None):
     init = sub.add_parser("init")
     init.add_argument("--max-mib", type=int, default=64)
     init.add_argument("--no-hook", action="store_true")
-    init.add_argument("--view", choices=("iteration", "latest"), default="iteration")
     for name in ("status", "sample", "seal", "reset-boundary", "install-hook", "hook-claude"):
         sub.add_parser(name)
     for name in ("report", "verify", "export"):
@@ -1179,11 +1333,12 @@ def main(argv=None):
         if name == "export":
             p.add_argument("destination")
         if name == "report":
-            p.add_argument("--html", action="store_true", help="Generate a self-contained HTML report")
-            p.add_argument("--view", choices=("iteration", "latest"))
+            p.add_argument("--html", action="store_true", help="Generate the self-contained commit report")
             p.add_argument("--output", help="Export HTML to a new file; existing files are preserved")
-    config = sub.add_parser("report-config")
-    config.add_argument("--view", choices=("iteration", "latest"), required=True)
+    index = sub.add_parser("index")
+    index.add_argument("--commit", default="HEAD")
+    index.add_argument("--html", action="store_true", help="Generate the repository summary page")
+    index.add_argument("--output", help="Export HTML to a new file; existing files are preserved")
     task = sub.add_parser("task")
     task.add_argument("task_id")
     task.add_argument("--status", choices=("active", "completed", "dropped"), required=True)
@@ -1207,7 +1362,7 @@ def main(argv=None):
         recorder = Recorder(args.cwd)
         action = args.action
         if action == "init":
-            result = recorder.init(args.max_mib, args.view)
+            result = recorder.init(args.max_mib)
             if not args.no_hook:
                 result["hook"] = install_hook(recorder)
         elif action == "install-hook":
@@ -1222,10 +1377,6 @@ def main(argv=None):
             result = recorder.import_claude_usage(args.path)
         elif action == "quota":
             result = recorder.set_quota(args.max_mib)
-        elif action == "report-config":
-            with recorder.connection() as db:
-                recorder.put(db, "report_view", args.view)
-            result = {"report_view": args.view}
         elif action == "task":
             evidence = []
             for name in args.evidence:
@@ -1237,8 +1388,11 @@ def main(argv=None):
                        "status": args.status, "evidence": evidence}, "task-cli")}
         elif action in {"status", "sample", "seal", "reset-boundary"}:
             result = getattr(recorder, action.replace("-", "_"))()
+        elif action == "index":
+            result = ({"index": str(recorder.html_index(args.commit, args.output))}
+                      if args.html or args.output else recorder.index_data(args.commit))
         elif action == "report":
-            result = {"report": str(recorder.html_report(args.commit, args.view, args.output))} if args.html or args.output else recorder.proof(args.commit)
+            result = {"report": str(recorder.html_report(args.commit, args.output))} if args.html or args.output else recorder.proof(args.commit)
         elif action == "verify":
             result = verify_bundle(recorder.root, args.bundle) if args.bundle else recorder.verify(args.commit)
         elif action == "export":

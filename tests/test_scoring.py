@@ -195,25 +195,54 @@ class ReportTests(unittest.TestCase):
         with self.rec.connection() as db, self.assertRaises(ValueError):
             pow.verify_proof(self.root, p, self.rec._events(db, p["epoch"]))
 
-    def test_modes_and_history(self):
+    def test_pages_are_separate_and_carry_different_data(self):
         first = self.commit("first")
         self.rec.seal()
         second = self.commit("second")
-        p = self.rec.seal()
-        iteration = self.rec.report_data(view="iteration")
-        self.assertEqual(iteration["current"]["commit"], second)
-        self.assertEqual(iteration["history"][0]["commit"], first)
-        self.assertEqual(iteration["statistics"]["count"], 1)
-        latest = self.rec.report_data(view="latest")
-        self.assertEqual(latest["history"], [])
-        self.assertIsNone(latest["statistics"])
-        self.assertIsNone(latest["iteration"])
-        self.assertEqual(iteration["iteration"]["rated_commits"], 2)
-        path = self.rec.html_report(view="latest", destination=self.root / "latest.html")
-        self.assertNotIn(first, path.read_text())
+        proof = self.rec.seal()
+        commit_page = self.rec.report_data()
+        # The commit page knows only this commit: no history, no cumulative total.
+        self.assertEqual(commit_page["current"]["commit"], second)
+        self.assertEqual(commit_page["current"]["parent"], first)
+        self.assertEqual(commit_page["kind"], "commit")
+        for absent in ("history", "iteration", "lifetime", "statistics"):
+            self.assertNotIn(absent, commit_page)
+        self.assertIn("files", commit_page["derived"])
+        index = self.rec.index_data()
+        self.assertEqual(index["kind"], "index")
+        self.assertEqual([row["commit"] for row in index["history"]], [second, first])
+        self.assertEqual(index["iteration"]["rated_commits"], 2)
+        self.assertEqual(index["statistics"]["count"], 1)
+        self.assertNotIn("derived", index)
+        report = self.rec.html_report(destination=self.root / "commit.html")
+        page = report.read_text()
+        # The parent hash belongs on the proof; the project total and history do not.
+        self.assertNotIn("commit-sum-v1", page)
+        self.assertNotIn("Recorded commits", page)
+        self.assertNotIn("Project total", page)
+        summary_path = self.rec.html_index(destination=self.root / "summary.html")
+        self.assertIn(first, summary_path.read_text())
         with self.assertRaises(FileExistsError):
-            self.rec.html_report(destination=path)
-        self.assertEqual(self.rec.proof()["proof_hash"], p["proof_hash"])
+            self.rec.html_report(destination=report)
+        self.assertEqual(self.rec.proof()["proof_hash"], proof["proof_hash"])
+
+    def test_derived_file_breakdown_names_and_rework(self):
+        (self.root / "app.py").write_text("def a():\n    return 1\n")
+        self.rec.sample()
+        (self.root / "app.py").write_text("def a():\n    return 2\n\ndef b():\n    return 3\n")
+        self.rec.sample()
+        self.git("add", "app.py")
+        self.git("commit", "-qm", "feature")
+        self.rec.seal()
+        derived = self.rec.report_data()["derived"]
+        row = next(item for item in derived["files"] if item["path"] == "app.py")
+        self.assertEqual(row["writes"], 2)
+        self.assertTrue(row["checked"])
+        self.assertEqual(row["overwritten"], 1)  # The first version of a() was replaced.
+        self.assertEqual(row["retained"], 2)  # Both units of the committed file survive.
+        self.assertGreaterEqual(row["operations"], 3)
+        self.assertEqual(derived["result"]["added"], 1)
+        self.assertTrue(any(item["kind"] == "rework" for item in derived["timeline"]))
 
     def test_unstaged_edits_do_not_survive(self):
         self.commit("base")
@@ -256,7 +285,7 @@ class ReportTests(unittest.TestCase):
         first = self.rec.seal()
         self.commit("second")
         second = self.rec.seal()
-        data = self.rec.report_data()
+        data = self.rec.index_data()
         totals = data["lifetime"]
         operations = sum(p["score"]["evidence"]["artifact"]["operations"] for p in (first, second))
         retained = sum(p["score"]["evidence"]["artifact"]["retained"] for p in (first, second))
@@ -265,7 +294,7 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(totals["artifact_operations"], operations)
         self.assertEqual(totals["artifact_survival"], format(retained / operations, ".4f"))
         self.assertEqual(totals["algorithms"], ["retention-v2"])
-        self.assertIsNone(self.rec.report_data(view="latest")["lifetime"])
+        self.assertNotIn("lifetime", self.rec.report_data())
 
     def test_ladder_does_not_reset_outside_visible_history(self):
         self.commit("first")
@@ -276,7 +305,7 @@ class ReportTests(unittest.TestCase):
         self.rec.sample()  # Establish the new interval's uncounted baseline.
         self.commit("latest")
         self.rec.seal()
-        data = self.rec.report_data()
-        self.assertEqual(len(data["history"]), 30)
-        self.assertTrue(all(item["score"] is None for item in data["history"]))
+        data = self.rec.index_data(rows=31)
+        self.assertEqual(len(data["history"]), 31)
+        self.assertTrue(all(item["score"] is None for item in data["history"][1:]))
         self.assertEqual(data["iteration"]["rated_commits"], 2)
