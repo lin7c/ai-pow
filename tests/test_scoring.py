@@ -95,22 +95,23 @@ class ScoringTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             pow.validate_event("file.observed", {"units_before": [], "units_after": ["z" * 64]})
 
-    def test_ladder_progress_and_diminishing_returns(self):
-        s = score(*fixture())
-        first = ladder_step(None, s)
-        rating = first
+    def test_ladder_is_exact_sum_from_zero(self):
+        rating = None
+        for value in ("81.4", "43.6", "50.0"):
+            rating = ladder_step(rating, {"value": value})
+            self.assertEqual(rating["delta"], value)
+        self.assertEqual(rating["value"], "175.0")
+        self.assertEqual(rating["starting_rating"], 0)
+        self.assertNotIn("tier", rating)
+        self.assertNotIn("target", rating)
         for _ in range(100):
-            updated = ladder_step(rating, s)
-            self.assertGreaterEqual(float(updated["value"]), float(rating["value"]))
-            self.assertLessEqual(abs(float(updated["delta"])), 40)
-            rating = updated
-        self.assertLess(float(rating["delta"]), float(first["delta"]))
-        self.assertLessEqual(float(rating["value"]), float(rating["target"]))
+            rating = ladder_step(rating, {"value": "81.4"})
+        self.assertEqual(rating["value"], "8315.0")
 
-    def test_ladder_weak_results_drop_and_unknown_freezes(self):
-        rating = ladder_step(None, score(*fixture()))
-        weaker = ladder_step(rating, score(*fixture(ratio=.1, cost=100)))
-        self.assertLess(float(weaker["value"]), float(rating["value"]))
+    def test_ladder_has_no_extra_weighting_and_unknown_is_omitted(self):
+        rating = ladder_step(None, {"value": "81.4", "confidence": "0"})
+        weaker = ladder_step(rating, {"value": "20.0"})
+        self.assertEqual(weaker["value"], "101.4")
         unknown = ladder_step(rating, None)
         self.assertEqual(unknown["value"], rating["value"])
         self.assertEqual(unknown["delta"], "0.0")

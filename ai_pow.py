@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 AI-PoW contributors
-"""AI-PoW 0.2: dependency-free process scoring and local provenance.
+"""AI-PoW 0.3: dependency-free process scoring and local provenance.
 
 This file is also vendored into laintas-cli. No daemon, network or model calls.
 """
@@ -25,7 +25,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -597,8 +597,6 @@ class Recorder:
                     saved = json.loads(row[0]).get("score") if row else None
                     if commit == current["commit"]:
                         saved = current_sealed_score
-                    if saved and saved["algorithm"] != current["score"]["algorithm"]:
-                        saved = None
                     iteration = ladder_step(iteration, saved)
                     if commit in visible:
                         ratings[commit] = iteration

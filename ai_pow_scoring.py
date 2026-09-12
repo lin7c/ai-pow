@@ -193,31 +193,14 @@ def history_stats(current, history):
 
 
 def ladder_step(previous, commit_score):
-    """Project-local, bounded rating movement. Not Elo: there are no opponents.
-
-    Missing evidence never earns a participation bonus. Repeated strong work
-    approaches a score-dependent target, with diminishing gains rather than
-    unbounded credit for producing commits.
-    """
-    before = float(previous["value"]) if previous else 1000.0
-    count = previous["rated_commits"] if previous else 0
-    eligible = bool(commit_score and commit_score["evidence"]["artifact"]["checked_operations"]
-                    and commit_score["evidence"]["scope"]["units"])
-    movement = 0.0
-    target = None
-    if eligible:
-        target = 1000 + 25 * (float(commit_score["value"]) - 50)
-        confidence = float(commit_score["confidence"])
-        scope_factor = min(1, commit_score["evidence"]["scope"]["units"] / 8)
-        movement = 40 * math.tanh((target - before) / 300) * confidence ** 2 * scope_factor
-        count += 1
-    value = round(before + movement, 1)
-    tiers = ((1750, "Diamond"), (1500, "Platinum"), (1300, "Gold"), (1100, "Silver"), (0, "Bronze"))
-    tier = next(label for threshold, label in tiers if value >= threshold)
-    next_tier = next(((threshold, label) for threshold, label in reversed(tiers) if threshold > value), None)
-    return {"algorithm": "ladder-v1", "value": format(value, ".1f"),
-            "previous": format(before, ".1f"), "delta": format(value - before, ".1f"),
-            "target": None if target is None else format(target, ".1f"),
-            "tier": tier, "next_tier": None if next_tier is None else next_tier[1],
-            "next_threshold": None if next_tier is None else next_tier[0],
-            "rated_commits": count, "eligible": eligible, "starting_rating": 1000}
+    """Add the existing commit score, unchanged, to a zero-based total."""
+    from decimal import Decimal, localcontext
+    before = Decimal(previous["value"]) if previous else Decimal(0)
+    delta = Decimal(commit_score["value"]) if commit_score else Decimal(0)
+    with localcontext() as context:
+        context.prec = 50
+        total = before + delta
+    return {"algorithm": "commit-sum-v1", "value": format(total, ".1f"),
+            "previous": format(before, ".1f"), "delta": format(delta, ".1f"),
+            "rated_commits": (previous["rated_commits"] if previous else 0) + int(commit_score is not None),
+            "starting_rating": 0}

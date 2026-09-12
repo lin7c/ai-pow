@@ -18,12 +18,12 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent activity, and sampled artifact revisions. It binds those observations to the resulting commit, computes a transparent process score, and creates an offline HTML report.
 
-**v0.2 includes:**
+**v0.3 includes:**
 
 - A smooth 0–100 score with four visible components, evidence confidence, and explicit uncertainty.
 - A designed commit report with grade, resource breakdown, scoring explanations, and proof identity.
 - Two views: **Iteration history** and **Latest commit**.
-- A cumulative project ladder starting at 1,000, with tiers, bounded rating changes, and a switchable rating/commit-score chart.
+- A zero-based cumulative project score: the exact sum of recorded commit scores, with a switchable total/commit-score chart.
 - Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
@@ -84,19 +84,18 @@ Reports are generated after committing and remain outside the tracked source tre
 
 **Latest commit: 0–100.** How did this observed development interval perform?
 
-**Iteration history: project rating, starting at 1,000.** How has the project's recorded process developed over successive versions?
+**Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once.
 
-The project ladder rises gradually after strong, well-evidenced iterations and can fall after weaker ones. Each update is bounded to 40 points and scaled by evidence confidence squared and scope. Missing artifact evidence freezes the rating. Repeating the same performance approaches a target rather than yielding unlimited points for more commits.
+```text
+Commit scores: 81.4 + 43.6 + 50.0
+Project total: 175.0
+```
 
-| Project tier | Rating |
-| --- | --- |
-| Bronze | Below 1,100 |
-| Silver | 1,100–1,299.9 |
-| Gold | 1,300–1,499.9 |
-| Platinum | 1,500–1,749.9 |
-| Diamond | 1,750+ |
+No separate code-line scoring, additional weighting, deductions, tiers, or upper limit. A commit worth 81.4 adds exactly 81.4, regardless of its confidence or the existing total. The single-commit scoring system is unchanged.
 
-Rating uses the complete locally available first-parent score history, even when only 30 rows are visible. It is project-local and separately versioned as `ladder-v1`: **not opponent-based Elo, a global rank, or proof that code gets better with age**. The latest-only export contains neither historical rows nor a cumulative rating.
+The total uses the complete locally available first-parent score history, even when only 30 rows are visible. Unscored commits add nothing; their scores are not invented. Refreshing or regenerating a report never adds a commit twice. Historical scores are used as originally recorded, including older score algorithms. The cumulative policy is `commit-sum-v1`; it is a total, not a quality ranking. The latest-only export contains neither historical rows nor a cumulative score.
+
+Upgrading does not change sealed commit scores. Run `aipow report --html --view iteration` to regenerate an existing report with the new design and cumulative total.
 
 ## What makes the score higher?
 

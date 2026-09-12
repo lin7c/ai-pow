@@ -19,7 +19,7 @@ The standalone suite covers:
 - Forged score evidence rejected even after recomputing its score and proof hash; verification rebuilds evidence from the trace and Git tree.
 - Latest-only data isolation, first-parent history averages, cohort/algorithm separation, and refusing to overwrite exports.
 - Scores use committed blobs rather than unstaged working-tree content.
-- Project-ladder bounded movement, diminishing gains, weaker-result declines, unknown-evidence freezes, and preservation of contributions older than the 30 visible history rows.
+- Zero-based exact addition of existing commit scores, no extra weighting or cap, omitted unscored commits, and preservation of contributions older than the 30 visible history rows.
 
 The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, and overflow checks at 375, 720, 1024, and 1440 pixels. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
 

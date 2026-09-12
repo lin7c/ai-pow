@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Replace project-rating updates with commit-sum-v1: start at zero and add each recorded commit score exactly once.
+- Remove cumulative-score tiers, confidence weighting, deductions, target convergence, and growth limits. Single-commit scoring remains unchanged.
+- Redesign reports with dark slate surfaces, orange/white contrast, angular controls, and compact typography.
+- Show the exact previous-total + commit-score = new-total calculation in iteration reports.
+- Refresh English documentation, interactive demos, and browser checks.
+
 ## 0.2.0
 
 - Introduce balanced-v1, a smooth four-component process score with explicit confidence and neutral missing evidence.

@@ -90,46 +90,34 @@ Proofs include the algorithm, score, components, and evidence in their hash. Ver
 
 Application 0.2 retains protocol 0.1 and accounting reducer observed-v2. Legacy observed-v1 proofs verify without adding a score to their sealed data. Viewing a legacy proof may calculate a separate provisional display score; that score was not sealed by the old release.
 
-## Project iteration ladder: ladder-v1
+## Cumulative project score: commit-sum-v1
 
-The per-commit score above remains 0–100. Iteration reports additionally replay
-the full available first-parent history of locally stored, matching-algorithm
-scores to derive a project rating. Its initial value is 1,000. Unscored commits
-and commits with no checked artifact operations or no scope do not move it.
+The cumulative score starts at **0**. Each recorded commit contributes its
+existing score exactly once, unchanged:
 
 ```text
-target = 1000 + 25 * (commit_score - 50)
-scope_factor = min(1, scope_units / 8)
-delta = 40 * tanh((target - previous_rating) / 300)
-           * confidence^2 * scope_factor
-rating = round(previous_rating + delta, 1)
+total[0] = 0
+total[n] = total[n-1] + recorded_commit_score[n]
 ```
 
-Each iteration moves by at most 40 points. Small or uncertain observations have
-very little influence; missing artifact evidence has none. Strong repeated
-results move toward a target with diminishing gains. A weaker result can lower
-an established rating even if its single-commit score is above 50. There is no
-automatic participation bonus and no permanent guarantee of upward movement.
+Example: 81.4 + 43.6 + 50.0 = 175.0. There is no additional code-line calculation,
+confidence or scope weighting, eligibility threshold, deduction, tier, or upper
+limit. All weighting belongs to the existing single-commit score, not this sum.
 
-Tiers: Bronze below 1,100; Silver from 1,100; Gold from 1,300; Platinum from
-1,500; Diamond from 1,750. These are product thresholds, not calibrated skill
-bands. With an identical commit score of 80, confidence of 0.8, and scope at
-least eight, successive updates start near +25.3, +25.2, and +25.1; eventually
-they approach a rating of 1,750 rather than growing without bound.
+The full locally available first-parent history is replayed; only the latest
+30 historical rows are displayed. Missing scores contribute nothing and are
+not inferred. Existing scores from earlier algorithms are added as recorded,
+not recomputed or filtered out. History averages still use their separately
+documented comparison rules. Reopening a report does not add another iteration.
 
-This is not Elo because there are no opponents or match outcomes. Ratings are
-derived report data, not an extra claim sealed inside the single-commit proof.
-Reproducing one requires the relevant local historical proofs, not only the
-latest exported bundle. Missing proofs freeze updates and restoring historical
-proofs can change the derived rating. History rewrites likewise change its
-input lineage. Oversized Git-history output fails explicitly rather than
-silently resetting the baseline. Only 30 historical rows are displayed; the
-calculation does not discard earlier available scores.
+Totals are derived report data, not an additional value sealed into the latest
+single-commit proof. Reproduction requires the relevant historical scores.
+Restoring missing proofs or changing the Git lineage changes the available sum.
+Oversized history fails explicitly rather than silently restarting from zero.
 
-Current-commit verification rebuilds its evidence and score. Historical rating
-inputs are locally stored sealed scores, not external attestations. Cross-project
-ratings are not comparable. Commit/task splitting and selective capture remain
-gaming risks; the ladder is a progress indicator, not a reward currency.
+This is a cumulative total, not a quality rating or an anti-gaming mechanism.
+It inherits the limitations of the per-commit scores and grows with recorded
+commits. The latest-only export omits both historical rows and the total.
 
 ## Accounting remains separate
 
