@@ -155,9 +155,9 @@ function scoreLayout(hero,groups,featured){
   content.replaceChildren(head);
   content.insertAdjacentHTML('beforeend',hero);
   if(featured)content.insertAdjacentHTML('beforeend',featured);
-  content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>数据与依据</h2><p>按需展开，查看完整记录</p></div>');
+  content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>Data & evidence</h2><p>Expand a section to explore the full record</p></div>');
   groups.forEach(([title,subtitle,nodes])=>content.append(disclosure(title,subtitle,nodes)));
-  if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('演示数据','warn'));
+  if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('Demo data','warn'));
 }
 const scoreHero=(label,value,unit,caption,aside)=>`<section class="score-hero" aria-label="${esc(label)}"><div class="score-main"><p class="eyebrow">AI-POW / SCORE REPORT</p><h2 class="score-label">${esc(label)}</h2><strong class="score-value">${n(value,1)}${unit?`<small>${esc(unit)}</small>`:''}</strong><p class="score-caption">${esc(caption)}</p></div><div class="score-aside">${aside}</div></section>`;
 
@@ -301,7 +301,7 @@ function eventRows(){
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / commit / <b>${esc(c.commit.slice(0,10))}</b>`;
 $('#chips').innerHTML=[chip(v.integrity_verified?'verified':'unverified',v.integrity_verified?'ok dot':'warn dot'),
-  chip('迭代版本')].join('');
+  chip('Iteration')].join('');
 
 $('#content').innerHTML=`
 <div class="pagehead"><div><h1>${esc(c.title)}</h1>
@@ -389,13 +389,13 @@ function sparks(){
 }
 
 const commitGrids=[...$('#content').querySelectorAll(':scope > .grid')];
-scoreLayout(scoreHero('迭代分数',s.value,'/ 100','本次提交的评分。分数依据记录中的编辑留存情况计算。',
-  '<h3>本次评分依据</h3>'+kv('留存编辑',n(kept,0)+' / '+n(ops,0))+
-  kv('证据置信度',pct(s.confidence,0))+kv('评分状态',s.status)+
-  `<div class="score-track"><i style="width:${Math.max(0,Math.min(100,Number(s.value)||0))}%"></i></div><p class="note">${esc(s.algorithm)} · ${esc(s.grade)}。评分不代表代码质量或测试通过。</p>`),[
-  ['效率与投入','人工、成本、留存与工具调用',[commitGrids[0],commitGrids[2],commitGrids[3]]],
-  ['变更与执行过程','文件改动、会话时间线与任务记录',[commitGrids[4],commitGrids[1],commitGrids[5]]],
-  ['验证与数据来源','校验结果、证据与计算口径',[commitGrids[6]]]
+scoreLayout(scoreHero('Iteration score',s.value,'/ 100','The score for this commit, based on recorded process retention.',
+  '<h3>Score evidence</h3>'+kv('Retained edits',n(kept,0)+' / '+n(ops,0))+
+  kv('Evidence confidence',pct(s.confidence,0))+kv('Score status',s.status)+
+  `<div class="score-track"><i style="width:${Math.max(0,Math.min(100,Number(s.value)||0))}%"></i></div><p class="note">${esc(s.algorithm)} · ${esc(s.grade)}. This score does not verify code quality or passing tests.</p>`),[
+  ['Efficiency & input','Human input, cost, retention and tool use',[commitGrids[0],commitGrids[2],commitGrids[3]]],
+  ['Changes & execution','Files, session timelines and task records',[commitGrids[4],commitGrids[1],commitGrids[5]]],
+  ['Verification & provenance','Checks, evidence and measurement methods',[commitGrids[6]]]
 ]);
 function paint(){waterfall();sparks()}
 $('#content').addEventListener('toggle',()=>requestAnimationFrame(paint),true);
@@ -435,11 +435,11 @@ const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
 $('#chips').innerHTML=[chip(data.chain_verified?'chain verified':'chain unverified',data.chain_verified?'ok dot':'warn dot'),
-  chip('当前版本')].join('');
+  chip('Current version')].join('');
 
 $('#content').innerHTML=`
-<div class="pagehead"><div><h1>${esc(data.project)} <span style="color:var(--dim);font-weight:400">/ 当前版本</span></h1>
-  <p class="sub">${rows.length?'最新提交 '+esc(rows[0].commit.slice(0,7))+' · '+esc(dayOf(rows[0].date)):'暂无已记录的迭代'}</p></div>
+<div class="pagehead"><div><h1>${esc(data.project)} <span style="color:var(--dim);font-weight:400">/ Current version</span></h1>
+  <p class="sub">${rows.length?'Latest commit '+esc(rows[0].commit.slice(0,7))+' · '+esc(dayOf(rows[0].date)):'No recorded iterations yet'}</p></div>
   <div class="meta">${chip(n(lt.sessions,0)+' sessions')}${chip(n(lt.model_calls,0)+' model calls')}${chip(short(lt.artifact_operations)+' edits')}</div>
 </div>
 <div class="grid g4">
@@ -546,14 +546,14 @@ function draw(){
 }
 
 const indexGrids=[...$('#content').querySelectorAll(':scope > .grid')];
-const historyView=`<div class="section-heading"><h2>迭代记录</h2><p>最新在前 · 点击标题查看本次评分</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>版本 / 变更</th><th class="r">迭代分数</th><th class="r opt">累计总分</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">暂无迭代记录</td></tr>'}</tbody></table></div></section>`;
-scoreLayout(scoreHero('总分数',total?total.value:null,'','截至当前版本，所有已评分迭代的累计总分。',
-  '<h3>总分如何变化</h3>'+kv('上一版本总分',n(total?total.previous:null,1))+
-  kv('本次迭代贡献',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('已评分迭代',n(total?total.rated_commits:lt.scored_commits,0))+
-  '<p class="note">总分 = 上一版本总分 + 本次迭代分数。累计值随已记录工作增长，不代表代码质量。</p>'),[
-  ['效率与趋势','人工投入、成本、留存及执行效率',indexGrids.slice(0,4)],
-  ['累计用量与开发方式','模型、工具、产物与开发特征',[indexGrids[4],indexGrids[6]]],
-  ['评分口径与累计规则','评分算法、累计公式与链路校验',indexGrids.slice(7)]
+const historyView=`<div class="section-heading"><h2>Iteration history</h2><p>Newest first · Select a change to view its score</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>Version / change</th><th class="r">Iteration score</th><th class="r opt">Running total</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">No iterations recorded</td></tr>'}</tbody></table></div></section>`;
+scoreLayout(scoreHero('Total score',total?total.value:null,'','The cumulative score of all rated iterations through the current version.',
+  '<h3>How the total changed</h3>'+kv('Previous total',n(total?total.previous:null,1))+
+  kv('This iteration adds',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('Rated iterations',n(total?total.rated_commits:lt.scored_commits,0))+
+  '<p class="note">Total = previous total + this iteration score. The total grows with recorded work; it does not measure code quality.</p>'),[
+  ['Efficiency & trends','Human input, cost, retention and execution',indexGrids.slice(0,4)],
+  ['Usage & development style','Models, tools, artifacts and development patterns',[indexGrids[4],indexGrids[6]]],
+  ['Scoring & accumulation','Algorithms, accumulation rules and chain verification',indexGrids.slice(7)]
 ],historyView);
 $('#content').addEventListener('toggle',()=>requestAnimationFrame(draw),true);
 draw();
@@ -601,7 +601,7 @@ document.getElementById('print').addEventListener('click',()=>window.print());
 def render(data):
     """The per-commit run view."""
     link = (data.get("links") or {}).get("index")
-    action = '<a class="btn" href="' + link + '">← 当前版本</a>' if link else ""
+    action = '<a class="btn" href="' + link + '">← Current version</a>' if link else ""
     return _page(data, JS_COMMIT, "AI-PoW · Commit run", action)
 
 

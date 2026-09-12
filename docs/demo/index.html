@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4Zp3xQu1DXML87KJnxdbXm/dNomzEVbPCsBTAV9/T8E='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V0se4XqT769aM4VSfqRZcMCn2dxYqfN/j/jot9OoS9Q='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
 :root{
 --bg:#0b0e13;--panel:#111620;--panel2:#151b26;--head:#0e131b;--line:#1f2733;--line2:#2b3543;
 --text:#e6edf3;--muted:#8b98a9;--dim:#5f6c7d;--accent:#ff9c31;--teal:#39c2b4;--violet:#9b8cff;
@@ -143,9 +143,9 @@ function scoreLayout(hero,groups,featured){
   content.replaceChildren(head);
   content.insertAdjacentHTML('beforeend',hero);
   if(featured)content.insertAdjacentHTML('beforeend',featured);
-  content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>数据与依据</h2><p>按需展开，查看完整记录</p></div>');
+  content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>Data & evidence</h2><p>Expand a section to explore the full record</p></div>');
   groups.forEach(([title,subtitle,nodes])=>content.append(disclosure(title,subtitle,nodes)));
-  if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('演示数据','warn'));
+  if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('Demo data','warn'));
 }
 const scoreHero=(label,value,unit,caption,aside)=>`<section class="score-hero" aria-label="${esc(label)}"><div class="score-main"><p class="eyebrow">AI-POW / SCORE REPORT</p><h2 class="score-label">${esc(label)}</h2><strong class="score-value">${n(value,1)}${unit?`<small>${esc(unit)}</small>`:''}</strong><p class="score-caption">${esc(caption)}</p></div><div class="score-aside">${aside}</div></section>`;
 
@@ -200,11 +200,11 @@ const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
 $('#chips').innerHTML=[chip(data.chain_verified?'chain verified':'chain unverified',data.chain_verified?'ok dot':'warn dot'),
-  chip('当前版本')].join('');
+  chip('Current version')].join('');
 
 $('#content').innerHTML=`
-<div class="pagehead"><div><h1>${esc(data.project)} <span style="color:var(--dim);font-weight:400">/ 当前版本</span></h1>
-  <p class="sub">${rows.length?'最新提交 '+esc(rows[0].commit.slice(0,7))+' · '+esc(dayOf(rows[0].date)):'暂无已记录的迭代'}</p></div>
+<div class="pagehead"><div><h1>${esc(data.project)} <span style="color:var(--dim);font-weight:400">/ Current version</span></h1>
+  <p class="sub">${rows.length?'Latest commit '+esc(rows[0].commit.slice(0,7))+' · '+esc(dayOf(rows[0].date)):'No recorded iterations yet'}</p></div>
   <div class="meta">${chip(n(lt.sessions,0)+' sessions')}${chip(n(lt.model_calls,0)+' model calls')}${chip(short(lt.artifact_operations)+' edits')}</div>
 </div>
 <div class="grid g4">
@@ -311,14 +311,14 @@ function draw(){
 }
 
 const indexGrids=[...$('#content').querySelectorAll(':scope > .grid')];
-const historyView=`<div class="section-heading"><h2>迭代记录</h2><p>最新在前 · 点击标题查看本次评分</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>版本 / 变更</th><th class="r">迭代分数</th><th class="r opt">累计总分</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">暂无迭代记录</td></tr>'}</tbody></table></div></section>`;
-scoreLayout(scoreHero('总分数',total?total.value:null,'','截至当前版本，所有已评分迭代的累计总分。',
-  '<h3>总分如何变化</h3>'+kv('上一版本总分',n(total?total.previous:null,1))+
-  kv('本次迭代贡献',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('已评分迭代',n(total?total.rated_commits:lt.scored_commits,0))+
-  '<p class="note">总分 = 上一版本总分 + 本次迭代分数。累计值随已记录工作增长，不代表代码质量。</p>'),[
-  ['效率与趋势','人工投入、成本、留存及执行效率',indexGrids.slice(0,4)],
-  ['累计用量与开发方式','模型、工具、产物与开发特征',[indexGrids[4],indexGrids[6]]],
-  ['评分口径与累计规则','评分算法、累计公式与链路校验',indexGrids.slice(7)]
+const historyView=`<div class="section-heading"><h2>Iteration history</h2><p>Newest first · Select a change to view its score</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>Version / change</th><th class="r">Iteration score</th><th class="r opt">Running total</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">No iterations recorded</td></tr>'}</tbody></table></div></section>`;
+scoreLayout(scoreHero('Total score',total?total.value:null,'','The cumulative score of all rated iterations through the current version.',
+  '<h3>How the total changed</h3>'+kv('Previous total',n(total?total.previous:null,1))+
+  kv('This iteration adds',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('Rated iterations',n(total?total.rated_commits:lt.scored_commits,0))+
+  '<p class="note">Total = previous total + this iteration score. The total grows with recorded work; it does not measure code quality.</p>'),[
+  ['Efficiency & trends','Human input, cost, retention and execution',indexGrids.slice(0,4)],
+  ['Usage & development style','Models, tools, artifacts and development patterns',[indexGrids[4],indexGrids[6]]],
+  ['Scoring & accumulation','Algorithms, accumulation rules and chain verification',indexGrids.slice(7)]
 ],historyView);
 $('#content').addEventListener('toggle',()=>requestAnimationFrame(draw),true);
 draw();

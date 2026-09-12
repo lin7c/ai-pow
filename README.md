@@ -10,7 +10,9 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 **[Repository summary](https://lin7c.github.io/ai-pow/demo/)** · **[Commit proof](https://lin7c.github.io/ai-pow/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
 
-[![AI-PoW commit proof: recorded quantities, per-file work and provenance](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
+[![Current version: total score and iteration history](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
+
+[![Iteration detail: score and expandable evidence](docs/demo/iteration-preview.png)](https://lin7c.github.io/ai-pow/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html)
 
 *The preview uses clearly labeled synthetic history evaluated by the production scoring algorithm.*
 
@@ -55,7 +57,9 @@ The post-commit hook seals the proof and writes two pages under `.git/ai-pow/`: 
 
 Existing or shared hooks are never replaced. If automatic hook installation is unavailable, integrate the printed command yourself or run `aipow seal` after each commit. For explicitly manual operation, initialize with `aipow init --no-hook`.
 
-## The two pages
+## The two page types
+
+The demo contains **8 HTML files**: one current-version overview (`docs/demo/index.html`) and seven iteration detail reports (`docs/demo/reports/<commit>.html`). Each iteration has its own standalone HTML file. Both page types share the same report generator.
 
 ```bash
 # This commit: identity, human, machine, agent, artifact, timeline, result, provenance.

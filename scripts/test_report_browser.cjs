@@ -46,7 +46,7 @@ const {chromium} = require('playwright');
     running.forEach((value, i) => assert.ok(Math.abs(value - (i ? running[i - 1] : 0) - adds[i]) < 1e-6,
                                             `row ${i} is not previous + contribution`));
     assert.equal(await page.locator('.panel svg').count() >= 4, true, 'trend charts are drawn');
-    await scoreLeads('总分数', chain.iteration.value);
+    await scoreLeads('Total score', chain.iteration.value);
     const rowCount = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length);
     assert.equal(await page.locator('tbody tr').count() >= rowCount, true, 'one table row per commit');
     const totals = await page.evaluate(() => {
@@ -72,7 +72,7 @@ const {chromium} = require('playwright');
     const runText = await page.locator('#content').textContent();
     assert.ok(/baseline/.test(runText), 'rates are compared with the project baseline');
     assert.ok(await page.locator('.delta').count() >= 3, 'the comparison is shown per rate');
-    await scoreLeads('迭代分数', await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).current.score.value));
+    await scoreLeads('Iteration score', await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).current.score.value));
     assert.equal(await page.locator('#waterfall svg').count(), 1, 'the session timeline is drawn');
     assert.ok(await page.locator('.tree').count() > 0, 'the agent topology is drawn');
     assert.ok(/├─|└─/.test(await page.locator('.tree').first().textContent()), 'as a tree');
