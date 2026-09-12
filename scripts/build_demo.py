@@ -38,7 +38,8 @@ def commits(count):
         for line in rest.splitlines():
             parts = line.split("\t")
             if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
-                files.append({"path": parts[2], "lines": int(parts[0]) + int(parts[1]),
+                path = parts[2].split(" => ")[-1].strip("{}")  # Renames read as {old => new}.
+                files.append({"path": path, "lines": int(parts[0]) + int(parts[1]),
                               "insertions": int(parts[0]), "deletions": int(parts[1])})
         found.append({"commit": commit, "title": subject[:120], "date": when, "files": files})
     found.reverse()
@@ -176,6 +177,14 @@ def main():
                         "tool_calls": metrics["event_counts"].get("tool.call", 0),
                         "sub_agents": metrics["event_counts"].get("agent.spawn", 0),
                         "sessions": metrics["activity"]["sessions"],
+                        "failed_tool_calls": metrics["activity"]["failed_tool_calls"],
+                        "coverage_gaps": metrics["activity"]["coverage_gaps"],
+                        "input_tokens": sum(b["input_tokens"] for b in metrics["models"].values()),
+                        "cached_input_tokens": sum(b["cached_input_tokens"] for b in metrics["models"].values()),
+                        "output_tokens": sum(b["output_tokens"] for b in metrics["models"].values()),
+                        "reasoning_tokens": sum(b["reasoning_tokens"] for b in metrics["models"].values()),
+                        "actual_usd": metrics["actual_usd_known_subtotal"],
+                        "tasks": evidence["task"]["attempts"],
                         "operations": evidence["artifact"]["operations"],
                         "retained": evidence["artifact"]["retained"]})
     history.reverse()

@@ -1,272 +1,275 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8CyTG/P08zE7uFPLkoaDPdd+yWlR6dby3LOuDHFR9nQ='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230e141d&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
-:root{--paper:#141a24;--card:#1e2836;--raised:#243040;--line:#3a4759;--hair:#2a3543;--ink:#f2f5f9;--muted:#a9b8cb;--dim:#7c8ca1;--accent:#ff9c31;--good:#63d29a;--bad:#ff7a6b;--paper-ink:#16202c;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;--sans:'Lato','Trebuchet MS','Segoe UI',Arial,sans-serif;--display:'Lato','Arial Narrow',Arial,sans-serif}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+1PR4BXaoNPVm+XM7jB+m71+rO3DAynISg74GkzlSgU='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
+:root{
+--bg:#0b0e13;--panel:#111620;--panel2:#151b26;--head:#0e131b;--line:#1f2733;--line2:#2b3543;
+--text:#e6edf3;--muted:#8b98a9;--dim:#5f6c7d;--accent:#ff9c31;--teal:#39c2b4;--violet:#9b8cff;
+--good:#52c07a;--bad:#e8695d;--grid:#1a222d;
+--mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+--sans:'Inter','Helvetica Neue',Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 var(--sans)}
-button,select,a{font:inherit;color:inherit}button{cursor:pointer}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-h1,h2,h3,p,dl,dd,table{margin:0}
-.wrap{max-width:1180px;margin:0 auto;padding:0 40px}
-.skip{position:absolute;top:-90px;left:20px;background:#fff;color:#111;padding:12px;z-index:10}.skip:focus{top:10px}
+body{margin:0;background:var(--bg);color:var(--text);font:12px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+button,select{font:inherit;color:inherit}button{cursor:pointer}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4,p,table{margin:0}
 .num{font-variant-numeric:tabular-nums}
-.banner{background:var(--raised);text-align:center;padding:9px 20px;font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.mast{background:#0e141d;border-bottom:3px solid var(--accent)}
-.mast .wrap{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-block:10px}
-.logo{display:flex;align-items:center;gap:14px;font:900 italic 26px var(--display);letter-spacing:-.03em}
-.mark{display:flex;gap:4px;transform:skew(-16deg)}.mark i{width:8px;height:24px;background:var(--accent)}.mark i:last-child{height:17px;align-self:flex-end;background:var(--ink)}
-.edition{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase;font-style:normal;font-weight:400}
-.acts{display:flex;align-items:center;gap:10px}
-.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 15px;font:900 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;min-height:40px;display:inline-flex;align-items:center;text-decoration:none}
-.ghost:hover{background:var(--raised);color:var(--ink);text-decoration:none}
-.ident{display:grid;grid-template-columns:repeat(6,auto);justify-content:start;gap:0 42px;margin:30px 0 0;padding-bottom:22px;border-bottom:1px solid var(--line);font:11px var(--mono)}
-.ident div{min-width:0}.ident span{display:block;color:var(--dim);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
-.ident b{font-weight:400;color:var(--ink);overflow-wrap:anywhere}
-.ok{color:var(--good)}.warn{color:var(--accent)}
-h1.title{font:900 italic clamp(26px,3.2vw,44px)/1.05 var(--display);letter-spacing:-.02em;text-transform:uppercase;margin:26px 0 8px;overflow-wrap:anywhere}
-.lede{color:var(--muted);font-size:12.5px;max-width:760px}
-.five{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--line);margin:26px 0 0;border-top:3px solid var(--accent)}
-.five div{background:var(--card);padding:20px 20px 22px;min-width:0}
-.five span{display:block;font:9px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
-.five b{display:block;font:900 italic 32px/1.15 var(--display);letter-spacing:-.03em;margin:10px 0 4px;overflow-wrap:anywhere}
-.five small{font:10px var(--mono);color:var(--dim)}
-.section{margin-top:46px}
-.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px}
-.section-head h2{font:900 italic 22px var(--display);letter-spacing:-.01em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
-.section-head h2:before{content:'';width:6px;height:17px;background:var(--accent);transform:skew(-16deg)}
-.section-head .note{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
-.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line)}
-.cols.two{grid-template-columns:1fr 1fr}
-.box{background:var(--card);padding:20px 22px 22px;min-width:0}
-.box h3{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:400;margin-bottom:14px}
-.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--hair);font:11px var(--mono);color:var(--dim)}
-.kv span,.kv b{min-width:0;overflow-wrap:anywhere}
-.kv:first-of-type{border-top:0}
-.kv b{color:var(--ink);font-weight:400;text-align:right;overflow-wrap:anywhere}
-.kv.none b{color:var(--dim)}.kv.lead b{font:900 italic 17px var(--display)}
-.mix{margin-top:6px}
-.mix-row{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:10px;align-items:center;margin-top:11px;font:11px var(--mono)}
-.mix-row span{min-width:0;overflow-wrap:anywhere}
-.mix-row .name{color:var(--ink)}.mix-row .pct{text-align:right;color:var(--muted)}
-.mix-bar{grid-column:1/3;height:8px;background:var(--hair)}.mix-bar i{display:block;height:100%;background:var(--accent)}
-.mix-row .sub{grid-column:1/3;color:var(--dim);font-size:10px}
-.tree{margin:6px 0 0;font:11px/1.7 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:220px}
+.shell{max-width:1460px;margin:0 auto;padding:0 20px 56px}
+.skip{position:absolute;top:-80px;left:16px;background:#fff;color:#000;padding:10px;z-index:9}.skip:focus{top:8px}
+.topbar{background:var(--head);border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:5}
+.topbar .shell{padding-block:0;display:flex;align-items:center;gap:16px;height:52px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font:700 13px var(--sans);letter-spacing:.04em}
+.mark{display:flex;gap:3px;transform:skew(-16deg)}.mark i{width:5px;height:15px;background:var(--accent)}
+.mark i:last-child{height:10px;align-self:flex-end;background:var(--text)}
+.crumb{color:var(--muted);font-size:11px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.crumb b{color:var(--text);font-weight:400}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:2px;padding:3px 8px;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.chip.ok{color:var(--good);border-color:#2a4636}.chip.warn{color:var(--accent);border-color:#4a3a22}
+.chip.dot:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--muted);padding:6px 11px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:30px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{color:var(--text);border-color:var(--dim);text-decoration:none}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:22px 0 14px}
+.pagehead h1{font:600 19px/1.25 var(--sans);letter-spacing:-.01em;overflow-wrap:anywhere;max-width:820px}
+.pagehead .sub{color:var(--muted);font-size:11px;margin-top:7px}
+.pagehead .meta{display:flex;gap:8px;flex-wrap:wrap}
+.hint{color:var(--dim);font-size:10.5px;letter-spacing:.02em}
+.grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:16px}
+.g6{grid-template-columns:repeat(6,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
+.stat{background:var(--panel);padding:13px 15px 15px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.stat .label{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:8px}
+.stat .value{font:600 26px/1.25 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
+.stat .value em{font:400 11px var(--mono);color:var(--dim);font-style:normal;margin-left:5px;letter-spacing:.04em}
+.stat .sub{color:var(--muted);font-size:10.5px;overflow-wrap:anywhere}
+.stat .spark{margin-top:6px;height:26px}
+.delta{font-size:10px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+.delta.up:before{content:'▲ ';color:var(--muted)}.delta.down:before{content:'▼ ';color:var(--muted)}
+.panel{background:var(--panel);min-width:0;display:flex;flex-direction:column}
+.panel>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 15px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.panel>header h3{font:600 11px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--text)}
+.panel>header .unit{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
+.panel .body{padding:14px 15px 16px;min-width:0;flex:1}
+.panel .body.flush{padding:0}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dotted var(--line2);color:var(--muted);font-size:11px}
+.kv:last-child{border-bottom:0}.kv span,.kv b{min-width:0;overflow-wrap:anywhere}
+.kv b{color:var(--text);font-weight:400;text-align:right}
+.kv.none b{color:var(--dim)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{text-align:left;color:var(--dim);font-weight:400;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.scroll thead th{position:sticky;top:0;z-index:1}
+td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}
+tr:hover td{background:var(--panel2)}
+td.key{color:var(--text)}td.r,th.r{text-align:right}
+.bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.bar i{display:block;height:6px;background:var(--accent);min-width:1px}
+.track{flex:1;max-width:120px;height:6px;background:var(--grid)}
+.scroll{max-height:360px;overflow:auto}
+.tree{font:11px/1.75 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:210px;margin:0}
 .tree b{color:var(--accent);font-weight:400}
-table{width:100%;border-collapse:collapse;font:11px var(--mono)}
-th{text-align:left;color:var(--dim);font-weight:400;font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:0 10px 10px 0;border-bottom:1px solid var(--line)}
-td{padding:9px 10px 9px 0;border-bottom:1px solid var(--hair);color:var(--muted);overflow-wrap:anywhere}
-td.path{color:var(--ink)}td.right,th.right{text-align:right;padding-right:0}
-.meter{display:inline-block;width:74px;height:6px;background:var(--hair);vertical-align:middle;margin-right:9px}
-.meter i{display:block;height:100%;background:var(--accent)}
-.timeline{border-left:2px solid var(--line);margin-left:6px;padding-left:0}
-.tl{display:grid;grid-template-columns:78px minmax(0,1fr);gap:14px;padding:10px 0 10px 18px;position:relative;font:11px var(--mono)}
-.tl span{min-width:0;overflow-wrap:anywhere}
-.tl:before{content:'';position:absolute;left:-5px;top:17px;width:8px;height:8px;background:var(--line)}
-.tl.rework:before{background:var(--accent)}.tl.task:before{background:var(--good)}
-.tl .at{color:var(--dim)}.tl .what{color:var(--ink)}.tl .detail{color:var(--muted)}
-.prov{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line)}
-.prov div{background:var(--card);padding:18px 20px 20px}
-.prov h4{font:900 italic 15px var(--display);text-transform:uppercase;margin:0 0 10px}
-.prov ul{margin:0;padding-left:16px;font:11px/1.9 var(--mono);color:var(--muted)}
-.prov p{font-size:11px;color:var(--dim);margin-top:10px}
-.derived-score{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--card);border-left:3px solid var(--accent);padding:16px 20px;margin-top:2px}
-.derived-score b{font:900 italic 28px var(--display)}
-.derived-score span{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
-.derived-score .dims{font:11px var(--mono);color:var(--muted)}
-.total-card{display:grid;grid-template-columns:minmax(280px,1fr) 1fr;gap:26px;background:var(--accent);color:var(--paper-ink);padding:26px 30px;position:relative;overflow:hidden}
-.total-card:after{content:'\03A3';position:absolute;right:30px;top:-48px;font:900 italic 190px/1 var(--display);opacity:.09}
-.total-card .eyebrow{color:#4a3a22;font-weight:700;font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase}
-.total-figure{font:900 italic 62px/.95 var(--display);letter-spacing:-.05em;margin:10px 0 4px}
-.total-figure small{font:900 14px var(--sans);letter-spacing:0;margin-left:12px}
-.total-card .blurb{font-size:12px;max-width:430px;margin:10px 0 0;position:relative}
-.equation{font:900 italic 22px var(--display);position:relative}
-.charts{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line)}
-.chart-cell{background:var(--card);padding:16px 18px 10px}
-.chart-cell span{display:block;font:9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.chart-cell b{display:block;font:900 italic 21px var(--display);margin:6px 0 2px}
-.chart-cell em{font:9px var(--mono);font-style:normal;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-left:8px}
-.chart-cell svg{display:block;width:100%}
-.style-card{display:grid;grid-template-columns:1fr 2fr;gap:2px;background:var(--line)}
-.pattern{background:var(--card);padding:24px}
-.pattern b{display:block;font:900 italic 27px/1.15 var(--display);text-transform:uppercase;margin:10px 0}
-.pattern p{font-size:11px;color:var(--dim)}
-.levels{background:var(--card);padding:24px}
-.level{display:grid;grid-template-columns:150px 92px minmax(0,1fr);gap:14px;align-items:center;padding:9px 0;border-top:1px solid var(--hair);font:11px var(--mono)}
-.level span{min-width:0;overflow-wrap:anywhere}
-.level:first-child{border-top:0}
-.level .tag{font:900 10px var(--sans);letter-spacing:.12em;text-transform:uppercase}
-.level .tag.high{color:var(--accent)}.level .tag.low{color:var(--good)}.level .tag.medium{color:var(--muted)}
-.level .why{color:var(--dim)}
-.rows{margin-top:12px;border-top:2px solid var(--line)}
-.row{width:100%;display:grid;grid-template-columns:78px minmax(0,1fr) 96px 140px 74px;align-items:center;gap:16px;background:var(--card);border:0;border-bottom:1px solid var(--hair);padding:14px;text-align:left;text-decoration:none}
-.row:nth-child(even){background:var(--paper)}
-.row:hover{background:var(--raised);box-shadow:inset 4px 0 var(--accent);text-decoration:none}
-.row .hash{font:10px var(--mono);color:var(--accent)}
-.row .subject{font-size:12.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .when{font:10px var(--mono);color:var(--dim)}
-.row .delta{font:10px var(--mono);color:var(--muted);text-align:right}
-.row .total{font:900 italic 19px var(--display);text-align:right;color:var(--ink)}
-.row.is-latest .subject:after{content:'LATEST';font:9px var(--mono);letter-spacing:.1em;color:var(--accent);margin-left:10px}
-.empty{padding:26px 14px;color:var(--dim);font-size:13px;background:var(--card)}
-.legend{margin-top:14px;font:10px/1.8 var(--mono);color:var(--dim)}
-.foot{margin-top:52px;border-top:1px solid var(--line);padding:20px 0 40px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font:9.5px/1.8 var(--mono);color:var(--dim)}
-.foot .id{max-width:68%;overflow-wrap:anywhere}
-@media(max-width:1040px){.five{grid-template-columns:repeat(3,1fr)}.cols,.charts,.prov{grid-template-columns:repeat(2,1fr)}.ident{grid-template-columns:repeat(3,auto);gap:18px 32px}}
-@media(max-width:760px){
-.wrap{padding:0 18px}.logo{font-size:21px}.edition{display:none}
-.five,.cols,.cols.two,.charts,.prov,.style-card,.total-card{grid-template-columns:1fr}
-.ident{grid-template-columns:repeat(2,auto)}.five b{font-size:27px}
-.total-figure{font-size:52px}.total-card:after{display:none}
-.row{grid-template-columns:62px minmax(0,1fr) 56px 66px;gap:8px;padding:13px 6px}.row .when{display:none}
-.level{grid-template-columns:minmax(0,1fr) 80px;row-gap:4px}.level .why{grid-column:1/3}
-.tl{grid-template-columns:62px minmax(0,1fr);gap:10px}.section{margin-top:34px}
-table.files td.wide,table.files th.wide{display:none}
-}
-@media print{
-body{background:#fff;color:#16202c}.ghost,.acts,.banner{display:none}
-.five div,.box,.chart-cell,.pattern,.levels,.row,.prov div{background:#fff}
-.five,.cols,.charts,.prov,.style-card{background:#ccd4de}
-.total-card{background:#fff;border:2px solid var(--accent)}.total-card:after{display:none}
-.kv,.legend,.foot,.lede,.tl .detail{color:#4b5563}.section,.box,.row{break-inside:avoid}
-.wrap{max-width:none;padding:0 12px}
-}
-</style></head><body><a class="skip" href="#content">Skip to content</a><header class="mast"><div class="wrap"><div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW<span class="edition"> / repository history</span></div><div class="acts"><button class="ghost" id="print">Print</button></div></div></header><main class="wrap" id="content"></main><noscript>This page requires JavaScript to display its embedded data. Use the aipow CLI for the JSON form.</noscript><footer class="wrap foot"><span class="id">AI-PoW · ai-pow</span><span>Process record. Not a measure of code quality.</span></footer><script id="report-data" type="application/json">{"project":"ai-pow","kind":"index","demo":true,"lifetime":{"commits":7,"scored_commits":7,"human_tokens":27624,"prompts":279,"visible_tokens":12540,"visible_events":151,"model_calls":262,"input_tokens":1362400,"output_tokens":235800,"reasoning_tokens":68120,"tool_calls":511,"sub_agents":28,"artifact_operations":1457,"artifact_retained":1242,"task_attempts":122,"task_completed":103,"priced_calls":262,"unpriced_calls":0,"span_ms":128165625,"timed_commits":7,"sessions":16,"runs":16,"failed_tool_calls":43,"coverage_gaps":3,"actual_priced_calls":262,"skills_used":4,"mcp_used":1,"actual_usd_known_subtotal":"29.167390","reference_usd_known_subtotal":"53.031582","reference_cost_complete":true,"artifact_survival":"0.8524","task_fulfillment":"0.8443","algorithms":["retention-v2"]},"iteration":{"algorithm":"commit-sum-v1","value":"448.6","previous":"376.8","delta":"71.8","rated_commits":7,"starting_rating":0},"history":[{"commit":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab","title":"Split the report into a commit proof and a repository summary","date":"2026-09-12T14:43:51+00:00","score":{"algorithm":"retention-v2","value":"71.8","grade":"B","confidence":"0.4145","status":"provisional","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.980000","quality":"0.975248","confidence":"0.495049","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.969697","quality":"0.918919","confidence":"0.445946","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":392,"operations":400,"checked_operations":400},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":32,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":20},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"448.6","span_ms":18793125,"human_tokens":4320,"prompts":40,"visible_tokens":1892,"awc":"2.400004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"operations":400,"retained":392},{"commit":"135c812f3ad6cfa5e5e164296f053771331f176f","title":"Record the interval, payment and agent facts the report was missing","date":"2026-09-12T14:19:31+00:00","score":{"algorithm":"retention-v2","value":"82.0","grade":"A","confidence":"0.8290","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.890000","quality":"0.886139","confidence":"0.990099","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.890000","quality":"0.854545","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.878788","quality":"0.837838","confidence":"0.891892","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":356,"operations":400,"checked_operations":400},"human":{"retained_weight":"3560.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":29,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":17},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"376.8","span_ms":5238750,"human_tokens":4200,"prompts":40,"visible_tokens":1870,"awc":"3.999994","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":1,"operations":400,"retained":356},{"commit":"7daebd65277bc6e93aaeb197d6804bb95756c844","title":"Rebuild the report: one headline per view","date":"2026-09-12T13:56:59+00:00","score":{"algorithm":"retention-v2","value":"79.5","grade":"B","confidence":"0.8240","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.848943","quality":"0.844776","confidence":"0.988060","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.850000","quality":"0.818182","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.851852","quality":"0.806452","confidence":"0.870968","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":281,"operations":331,"checked_operations":331},"human":{"retained_weight":"3400.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":23,"attempts":27,"declared":27,"basis":"declared-with-committed-evidence"},"scope":{"units":165,"files":10},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"294.8","span_ms":14400000,"human_tokens":4080,"prompts":40,"visible_tokens":1848,"awc":"5.000002","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"operations":331,"retained":281},{"commit":"a6b3c471f9178afdfe415ef1ba4b3e9bc52357c5","title":"Score retention only and make the proof vector the report body","date":"2026-09-12T13:32:57+00:00","score":{"algorithm":"retention-v2","value":"62.1","grade":"C","confidence":"0.4056","status":"provisional","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.758929","quality":"0.754386","confidence":"0.491228","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.760000","quality":"0.736364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.777778","quality":"0.727273","confidence":"0.409091","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":170,"operations":224,"checked_operations":224},"human":{"retained_weight":"3040.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":14,"attempts":18,"declared":18,"basis":"declared-with-committed-evidence"},"scope":{"units":112,"files":16},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"215.3","span_ms":11565000,"human_tokens":3960,"prompts":40,"visible_tokens":1826,"awc":"7.000018","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"operations":224,"retained":170},{"commit":"8d4c45f5952572bd431d975e056946de8a6b14d4","title":"Use the masthead mark as the report favicon","date":"2026-09-12T12:56:16+00:00","score":{"algorithm":"retention-v2","value":"51.2","grade":"C","confidence":"0.5879","status":"provisional","cohort":"small","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.500000","quality":"0.500000","confidence":"0.666667","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.540000","quality":"0.536364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.333333","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":4,"operations":8,"checked_operations":8},"human":{"retained_weight":"2160.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":1,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":4,"files":3},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"153.2","span_ms":25241250,"human_tokens":3744,"prompts":39,"visible_tokens":1722,"awc":"11.368404","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":3,"operations":8,"retained":4},{"commit":"bb8b4f9438c8bf3a82b4d06838d6cd9456c81b0b","title":"Handle transient concurrent writer contention with bounded retries","date":"2026-09-12T12:47:13+00:00","score":{"algorithm":"retention-v2","value":"56.2","grade":"C","confidence":"0.5879","status":"provisional","cohort":"small","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.625000","quality":"0.583333","confidence":"0.666667","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.620000","quality":"0.609091","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.333333","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":5,"operations":8,"checked_operations":8},"human":{"retained_weight":"2480.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":1,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":4,"files":4},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"102.0","span_ms":20160000,"human_tokens":3720,"prompts":40,"visible_tokens":1782,"awc":"10.000004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"operations":8,"retained":5},{"commit":"b4aa041d739f658d31f0ff75568cfad1b9cacbf2","title":"Release v0.3: sum commit scores from zero and redesign reports","date":"2026-09-12T12:41:53+00:00","score":{"algorithm":"retention-v2","value":"45.8","grade":"D","confidence":"0.3820","status":"provisional","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.395349","quality":"0.400000","confidence":"0.477778","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.400000","quality":"0.409091","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.428571","quality":"0.454545","confidence":"0.318182","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":34,"operations":86,"checked_operations":86},"human":{"retained_weight":"1600.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":3,"attempts":7,"declared":7,"basis":"declared-with-committed-evidence"},"scope":{"units":43,"files":13},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"45.8","span_ms":32767500,"human_tokens":3600,"prompts":40,"visible_tokens":1600,"awc":"13.263156","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":4,"operations":86,"retained":34}],"commits_in_history":7,"statistics":{"count":6,"average":62.8,"delta":-10.2,"peer_count":2,"peer_average":80.8,"percentile":null,"same_grade":1},"span":{"first":{"commit":"b4aa041d739f658d31f0ff75568cfad1b9cacbf2","date":"2026-09-12T12:41:53+00:00"},"last":{"commit":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab","date":"2026-09-12T14:43:51+00:00"}},"links":{"commit":"reports/"}}</script><script>
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:10px;margin-top:10px}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px}
+svg{display:block}
+.axis{fill:var(--dim);font:9.5px var(--mono)}
+.note{color:var(--dim);font-size:10.5px;margin-top:10px;line-height:1.7}
+.prov{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
+.prov div{background:var(--panel);padding:13px 15px 15px}
+.prov h4{font:600 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.prov ul{margin:0;padding-left:15px;color:var(--muted);font-size:10.5px;line-height:1.85}
+.prov .obs{color:var(--teal)}.prov .der{color:var(--accent)}.prov .inf{color:var(--violet)}
+.checks{display:flex;flex-wrap:wrap;gap:7px}
+.big-total{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.big-total b{font:600 40px/1 var(--sans);letter-spacing:-.03em}
+.pattern b{font:600 21px var(--sans);letter-spacing:-.01em;display:block;margin-bottom:4px}
+.lvl{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:6px 12px;padding:7px 0;border-bottom:1px dotted var(--line2);font-size:11px;color:var(--muted)}
+.lvl:last-child{border-bottom:0}
+.lvl .tag{text-align:right;font-size:10px;letter-spacing:.1em}
+.lvl .tag.high{color:var(--accent)}.lvl .tag.low{color:var(--teal)}.lvl .tag.medium{color:var(--muted)}
+.lvl .why{grid-column:1/3;color:var(--dim);font-size:10px}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:10px;border-top:1px solid var(--line);padding-top:14px;margin-top:26px}
+@media(max-width:1180px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}
+.g21,.g12,.g3{grid-template-columns:1fr}}
+@media(max-width:720px){.shell{padding:0 12px 40px}.g6,.g4,.g3,.g2{grid-template-columns:1fr}
+.prov{grid-template-columns:1fr}.scroll thead th{position:static}.topbar .shell{height:auto;padding-block:8px}
+.pagehead h1{font-size:17px}table.compact td.opt,table.compact th.opt{display:none}}
+@media print{body{background:#fff;color:#111}.topbar{position:static}.btn{display:none}
+.panel,.stat,.prov div{background:#fff}.grid,.prov{background:#d8dee6;border-color:#d8dee6}
+td,th{border-color:#e2e7ee}.kv,.note,.hint{color:#4b5563}}
+</style></head><body><a class="skip" href="#content">Skip to content</a><div class="topbar"><div class="shell"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW</span><span class="crumb" id="crumb"></span><span class="spacer"></span><span class="crumb" id="chips"></span><button class="btn" id="print">Print</button></div></div><main class="shell" id="content"></main><noscript>This page requires JavaScript to render its embedded data. Use the aipow CLI for the JSON form.</noscript><div class="shell"><div class="foot"><span>AI-PoW · ai-pow</span><span>Process record · not a measure of code quality</span></div></div><script id="report-data" type="application/json">{"project":"ai-pow","kind":"index","demo":true,"lifetime":{"commits":7,"scored_commits":7,"human_tokens":27624,"prompts":279,"visible_tokens":12540,"visible_events":151,"model_calls":262,"input_tokens":1362400,"cached_input_tokens":471600,"output_tokens":235800,"reasoning_tokens":68120,"tool_calls":511,"sub_agents":28,"artifact_operations":1421,"artifact_retained":1126,"task_attempts":119,"task_completed":94,"priced_calls":262,"unpriced_calls":0,"span_ms":128165625,"timed_commits":7,"sessions":16,"runs":16,"failed_tool_calls":43,"coverage_gaps":3,"actual_priced_calls":262,"skills_used":4,"mcp_used":1,"actual_usd_known_subtotal":"29.167390","reference_usd_known_subtotal":"53.031582","reference_cost_complete":true,"artifact_survival":"0.7924","task_fulfillment":"0.7899","algorithms":["retention-v2"]},"iteration":{"algorithm":"commit-sum-v1","value":"449.6","previous":"381.6","delta":"68.0","rated_commits":7,"starting_rating":0},"history":[{"commit":"ccb75f3899d0bba507842ad3df3000f278ef13d3","title":"Keep every generated page inside the viewport at phone width","date":"2026-09-12T14:46:58+00:00","score":{"algorithm":"retention-v2","value":"68.0","grade":"B","confidence":"0.3625","status":"provisional","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.980000","quality":"0.944444","confidence":"0.462963","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.750000","confidence":"0.250000","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":49,"operations":50,"checked_operations":50},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":4,"attempts":4,"declared":4,"basis":"declared-with-committed-evidence"},"scope":{"units":25,"files":11},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"449.6","span_ms":18793125,"human_tokens":4320,"prompts":40,"visible_tokens":1892,"awc":"2.400004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"1.320006","tasks":4,"operations":50,"retained":49},{"commit":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab","title":"Split the report into a commit proof and a repository summary","date":"2026-09-12T14:43:51+00:00","score":{"algorithm":"retention-v2","value":"82.0","grade":"A","confidence":"0.8290","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.890000","quality":"0.886139","confidence":"0.990099","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.890000","quality":"0.854545","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.878788","quality":"0.837838","confidence":"0.891892","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":356,"operations":400,"checked_operations":400},"human":{"retained_weight":"3560.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":29,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":20},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"381.6","span_ms":5238750,"human_tokens":4200,"prompts":40,"visible_tokens":1870,"awc":"3.999994","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":1,"failed_tool_calls":5,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.200010","tasks":33,"operations":400,"retained":356},{"commit":"135c812f3ad6cfa5e5e164296f053771331f176f","title":"Record the interval, payment and agent facts the report was missing","date":"2026-09-12T14:19:31+00:00","score":{"algorithm":"retention-v2","value":"79.7","grade":"B","confidence":"0.8290","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.850000","quality":"0.846535","confidence":"0.990099","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.850000","quality":"0.818182","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.848485","quality":"0.810811","confidence":"0.891892","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":340,"operations":400,"checked_operations":400},"human":{"retained_weight":"3400.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":28,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":17},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"299.6","span_ms":14400000,"human_tokens":4080,"prompts":40,"visible_tokens":1848,"awc":"5.000002","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.749984","tasks":33,"operations":400,"retained":340},{"commit":"7daebd65277bc6e93aaeb197d6804bb95756c844","title":"Rebuild the report: one headline per view","date":"2026-09-12T13:56:59+00:00","score":{"algorithm":"retention-v2","value":"62.5","grade":"C","confidence":"0.4120","status":"provisional","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.761329","quality":"0.758209","confidence":"0.494030","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.760000","quality":"0.736364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.777778","quality":"0.741935","confidence":"0.435484","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":252,"operations":331,"checked_operations":331},"human":{"retained_weight":"3040.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":21,"attempts":27,"declared":27,"basis":"declared-with-committed-evidence"},"scope":{"units":165,"files":10},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"219.9","span_ms":11565000,"human_tokens":3960,"prompts":40,"visible_tokens":1826,"awc":"7.000018","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"3.850008","tasks":27,"operations":331,"retained":252},{"commit":"a6b3c471f9178afdfe415ef1ba4b3e9bc52357c5","title":"Score retention only and make the proof vector the report body","date":"2026-09-12T13:32:57+00:00","score":{"algorithm":"retention-v2","value":"54.0","grade":"C","confidence":"0.8112","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.540179","quality":"0.539474","confidence":"0.982456","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.540000","quality":"0.536364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.555556","quality":"0.545455","confidence":"0.818182","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":121,"operations":224,"checked_operations":224},"human":{"retained_weight":"2160.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":10,"attempts":18,"declared":18,"basis":"declared-with-committed-evidence"},"scope":{"units":112,"files":16},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"157.4","span_ms":25241250,"human_tokens":3744,"prompts":39,"visible_tokens":1722,"awc":"11.368404","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":3,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"6.252624","tasks":18,"operations":224,"retained":121},{"commit":"8d4c45f5952572bd431d975e056946de8a6b14d4","title":"Use the masthead mark as the report favicon","date":"2026-09-12T12:56:16+00:00","score":{"algorithm":"retention-v2","value":"56.2","grade":"C","confidence":"0.5879","status":"provisional","cohort":"small","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.625000","quality":"0.583333","confidence":"0.666667","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.620000","quality":"0.609091","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.333333","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":5,"operations":8,"checked_operations":8},"human":{"retained_weight":"2480.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":1,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":4,"files":3},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"103.4","span_ms":20160000,"human_tokens":3720,"prompts":40,"visible_tokens":1782,"awc":"10.000004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"5.500006","tasks":2,"operations":8,"retained":5},{"commit":"bb8b4f9438c8bf3a82b4d06838d6cd9456c81b0b","title":"Handle transient concurrent writer contention with bounded retries","date":"2026-09-12T12:47:13+00:00","score":{"algorithm":"retention-v2","value":"47.2","grade":"D","confidence":"0.2939","status":"provisional","cohort":"small","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.375000","quality":"0.416667","confidence":"0.333334","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.400000","quality":"0.409091","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.166666","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":3,"operations":8,"checked_operations":8},"human":{"retained_weight":"1600.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":1,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":4,"files":4},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"47.2","span_ms":32767500,"human_tokens":3600,"prompts":40,"visible_tokens":1600,"awc":"13.263156","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":4,"failed_tool_calls":8,"coverage_gaps":1,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"7.294752","tasks":2,"operations":8,"retained":3}],"commits_in_history":7,"statistics":{"count":6,"average":63.6,"delta":-14.0,"peer_count":0,"peer_average":null,"percentile":null,"same_grade":1},"span":{"first":{"commit":"bb8b4f9438c8bf3a82b4d06838d6cd9456c81b0b","date":"2026-09-12T12:47:13+00:00"},"last":{"commit":"ccb75f3899d0bba507842ad3df3000f278ef13d3","date":"2026-09-12T14:46:58+00:00"}},"links":{"commit":"reports/"}}</script><script>
 const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const unknown='not recorded';
-const n=x=>x===null||x===undefined?unknown:Number(x).toLocaleString('en-US',{maximumFractionDigits:1});
-const short=x=>x===null||x===undefined?unknown:Number(x)>=1e6?(Number(x)/1e6).toFixed(2)+'M':Number(x)>=1000?(Number(x)/1e3).toFixed(1)+'K':n(x);
-const pct=(x,digits)=>x===null||x===undefined?unknown:(Number(x)*100).toFixed(digits===undefined?1:digits)+'%';
-const points=x=>x===null||x===undefined?unknown:Number(x).toFixed(1);
-const money=x=>x===null||x===undefined?unknown:'$'+Number(x).toFixed(2);
-const awc=x=>x===null||x===undefined?unknown:Number(x).toFixed(2);
-const when=x=>new Date(x).toLocaleString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-const day=x=>new Date(x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-const clock=x=>new Date(x).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-const span=ms=>{if(ms===null||ms===undefined)return unknown;const sec=Math.round(ms/1000);
-  if(sec<90)return sec+'s';const min=Math.round(sec/60);if(min<90)return min+'m';
-  const hr=Math.floor(min/60);if(hr<48)return hr+'h '+String(min%60).padStart(2,'0')+'m';
-  return Math.floor(hr/24)+'d '+(hr%24)+'h'};
-const ratio=(part,whole)=>whole?part/whole:null;
-const kv=(k,v,lead)=>`<div class="kv${v===null||v===undefined?' none':''}${lead?' lead':''}"><span>${esc(k)}</span><b>${esc(v===null||v===undefined?unknown:v)}</b></div>`;
-const box=(title,rows,extra)=>`<section class="box"><h3>${esc(title)}</h3>${(rows||[]).join('')}${extra||''}</section>`;
-function sparkline(values,host){
-  const width=host.clientWidth||260,height=52,pad=3;
-  const clean=values.map(v=>v===null||v===undefined?null:Number(v));
-  const known=clean.filter(v=>v!==null);
-  if(!known.length)return host.innerHTML='<p class="kv none"><b>not recorded</b></p>';
-  const high=Math.max(...known),low=Math.min(0,...known),range=high-low||1;
-  const x=i=>pad+(width-2*pad)*i/Math.max(1,clean.length-1),y=v=>height-pad-(height-2*pad)*(v-low)/range;
-  let path='',dots='';
-  clean.forEach((v,i)=>{if(v===null)return;path+=(path?' L':'M')+x(i)+' '+y(v);
-    if(i===clean.length-1)dots+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="#ff9c31"/>`});
-  host.innerHTML=`<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">`
-    +`<path d="${path}" fill="none" stroke="#ff9c31" stroke-width="2"/>${dots}</svg>`;
+const NA='—';
+const isNum=x=>x!==null&&x!==undefined&&!Number.isNaN(Number(x));
+const n=(x,d)=>!isNum(x)?NA:Number(x).toLocaleString('en-US',{maximumFractionDigits:d===undefined?1:d});
+const short=x=>!isNum(x)?NA:Math.abs(x)>=1e6?(x/1e6).toFixed(2)+'M':Math.abs(x)>=1e3?(x/1e3).toFixed(1)+'k':n(x,0);
+const pct=(x,d)=>!isNum(x)?NA:(Number(x)*100).toFixed(d===undefined?1:d)+'%';
+const usd=x=>!isNum(x)?NA:'$'+Number(x).toFixed(2);
+const rate=(a,b,d)=>!isNum(a)||!b?null:a/b;
+const dur=ms=>{if(!isNum(ms))return NA;const s=Math.round(ms/1000);if(s<90)return s+'s';
+  const m=Math.round(s/60);if(m<90)return m+'m';const h=Math.floor(m/60);
+  if(h<48)return h+'h'+String(m%60).padStart(2,'0');return Math.floor(h/24)+'d'+(h%24)+'h'};
+const stamp=x=>new Date(x).toISOString().replace('T',' ').slice(0,16)+'Z';
+const dayOf=x=>new Date(x).toISOString().slice(0,10);
+const hhmm=x=>new Date(x).toISOString().slice(11,19)+'Z';
+const chip=(text,kind)=>`<span class="chip${kind?' '+kind:''}">${esc(text)}</span>`;
+const kv=(k,v,cls)=>`<div class="kv${isNum(v)||typeof v==='string'?'':' none'}${cls?' '+cls:''}"><span>${esc(k)}</span><b>${v===null||v===undefined?NA:esc(v)}</b></div>`;
+const panel=(title,unit,body,cls)=>`<section class="panel${cls?' '+cls:''}"><header><h3>${esc(title)}</h3><span class="unit">${esc(unit||'')}</span></header><div class="body${cls&&cls.includes('flush')?' flush':''}">${body}</div></section>`;
+const stat=(label,value,unit,sub,extra)=>`<div class="stat"><span class="label">${esc(label)}${extra||''}</span>
+  <span class="value num">${esc(value)}${unit?`<em>${esc(unit)}</em>`:''}</span><span class="sub">${esc(sub||'')}</span></div>`;
+const track=(value,scale)=>`<span class="bar"><span class="track"><i style="width:${Math.max(0,Math.min(100,Math.round((value||0)*100/(scale||1))))}%"></i></span></span>`;
+function spark(values,host,color){
+  const w=host.clientWidth||180,h=26,pad=2;
+  const clean=values.map(v=>isNum(v)?Number(v):null),known=clean.filter(v=>v!==null);
+  if(known.length<2)return host.innerHTML='';
+  const hi=Math.max(...known),lo=Math.min(...known),range=(hi-lo)||1;
+  const x=i=>pad+(w-2*pad)*i/Math.max(1,clean.length-1),y=v=>h-pad-(h-2*pad)*(v-lo)/range;
+  let d='';clean.forEach((v,i)=>{if(v===null)return;d+=(d?' L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
+  const last=clean.reduce((a,v,i)=>v===null?a:i,-1);
+  host.innerHTML=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${color||'#ff9c31'}" stroke-width="1.5" opacity=".9"/>`
+    +(last>=0?`<circle cx="${x(last).toFixed(1)}" cy="${y(clean[last]).toFixed(1)}" r="2.2" fill="${color||'#ff9c31'}"/>`:'')+'</svg>';
 }
 
 const lt=data.lifetime,total=data.iteration,rows=data.history,stats=data.statistics||{};
+const series=[...rows].reverse();
 document.title=data.project+' · AI-PoW history';
-if(data.demo){const b=document.createElement('div');b.className='banner';b.textContent='Demonstration · real commits from this repository, synthetic evidence';document.body.insertBefore(b,document.body.children[1])}
-const dayCount=data.span.first&&data.span.last?Math.max(1,Math.round((new Date(data.span.last.date)-new Date(data.span.first.date))/86400000)):null;
-const days=dayCount===null?unknown:n(dayCount)+(dayCount===1?' day':' days');
-const perOperation=lt.artifact_operations?lt.human_tokens/lt.artifact_operations:null;
-const awcPerOperation=lt.artifact_operations&&lt.reference_usd_known_subtotal!==null?Number(lt.reference_usd_known_subtotal)/lt.artifact_operations:null;
-const rework=lt.artifact_survival===null?null:1-Number(lt.artifact_survival);
-const level=(value,high,low)=>value===null||value===undefined?['unknown','—']:value>=high?['high','HIGH']:value<=low?['low','LOW']:['medium','MEDIUM'];
-const human=level(perOperation,40,15),machine=level(awcPerOperation,.05,.02),churn=level(rework,.4,.2);
-const pattern=human[0]==='high'&&machine[0]==='low'?'Human-guided / low-cost AI'
-  :human[0]==='low'&&machine[0]==='high'?'Autonomous / high-compute'
-  :human[0]==='unknown'||machine[0]==='unknown'?'Not enough recorded history':'Balanced';
+if(data.demo)document.querySelector('#chips').insertAdjacentHTML('afterbegin',chip('demo data','warn'));
+const days=data.span.first&&data.span.last?Math.max(1,Math.round((new Date(data.span.last.date)-new Date(data.span.first.date))/86400000)):null;
+const perEdit=f=>series.map(p=>p.retained?f(p)/p.retained:null);
+const ratesHuman=perEdit(p=>p.human_tokens||0),ratesCost=perEdit(p=>Number(p.awc||0)),ratesTools=perEdit(p=>p.tool_calls||0);
+const survival=series.map(p=>p.operations?p.retained/p.operations:null);
+const durations=series.map(p=>isNum(p.span_ms)?p.span_ms/3600000:null);
+const cacheShare=series.map(p=>p.input_tokens?p.cached_input_tokens/p.input_tokens:null);
+const failShare=series.map(p=>p.tool_calls?p.failed_tool_calls/p.tool_calls:null);
+const lastOf=values=>{for(let i=values.length-1;i>=0;i--)if(isNum(values[i]))return values[i];return null};
+const prevOf=values=>{let found=0;for(let i=values.length-1;i>=0;i--)if(isNum(values[i])&&++found===2)return values[i];return null};
+function delta(values,invert){
+  const now=lastOf(values),before=prevOf(values);
+  if(!isNum(now)||!isNum(before)||!before)return '';
+  const change=(now-before)/Math.abs(before);
+  if(Math.abs(change)<.005)return '<span class="delta">flat</span>';
+  return `<span class="delta ${change>0?'up':'down'}">${(Math.abs(change)*100).toFixed(0)}% vs prev</span>`;
+}
+const keptTotal=lt.artifact_retained,opsTotal=lt.artifact_operations;
+const perOperation=opsTotal?lt.human_tokens/opsTotal:null;
+const awcPerEdit=opsTotal&&isNum(lt.reference_usd_known_subtotal)?Number(lt.reference_usd_known_subtotal)/opsTotal:null;
+const rework=isNum(lt.artifact_survival)?1-Number(lt.artifact_survival):null;
+const level=(value,high,low)=>!isNum(value)?['medium','—']:value>=high?['high','HIGH']:value<=low?['low','LOW']:['medium','MEDIUM'];
+const hu=level(perOperation,40,15),ma=level(awcPerEdit,.05,.02),rw=level(rework,.4,.2);
+const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==='low'&&ma[0]==='high'?'Autonomous / high-compute'
+  :hu[1]==='—'||ma[1]==='—'?'Not enough recorded history':'Balanced';
+
+$('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
+$('#chips').innerHTML=[chip(n(lt.scored_commits,0)+' / '+n(data.commits_in_history,0)+' commits'),
+  chip(days===null?'span unknown':n(days,0)+(days===1?' day':' days')),chip(dur(lt.span_ms)+' recorded'),
+  chip((lt.algorithms||[]).join(', ')||'no algorithm')].join('');
 
 $('#content').innerHTML=`
-<div class="ident">
-  <div><span>Project</span><b>${esc(data.project)}</b></div>
-  <div><span>Commits with proof</span><b>${n(lt.scored_commits)} of ${n(data.commits_in_history)}</b></div>
-  <div><span>Development span</span><b>${esc(days)}</b></div>
-  <div><span>Recorded time</span><b>${esc(span(lt.span_ms))}</b></div>
-  <div><span>Sessions</span><b>${n(lt.sessions)}</b></div>
-  <div><span>Algorithms</span><b>${esc(lt.algorithms.join(', ')||unknown)}</b></div>
+<div class="pagehead"><div><h1>${esc(data.project)} · AI development history</h1>
+  <p class="sub">Per-commit rates over the recorded first-parent history. Pooled ratios are recomputed from pooled totals, never averaged per commit, and unknown values stay unknown.</p></div>
+  <div class="meta">${chip(n(lt.sessions,0)+' sessions')}${chip(n(lt.model_calls,0)+' model calls')}${chip(short(lt.artifact_operations)+' edits')}</div>
 </div>
-<h1 class="title">${esc(data.project)} · AI development history</h1>
-<p class="lede">Pooled quantities over every commit that carries a proof. Ratios are recomputed from the pooled totals, never averaged per commit, and unknown values stay unknown instead of counting as zero.</p>
-<div class="five">
-  <div><span>Human input</span><b class="num">${short(lt.human_tokens)}</b><small>tokens · ${n(lt.prompts)} prompts</small></div>
-  <div><span>AI visible output</span><b class="num">${short(lt.visible_tokens)}</b><small>tokens · ${n(lt.visible_events)} messages</small></div>
-  <div><span>Machine work</span><b class="num">${lt.priced_calls?awc(lt.reference_usd_known_subtotal):unknown}</b><small>AWC · ${n(lt.model_calls)} model calls</small></div>
-  <div><span>Agent calls</span><b class="num">${n(lt.tool_calls+lt.sub_agents)}</b><small>${n(lt.sub_agents)} sub-agents</small></div>
-  <div><span>Artifact survival</span><b class="num">${lt.artifact_operations?pct(lt.artifact_survival):unknown}</b><small>${n(lt.artifact_retained)} of ${n(lt.artifact_operations)} edits</small></div>
+<div class="grid g4">
+  ${stat('Human steering',n(lastOf(ratesHuman),1),'tok/edit','pooled '+n(perOperation,1)+' · '+short(lt.human_tokens)+' tokens',delta(ratesHuman))}
+  ${stat('Unit cost',isNum(lastOf(ratesCost))?lastOf(ratesCost).toFixed(4):NA,'AWC/edit','pooled '+(isNum(awcPerEdit)?awcPerEdit.toFixed(4):NA)+' · '+(lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':NA),delta(ratesCost))}
+  ${stat('Retention',pct(lastOf(survival),1),'survived','pooled '+pct(lt.artifact_survival,1)+' · rework '+pct(rework,1),delta(survival))}
+  ${stat('Autonomy',n(lastOf(ratesTools),2),'calls/edit','pooled '+n(rate(lt.tool_calls,opsTotal),2)+' · '+short(lt.tool_calls)+' calls',delta(ratesTools))}
 </div>
-
-<div class="section">
-  <div class="section-head"><h2>Trends</h2><span class="note">Per commit · oldest to newest · ${n(rows.length)} shown</span></div>
-  <div class="charts" id="charts"></div>
-  <p class="legend">A project that matures should need fewer human tokens and less rework for the same amount of surviving work. These lines are the evidence for that question, not an answer to it.</p>
+<div class="grid g4">
+  ${stat('Duration',dur(lastOf(durations)*3600000),'per commit','total '+dur(lt.span_ms),delta(durations))}
+  ${stat('Cache reads',pct(lastOf(cacheShare),0),'of input','pooled '+(isNum(lt.cached_input_tokens)&&lt.input_tokens?pct(lt.cached_input_tokens/lt.input_tokens,0):NA),delta(cacheShare))}
+  ${stat('Failed tools',pct(lastOf(failShare),1),'of calls','total '+n(lt.failed_tool_calls,0)+' failures',delta(failShare))}
+  ${stat('Paid',lt.actual_priced_calls?usd(lt.actual_usd_known_subtotal):NA,'actual','reference '+(lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':NA))}
 </div>
-
-<div class="section">
-  <div class="section-head"><h2>Development style</h2><span class="note">Descriptive · not a score</span></div>
-  <div class="style-card">
-    <div class="pattern"><span class="edition">Pattern</span><b>${esc(pattern)}</b>
-      <p>Derived from the pooled ratios on the right. It describes how this project uses AI, not how well it does.</p></div>
-    <div class="levels">
-      <div class="level"><span>Human input</span><span class="tag ${human[0]}">${human[1]}</span>
-        <span class="why">${perOperation===null?unknown:n(perOperation)+' prompt tokens per semantic edit · high ≥ 40, low ≤ 15'}</span></div>
-      <div class="level"><span>Machine compute</span><span class="tag ${machine[0]}">${machine[1]}</span>
-        <span class="why">${awcPerOperation===null?unknown:awc(awcPerOperation)+' AWC per semantic edit · high ≥ 0.05, low ≤ 0.02'}</span></div>
-      <div class="level"><span>Rework</span><span class="tag ${churn[0]}">${churn[1]}</span>
-        <span class="why">${rework===null?unknown:pct(rework,0)+' of observed edits did not survive · high ≥ 40%, low ≤ 20%'}</span></div>
-    </div>
-  </div>
+<div class="grid g2">
+  ${panel('Human tokens per surviving edit','oldest → newest','<div id="chart-effort"></div>')}
+  ${panel('AWC per surviving edit','oldest → newest','<div id="chart-cost"></div>')}
 </div>
-
-<div class="section">
-  <div class="section-head"><h2>Pooled totals</h2><span class="note">Unknown stays unknown</span></div>
-  <div class="cols">
-    ${box('Machine',[kv('Reference compute',lt.priced_calls?awc(lt.reference_usd_known_subtotal)+' AWC':null,true),
-      kv('Actual cost',lt.actual_priced_calls?money(lt.actual_usd_known_subtotal):null),
-      kv('Model tokens',short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens)),
-      kv('Reasoning tokens',short(lt.reasoning_tokens)),kv('Model calls',n(lt.model_calls))])}
-    ${box('Agent',[kv('Tool calls',n(lt.tool_calls),true),kv('Failed tool results',n(lt.failed_tool_calls)),
-      kv('Sub-agents',n(lt.sub_agents)),kv('Skills / MCP',`${n(lt.skills_used)} / ${n(lt.mcp_used)}`),
-      kv('Wrapped runs',n(lt.runs)),kv('Coverage gaps',n(lt.coverage_gaps))])}
-    ${box('Artifact and tasks',[kv('Semantic edits',n(lt.artifact_operations),true),kv('Surviving edits',n(lt.artifact_retained)),
-      kv('Artifact survival',lt.artifact_operations?pct(lt.artifact_survival):null),
-      kv('Rework',rework===null?null:pct(rework)),
-      kv('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment):null)])}
-  </div>
+<div class="grid g2">
+  ${panel('Retention and rework','share of observed edits','<div id="chart-retention"></div><div class="legend"><span><i style="background:#39c2b4"></i>survived</span><span><i style="background:#ff9c31"></i>reworked</span></div>')}
+  ${panel('Surviving edits per commit','volume','<div id="chart-volume"></div>')}
 </div>
+<div class="grid">
+  ${panel('Development style','descriptive, not a score',
+    `<div class="pattern"><b>${esc(pattern)}</b><span class="hint">Derived from the pooled ratios below.</span></div>
+     <div style="margin-top:10px">
+     <div class="lvl"><span>Human input</span><span class="tag ${hu[0]}">${hu[1]}</span><span class="why">${isNum(perOperation)?n(perOperation,1)+' prompt tokens per semantic edit · high ≥ 40, low ≤ 15':'not recorded'}</span></div>
+     <div class="lvl"><span>Machine compute</span><span class="tag ${ma[0]}">${ma[1]}</span><span class="why">${isNum(awcPerEdit)?awcPerEdit.toFixed(4)+' AWC per semantic edit · high ≥ 0.05, low ≤ 0.02':'not recorded'}</span></div>
+     <div class="lvl"><span>Rework</span><span class="tag ${rw[0]}">${rw[1]}</span><span class="why">${isNum(rework)?pct(rework,0)+' of observed edits did not survive · high ≥ 40%, low ≤ 20%':'not recorded'}</span></div>
+     </div>`)}
+</div>
+<div class="grid">
+  ${panel('Commits','newest first · open one for its proof',
+    `<div class="scroll"><table class="compact"><thead><tr><th>Date</th><th>Commit</th><th>Subject</th>
+      <th class="r opt">Duration</th><th class="r opt">AWC</th><th class="r">Edits</th><th class="r">Survival</th><th class="r opt">Score</th></tr></thead><tbody>`
+    +rows.map(p=>{const sv=p.operations?p.retained/p.operations:null;
+      return `<tr><td>${esc(dayOf(p.date))}</td>
+        <td><a href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.commit.slice(0,7))}</a></td>
+        <td class="key">${esc(p.title)}</td><td class="r opt">${dur(p.span_ms)}</td>
+        <td class="r opt num">${isNum(p.awc)?Number(p.awc).toFixed(2):NA}</td><td class="r num">${n(p.retained,0)}</td>
+        <td class="r"><span class="bar"><span class="track"><i style="width:${Math.round((sv||0)*100)}%"></i></span><span class="num">${pct(sv,0)}</span></span></td>
+        <td class="r opt num">${p.score?esc(p.score.value):NA}</td></tr>`}).join('')
+    +'</tbody></table></div>','flush')}
+</div>
+<div class="grid g3">
+  ${panel('Pooled machine','totals',[kv('Reference compute',lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':null),
+    kv('Actually paid',lt.actual_priced_calls?usd(lt.actual_usd_known_subtotal):null),
+    kv('Model tokens',short(isNum(lt.input_tokens)&&isNum(lt.output_tokens)?lt.input_tokens+lt.output_tokens:null)),
+    kv('Reasoning tokens',short(lt.reasoning_tokens)),kv('Model calls',n(lt.model_calls,0))].join(''))}
+  ${panel('Pooled agent','totals',[kv('Tool calls',n(lt.tool_calls,0)),kv('Failed results',n(lt.failed_tool_calls,0)),
+    kv('Sub-agents',n(lt.sub_agents,0)),kv('Skills / MCP',n(lt.skills_used,0)+' / '+n(lt.mcp_used,0)),
+    kv('Wrapped runs',n(lt.runs,0)),kv('Coverage gaps',n(lt.coverage_gaps,0))].join(''))}
+  ${panel('Pooled artifact','totals',[kv('Semantic edits',n(lt.artifact_operations,0)),kv('Surviving',n(lt.artifact_retained,0)),
+    kv('Survival',pct(lt.artifact_survival,1)),kv('Rework',pct(rework,1)),
+    kv('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment,1):null),
+    kv('Commits scored',n(lt.scored_commits,0)+' / '+n(lt.commits,0))].join(''))}
+</div>
+${total?`<div class="grid">
+  ${panel('Cumulative score','derived · '+total.algorithm,
+    `<div class="big-total"><b class="num">${n(total.value,1)}</b>
+      <span class="hint">${n(total.previous,1)} + ${n(total.delta,1)} = ${n(total.value,1)} · ${n(total.rated_commits,0)} scored commits · started at 0</span></div>
+     <p class="note">Every recorded commit score added once and unchanged. It grows with the number of recorded commits, so it measures accumulated recorded work, not quality. Average commit score ${n(stats.average,1)}.</p>`)}
+</div>`:''}`;
 
-${total?`<div class="section">
-  <div class="section-head"><h2>Cumulative score</h2><span class="note">Derived · ${esc(total.algorithm)}</span></div>
-  <div class="total-card">
-    <div><span class="eyebrow">Project total</span>
-      <p class="total-figure num">${points(total.value)}<small>+${points(total.delta)} LATEST</small></p>
-      <p class="total-meta" style="font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase">${n(total.rated_commits)} scored commits · started at 0</p></div>
-    <div style="align-self:center"><p class="equation num">${points(total.previous)} + ${points(total.delta)} = ${points(total.value)}</p>
-      <p class="blurb">Every recorded commit score, added once and unchanged. It grows with the number of recorded commits, so it measures accumulated recorded work, not quality. Average commit score ${points(stats.average)}.</p></div>
-  </div>
-</div>`:''}
-
-<div class="section">
-  <div class="section-head"><h2>Recorded commits</h2><span class="note">Newest first · open one for its full proof</span></div>
-  <div class="rows">${rows.map((p,i)=>`<a class="row${i===0?' is-latest':''}" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">
-    <span class="hash">${esc(p.commit.slice(0,7))}</span><span class="subject">${esc(p.title)}</span>
-    <span class="when">${esc(day(p.date))}</span>
-    <span class="delta">${p.span_ms===null||p.span_ms===undefined?'':esc(span(p.span_ms))}${p.awc?' · '+awc(p.awc)+' AWC':''}</span>
-    <span class="total num">${p.operations?pct(ratio(p.retained,p.operations),0):'—'}</span></a>`).join('')||'<p class="empty">No commits recorded yet.</p>'}</div>
-  <p class="legend">The right-hand column is artifact survival for that commit. Duration and AWC come from its own proof.</p>
-</div>`;
-
-const series=[...rows].reverse();
-const percent=v=>v===null?unknown:Math.round(v)+'%';
-const charts=[['Human tokens / commit',series.map(p=>p.human_tokens),short],
-  ['AWC / commit',series.map(p=>p.awc===null||p.awc===undefined?null:Number(p.awc)),awc],
-  ['Artifact survival',series.map(p=>p.operations?100*p.retained/p.operations:null),percent],
-  ['Rework ratio',series.map(p=>p.operations?100*(1-p.retained/p.operations):null),percent],
-  ['Agent calls / commit',series.map(p=>p.tool_calls+p.sub_agents),n],
-  ['Duration / commit',series.map(p=>p.span_ms===null||p.span_ms===undefined?null:p.span_ms),span]];
-const latestOf=values=>{for(let i=values.length-1;i>=0;i--)if(values[i]!==null&&values[i]!==undefined)return values[i];return null};
-$('#charts').innerHTML=charts.map((c,i)=>`<div class="chart-cell"><span>${esc(c[0])}</span><b>${esc(c[2](latestOf(c[1])))}<em>latest</em></b><div id="spark-${i}"></div></div>`).join('');
-function draw(){charts.forEach((c,i)=>sparkline(c[1],document.getElementById('spark-'+i)))}
+function line(host,sets,opts){
+  const el=$(host);if(!el)return;
+  const w=el.clientWidth||600,h=(opts&&opts.height)||150,left=34,right=8,top=10,bottom=20;
+  const all=sets.flatMap(s=>s.values).filter(isNum);
+  if(!all.length)return el.innerHTML='<p class="hint">not recorded</p>';
+  const hi=(opts&&opts.max)||Math.max(...all)*1.1||1,lo=0,count=sets[0].values.length;
+  const x=i=>left+(w-left-right)*i/Math.max(1,count-1),y=v=>top+(h-top-bottom)*(1-(v-lo)/(hi-lo||1));
+  let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(opts&&opts.label||'')}">`;
+  for(let i=0;i<=2;i++){const v=hi*i/2;
+    svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#1a222d"/>`
+      +`<text class="axis" x="0" y="${(y(v)+3).toFixed(1)}">${esc(opts&&opts.fmt?opts.fmt(v):n(v,1))}</text>`}
+  for(const set of sets){
+    let d='';set.values.forEach((v,i)=>{if(!isNum(v))return;d+=(d?' L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
+    svg+=`<path d="${d}" fill="none" stroke="${set.color}" stroke-width="1.8"/>`;
+    set.values.forEach((v,i)=>{if(!isNum(v))return;svg+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="${i===count-1?3.5:2}" fill="${set.color}"><title>${esc(set.name+' · '+n(v,3))}</title></circle>`})}
+  svg+=`<text class="axis" x="${left}" y="${h-4}">${esc(series.length?dayOf(series[0].date):'')}</text>`
+    +`<text class="axis" x="${w-right}" y="${h-4}" text-anchor="end">latest</text>`;
+  el.innerHTML=svg+'</svg>';
+}
+function bars(host,values,labels){
+  const el=$(host);if(!el)return;
+  const w=el.clientWidth||600,h=150,left=34,right=8,top=10,bottom=20;
+  const hi=Math.max(...values.filter(isNum),1);
+  const slot=(w-left-right)/Math.max(1,values.length),width=Math.max(3,Math.min(26,slot*.62));
+  let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Surviving edits per commit">`;
+  for(let i=0;i<=2;i++){const v=hi*i/2,y=top+(h-top-bottom)*(1-v/hi);
+    svg+=`<line x1="${left}" x2="${w-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1a222d"/><text class="axis" x="0" y="${(y+3).toFixed(1)}">${short(v)}</text>`}
+  values.forEach((v,i)=>{if(!isNum(v))return;const bh=(h-top-bottom)*v/hi,x=left+slot*i+(slot-width)/2;
+    svg+=`<rect x="${x.toFixed(1)}" y="${(h-bottom-bh).toFixed(1)}" width="${width.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${i===values.length-1?'#ff9c31':'#39c2b4'}" opacity="${i===values.length-1?1:.65}"><title>${esc(labels[i])}</title></rect>`});
+  el.innerHTML=svg+'</svg>';
+}
+function draw(){
+  line('#chart-effort',[{name:'human tokens / edit',values:ratesHuman,color:'#ff9c31'}],
+    {label:'Human tokens per surviving edit',fmt:v=>short(v)});
+  line('#chart-cost',[{name:'AWC / edit',values:ratesCost,color:'#39c2b4'}],
+    {label:'AWC per surviving edit',fmt:v=>v>=1?v.toFixed(1):v.toFixed(3)});
+  line('#chart-retention',[{name:'survived',values:survival.map(v=>isNum(v)?v*100:null),color:'#39c2b4'},
+    {name:'reworked',values:survival.map(v=>isNum(v)?(1-v)*100:null),color:'#ff9c31'}],{max:100,fmt:v=>Math.round(v)+'%',label:'Retention and rework'});
+  bars('#chart-volume',series.map(p=>p.retained),series.map(p=>p.commit.slice(0,7)+' · '+n(p.retained,0)+' surviving edits'));
+}
 draw();
 let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(draw,150)});
 

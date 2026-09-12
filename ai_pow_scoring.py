@@ -248,7 +248,7 @@ def lifetime_start():
     from decimal import Decimal
     return {"commits": 0, "scored_commits": 0, "human_tokens": 0, "prompts": 0,
             "visible_tokens": 0, "visible_events": 0, "model_calls": 0,
-            "input_tokens": 0, "output_tokens": 0, "reasoning_tokens": 0,
+            "input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0, "reasoning_tokens": 0,
             "tool_calls": 0, "sub_agents": 0, "skills": set(), "mcp": set(),
             "artifact_operations": 0, "artifact_retained": 0,
             "task_attempts": 0, "task_completed": 0, "priced_calls": 0,
@@ -272,7 +272,7 @@ def lifetime_add(totals, proof):
         totals[count] += text.get("messages", text.get("events", 0)) or 0
     for model in (metrics.get("models") or {}).values():
         totals["model_calls"] += model.get("calls") or 0
-        for field in ("input_tokens", "output_tokens", "reasoning_tokens"):
+        for field in ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens"):
             totals[field] = _add(totals[field], model.get(field))
     counts = metrics.get("event_counts") or {}
     totals["tool_calls"] += counts.get("tool.call", 0)

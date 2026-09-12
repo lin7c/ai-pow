@@ -18,16 +18,14 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent architecture, and sampled artifact revisions. It binds those observations to the resulting commit as a **proof vector**, derives a transparent process score from the part that can be checked against the commit, and writes an offline HTML report.
 
-**v0.6 includes:**
+**v0.7 includes:**
 
-- **Two pages, two questions.** `reports/<commit>.html` proves how one commit came to be; `index.html` summarises the project's long-term human/machine structure. Neither is a tab of the other.
-- **Quantities first, always.** Both pages open with the same five recorded numbers — human input, AI visible output, machine work in AWC, agent calls, artifact survival. No composite score appears on a first screen.
-- A commit proof laid out in fixed order: identity and verification, human, machine, agent, artifact, timeline, result, and an observed / derived / inferred provenance map.
-- Per-file work with real paths: edits, write events, overwritten edits, re-additions and survival, plus the most reworked files.
-- A timeline of sessions, declared tasks and rework in recorded order.
-- Machine work by model with a share bar, reference compute (1 AWC = $1 at the recorded list price) kept separate from what was actually paid.
-- The agent execution graph as a tree, with per-tool call counts.
-- Repository trends per commit (human tokens, AWC, survival, rework, agent calls, duration) and a descriptive development style with its thresholds shown.
+- **Two observability pages.** `reports/<commit>.html` is a run view for one commit; `index.html` is a dashboard over the recorded history. Dense, monospace, dark, built like a telemetry console.
+- **Rates first, not totals.** Totals scale with the size of a change; the ratios are what actually differ between people, tools and setups. Both pages lead with them: human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share.
+- A session timeline drawn from real timestamps, with task changes and rework marked on it.
+- Per-file work with real paths, per-model and per-tool tables with share bars, the agent spawn tree, and event volume by type.
+- Repository trends per commit with deltas against the previous commit, a bar chart of surviving edits, and a descriptive development style with its thresholds printed.
+- **No composite score in either first screen.** The retention score sits in the proof panel; the cumulative total sits at the bottom of the dashboard. A browser check fails the build if either moves up.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
 
@@ -84,9 +82,22 @@ Reports are generated after committing and remain outside the tracked source tre
 
 ### Two pages, two different questions
 
-`.git/ai-pow/reports/<commit>.html` answers "what happened between the last commit and this one". `.git/ai-pow/index.html` answers "how has this project used AI over its lifetime". The commit page is the core record; the repository page is a summary of many of them.
+`.git/ai-pow/reports/<commit>.html` answers "what happened between the last commit and this one". `.git/ai-pow/index.html` answers "how has this project used AI over its lifetime". The run view is the core record; the dashboard summarises many of them.
 
-**Commit page: quantities first, score last.** The five recorded numbers open the page; the 0–100 retention score sits inside the artifact section, labelled derived. A first screen that leads with one composite number invites gaming it.
+Both open with comparable **rates**, because raw totals only tell you how big the change was:
+
+| Rate | What differs between people |
+| --- | --- |
+| human tokens / surviving edit | how much steering the work needed |
+| visible tokens / message | how much reading the agent demanded |
+| AWC / surviving edit | what the machine cost per unit of kept work |
+| surviving / observed edits | how much was thrown away before the commit |
+| surviving edits / hour | how fast kept work accumulated |
+| tool calls / surviving edit | how much machinery each kept edit took |
+| cache reads / input tokens | how well the setup reuses context |
+| failed / total tool calls | how much of the automation misfired |
+
+**Run view: rates first, score last.** The comparable ratios open the page; the 0–100 retention score sits in the proof panel, labelled derived. A first screen that leads with one composite number invites gaming it.
 
 **Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 

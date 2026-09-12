@@ -15,23 +15,30 @@ const {chromium} = require('playwright');
     page.on('request', request => {if (/^https?:/.test(request.url())) requests.push(request.url());});
     const folder = path.resolve(process.argv[2] || 'docs/demo');
     const reports = fs.readdirSync(path.join(folder, 'reports')).filter(f => f.endsWith('.html'));
-    assert.ok(reports.length >= 2, 'a proof page per recorded commit');
-    const below = async (selector, reference) => {
-      const a = await page.locator(selector).first().boundingBox();
-      const b = await page.locator(reference).first().boundingBox();
-      return a && b && a.y > b.y + b.height;
+    assert.ok(reports.length >= 2, 'a run view per recorded commit');
+    // Nothing derived from a score may sit in the first screen of either page.
+    const scoreBelowStats = async () => {
+      const box = await page.locator('.grid').first().boundingBox();
+      const found = await page.evaluate(() => {
+        const hits = [];
+        document.querySelectorAll('.kv, .big-total, .panel > header h3').forEach(el => {
+          if (/score/i.test(el.textContent)) hits.push(el.getBoundingClientRect().top + scrollY);
+        });
+        return hits;
+      });
+      assert.ok(found.length > 0, 'the derived score is still reported');
+      return found.every(top => top > box.y + box.height);
     };
 
-    // ---- Repository summary -------------------------------------------------
+    // ---- Repository dashboard ----------------------------------------------
     await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
-    await page.locator('.five').waitFor();
+    await page.locator('.stat').first().waitFor();
     assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
-    assert.equal(await page.locator('.five div').count(), 5, 'five pooled quantities first');
-    assert.equal(await page.locator('.chart-cell svg path').count(), 6, 'six trend lines');
-    assert.equal(await page.locator('.level').count(), 3, 'development style levels');
+    assert.equal(await page.locator('.stat').count(), 8, 'eight comparable rates lead the dashboard');
+    assert.equal(await page.locator('.panel svg').count() >= 4, true, 'trend charts are drawn');
+    assert.ok(await scoreBelowStats(), 'no score in the first screen of the dashboard');
     const rowCount = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length);
-    assert.equal(await page.locator('.row').count(), rowCount, 'one row per recorded commit');
-    assert.ok(await below('.total-figure', '.five'), 'the cumulative score is never the first screen');
+    assert.equal(await page.locator('tbody tr').count() >= rowCount, true, 'one table row per commit');
     const totals = await page.evaluate(() => {
       const d = JSON.parse(document.querySelector('#report-data').textContent);
       const ops = d.history.reduce((t, p) => t + p.operations, 0);
@@ -44,41 +51,36 @@ const {chromium} = require('playwright');
     assert.ok(Math.abs(totals.pooled - totals.reported) < 1e-4, 'lifetime ratios are pooled');
     assert.ok(Math.abs(totals.mean - totals.reported) > 1e-4, 'pooled is not the mean of per-commit ratios');
 
-    // ---- Commit proof -------------------------------------------------------
-    const href = await page.locator('.row').first().getAttribute('href');
+    // ---- Commit run view ----------------------------------------------------
+    const href = await page.locator('tbody a').first().getAttribute('href');
     const proofFile = path.basename(href);
-    assert.ok(fs.existsSync(path.join(folder, 'reports', proofFile)), 'the linked proof page exists');
-    await page.locator('.row').first().click();
-    await page.locator('.five').waitFor();
-    assert.ok(href.includes('reports/'), 'each row opens that commit proof');
-    assert.equal(await page.locator('.five div').count(), 5, 'five recorded quantities first');
-    assert.equal(await page.locator('.ident div').count(), 6, 'identity: commit, parent, time, duration, proof, trace');
-    assert.equal(await page.locator('.total-figure').count(), 0, 'no project total on a commit page');
-    assert.ok(await below('.derived-score', '.five'), 'the score is never the first screen');
+    assert.ok(fs.existsSync(path.join(folder, 'reports', proofFile)), 'the linked run view exists');
+    await page.locator('tbody a').first().click();
+    await page.locator('.stat').first().waitFor();
+    assert.equal(await page.locator('.stat').count(), 6, 'six comparable rates lead the run view');
+    assert.ok(await scoreBelowStats(), 'no score in the first screen of the run view');
+    assert.equal(await page.locator('#waterfall svg').count(), 1, 'the session timeline is drawn');
+    assert.ok(await page.locator('.tree').count() > 0, 'the agent topology is drawn');
+    assert.ok(/├─|└─/.test(await page.locator('.tree').first().textContent()), 'as a tree');
+    assert.ok(await page.locator('tbody tr').count() > 0, 'per-file work is listed');
     assert.equal(await page.locator('.prov div').count(), 3, 'observed / derived / inferred');
-    assert.ok(await page.locator('.timeline .tl').count() > 0, 'the timeline is drawn');
-    assert.ok(await page.locator('table.files tbody tr').count() > 0, 'per-file work is listed');
-    const tree = await page.locator('.tree').first().textContent();
-    assert.ok(/├─|└─/.test(tree), 'the agent structure is drawn as a tree');
     const text = await page.locator('#content').textContent();
-    for (const heading of ['Human', 'Machine', 'Agent', 'Artifact', 'Timeline', 'Result', 'Verification'])
-      assert.ok(text.includes(heading), `section ${heading}`);
-    for (const label of ['Duration', 'Actual cost', 'Unique sessions', 'Failed results', 'Of which cache reads'])
-      assert.ok(text.includes(label), `the proof shows ${label}`);
+    for (const label of ['Human steering', 'Unit cost', 'Retention', 'Throughput', 'Autonomy',
+                         'Cache read share', 'Actually paid', 'Failed results', 'Coverage gaps'])
+      assert.ok(text.includes(label), `the run view shows ${label}`);
     if (process.env.REPORT_SCREENSHOT) await page.screenshot({path: process.env.REPORT_SCREENSHOT, fullPage: true});
 
-    // Every generated page, at every width, with the widest recorded labels.
     for (const width of [375, 720, 1024]) {
       await page.setViewportSize({width, height: 900});
       for (const file of ['index.html', ...reports.map(name => path.join('reports', name))]) {
         await page.goto(pathToFileURL(path.join(folder, file)).href);
-        await page.locator('.five').waitFor();
+        await page.locator('.stat').first().waitFor();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
                      `${file} overflows at ${width}px`);
       }
     }
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
-    console.log('Report browser checks passed: two pages, quantities first, provenance, privacy, offline.');
+    console.log('Browser checks passed: two pages, rates first, no score up top, privacy, offline.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

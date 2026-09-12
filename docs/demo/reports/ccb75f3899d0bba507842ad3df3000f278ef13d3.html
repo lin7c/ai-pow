@@ -1,14 +1,4 @@
-# SPDX-License-Identifier: MIT
-"""Offline observability pages: one run view per commit, one dashboard per repository.
-
-Nothing is fetched at view time. Both pages lead with the rates that differ
-between people and setups, not with totals that only scale with the change.
-"""
-import base64
-import hashlib
-import json
-
-CSS = r"""
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-R1UlkMBCoh3Xx7kDi15Dyb0miOnTRwRevTenThqCY9M='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Commit run</title><style>
 :root{
 --bg:#0b0e13;--panel:#111620;--panel2:#151b26;--head:#0e131b;--line:#1f2733;--line2:#2b3543;
 --text:#e6edf3;--muted:#8b98a9;--dim:#5f6c7d;--accent:#ff9c31;--teal:#39c2b4;--violet:#9b8cff;
@@ -104,9 +94,7 @@ svg{display:block}
 @media print{body{background:#fff;color:#111}.topbar{position:static}.btn{display:none}
 .panel,.stat,.prov div{background:#fff}.grid,.prov{background:#d8dee6;border-color:#d8dee6}
 td,th{border-color:#e2e7ee}.kv,.note,.hint{color:#4b5563}}
-"""
-
-HELPERS = r"""
+</style></head><body><a class="skip" href="#content">Skip to content</a><div class="topbar"><div class="shell"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW</span><span class="crumb" id="crumb"></span><span class="spacer"></span><span class="crumb" id="chips"></span><a class="btn" href="../index.html">Repository ▸</a><button class="btn" id="print">Print</button></div></div><main class="shell" id="content"></main><noscript>This page requires JavaScript to render its embedded data. Use the aipow CLI for the JSON form.</noscript><div class="shell"><div class="foot"><span>AI-PoW · ai-pow</span><span>Process record · not a measure of code quality</span></div></div><script id="report-data" type="application/json">{"project":"ai-pow","kind":"commit","demo":true,"current":{"commit":"ccb75f3899d0bba507842ad3df3000f278ef13d3","title":"Keep every generated page inside the viewport at phone width","date":"2026-09-12T14:46:58+00:00","score":{"algorithm":"retention-v2","value":"68.0","grade":"B","confidence":"0.3625","status":"provisional","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.980000","quality":"0.944444","confidence":"0.462963","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.750000","confidence":"0.250000","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":49,"operations":50,"checked_operations":50},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":4,"attempts":4,"declared":4,"basis":"declared-with-committed-evidence"},"scope":{"units":25,"files":11},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"summary":{"human":{"events":40,"methods":{"tokenizer":{"tokens":4320,"bytes":0,"events":40}},"unknown_token_events":0,"messages":40,"tokens_estimated":0,"tokens_measured":4320,"tokens_complete":true,"attention_seconds":null},"visible_ai":{"events":22,"methods":{"tokenizer":{"tokens":1892,"bytes":0,"events":22}},"unknown_token_events":0,"tokens_estimated":0,"tokens_measured":1892,"tokens_complete":true,"attention_seconds":null},"models":{"example-small/provider_reported":{"calls":14,"input_tokens":72800,"output_tokens":12600,"cached_input_tokens":25200,"reasoning_tokens":3640,"cache_write_tokens":5600,"unknown_fields":[],"known_token_subtotals":{"input_tokens":72800,"output_tokens":12600,"cached_input_tokens":25200,"reasoning_tokens":3640,"cache_write_tokens":5600},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}},"example-large/provider_reported":{"calls":24,"input_tokens":124800,"output_tokens":21600,"cached_input_tokens":43200,"reasoning_tokens":6240,"cache_write_tokens":9600,"unknown_fields":[],"known_token_subtotals":{"input_tokens":124800,"output_tokens":21600,"cached_input_tokens":43200,"reasoning_tokens":6240,"cache_write_tokens":9600},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}}},"reference_usd_known_subtotal":"2.400004","priced_calls":38,"unpriced_calls":0,"tools_used":["apply_patch","mcp__docs__lookup","read_file","search","shell"],"skills_used":["frontend-design","release","review","testing"],"mcp_used":["docs"],"event_counts":{"run.start":2,"human.message":40,"assistant.visible":22,"model.usage":38,"tool.call":73,"tool.result":72,"run.stop":2,"skill.used":4,"agent.spawn":4,"coverage.gap":1},"human_survival":null,"artifact_survival":null,"task_survival":null,"semantic_edits":null,"quality":null,"algorithm":"observed-v4","reference_usd_by_measurement":{"provider_reported":{"known_subtotal":"2.400004","complete_for_observed_calls":true,"priced":38,"unpriced":0}},"reference_cost_complete_for_observed_calls":true,"overall_score":null,"efficiency":null,"ranking_eligible":false,"agent":{"spawns":4,"stops":0,"nodes":4,"parents_known":3,"max_depth":3,"graph":[["planner",""],["builder","planner"],["reviewer","builder"],["tester","planner"]],"tool_calls_by_name":[["apply_patch",18],["read_file",18],["search",18],["shell",18],["mcp__docs__lookup",1]],"other_tool_calls":0,"truncated":false},"window":{"first_ms":1789555273125,"last_ms":1789574066250,"span_ms":18793125,"basis":"local-observation-times"},"activity":{"runs":2,"run_stops":2,"nonzero_exits":0,"sessions":2,"sessions_truncated":false,"failed_tool_calls":6,"coverage_gaps":1},"actual_usd_known_subtotal":"1.320006","actual_priced_calls":38},"proof_hash":"939e965a35e50deabbf79eb7388097bc9ce180d461f2d9f3aec13b8179b319f8","parent":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab","tree":"b9e41c0f585444a70aa78f5d5e33f087dc2714b68528287d31064d74c13c1bee","trace_root":"2143efa663a5dcfed33a4c0e43c544ecb4933c9a49cab28c39adf60445edd50f","boundary":"head-observed-after-commit"},"verification":{"integrity_verified":false,"git_tree_verified":false,"events":258,"trust":"local-self-reported"},"derived":{"files":[{"path":"docs/demo/index.html","id":"3bbb8d3e64","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html","id":"fba2ae8b5b","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab.html","id":"8fa172b21c","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/7daebd65277bc6e93aaeb197d6804bb95756c844.html","id":"614e895c34","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/8d4c45f5952572bd431d975e056946de8a6b14d4.html","id":"5c908beafc","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/a6b3c471f9178afdfe415ef1ba4b3e9bc52357c5.html","id":"8d46793765","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/b4aa041d739f658d31f0ff75568cfad1b9cacbf2.html","id":"3e609d5a52","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"docs/demo/reports/bb8b4f9438c8bf3a82b4d06838d6cd9456c81b0b.html","id":"4511426858","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"scripts/test_report_browser.cjs","id":"7eec37aea0","writes":1,"operations":5,"retained":5,"checked":true,"overwritten":0,"reintroduced":0},{"path":"ai_pow_report.py","id":"944f6255f2","writes":1,"operations":4,"retained":4,"checked":true,"overwritten":0,"reintroduced":0},{"path":"scripts/build_demo.py","id":"155ea379c1","writes":1,"operations":2,"retained":2,"checked":true,"overwritten":0,"reintroduced":0}],"files_total":11,"timeline":[{"at":1789555273125,"kind":"session","label":"session started","detail":"laintas-cli"},{"at":1789556263636,"kind":"task","label":"catalog page","detail":"active","repeat":1},{"at":1789557327272,"kind":"task","label":"catalog page","detail":"completed","repeat":1},{"at":1789558390908,"kind":"task","label":"checkout retry","detail":"active","repeat":1},{"at":1789559454544,"kind":"task","label":"checkout retry","detail":"completed","repeat":1},{"at":1789564267500,"kind":"session","label":"session ended","detail":"exit 0"},{"at":1789564340625,"kind":"session","label":"session started","detail":"laintas-cli"},{"at":1789573335000,"kind":"session","label":"session ended","detail":"exit 0"}],"timeline_omitted":0,"mcp_calls":1,"tool_results":72,"result":{"added":1,"modified":10,"removed":0,"renamed":0,"tests":0}},"diff":{"files":11,"insertions":121,"deletions":79},"links":{"index":"../index.html"}}</script><script>
 const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -140,9 +128,7 @@ function spark(values,host,color){
   host.innerHTML=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${color||'#ff9c31'}" stroke-width="1.5" opacity=".9"/>`
     +(last>=0?`<circle cx="${x(last).toFixed(1)}" cy="${y(clean[last]).toFixed(1)}" r="2.2" fill="${color||'#ff9c31'}"/>`:'')+'</svg>';
 }
-"""
 
-JS_COMMIT = HELPERS + r"""
 const c=data.current,s=c.score,m=c.summary,e=s.evidence,d=data.derived,v=data.verification;
 const counts=m.event_counts||{},models=m.models||{},agent=m.agent||null,act=m.activity||{},win=m.window||{};
 const sum=f=>{let t=0,seen=false;for(const b of Object.values(models)){if(!isNum(b[f]))return null;t+=b[f];seen=true}return seen?t:null};
@@ -322,194 +308,5 @@ $('#content').innerHTML=`
 </div>`;
 waterfall();
 let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(waterfall,150)});
-"""
 
-JS_INDEX = HELPERS + r"""
-const lt=data.lifetime,total=data.iteration,rows=data.history,stats=data.statistics||{};
-const series=[...rows].reverse();
-document.title=data.project+' · AI-PoW history';
-if(data.demo)document.querySelector('#chips').insertAdjacentHTML('afterbegin',chip('demo data','warn'));
-const days=data.span.first&&data.span.last?Math.max(1,Math.round((new Date(data.span.last.date)-new Date(data.span.first.date))/86400000)):null;
-const perEdit=f=>series.map(p=>p.retained?f(p)/p.retained:null);
-const ratesHuman=perEdit(p=>p.human_tokens||0),ratesCost=perEdit(p=>Number(p.awc||0)),ratesTools=perEdit(p=>p.tool_calls||0);
-const survival=series.map(p=>p.operations?p.retained/p.operations:null);
-const durations=series.map(p=>isNum(p.span_ms)?p.span_ms/3600000:null);
-const cacheShare=series.map(p=>p.input_tokens?p.cached_input_tokens/p.input_tokens:null);
-const failShare=series.map(p=>p.tool_calls?p.failed_tool_calls/p.tool_calls:null);
-const lastOf=values=>{for(let i=values.length-1;i>=0;i--)if(isNum(values[i]))return values[i];return null};
-const prevOf=values=>{let found=0;for(let i=values.length-1;i>=0;i--)if(isNum(values[i])&&++found===2)return values[i];return null};
-function delta(values,invert){
-  const now=lastOf(values),before=prevOf(values);
-  if(!isNum(now)||!isNum(before)||!before)return '';
-  const change=(now-before)/Math.abs(before);
-  if(Math.abs(change)<.005)return '<span class="delta">flat</span>';
-  return `<span class="delta ${change>0?'up':'down'}">${(Math.abs(change)*100).toFixed(0)}% vs prev</span>`;
-}
-const keptTotal=lt.artifact_retained,opsTotal=lt.artifact_operations;
-const perOperation=opsTotal?lt.human_tokens/opsTotal:null;
-const awcPerEdit=opsTotal&&isNum(lt.reference_usd_known_subtotal)?Number(lt.reference_usd_known_subtotal)/opsTotal:null;
-const rework=isNum(lt.artifact_survival)?1-Number(lt.artifact_survival):null;
-const level=(value,high,low)=>!isNum(value)?['medium','—']:value>=high?['high','HIGH']:value<=low?['low','LOW']:['medium','MEDIUM'];
-const hu=level(perOperation,40,15),ma=level(awcPerEdit,.05,.02),rw=level(rework,.4,.2);
-const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==='low'&&ma[0]==='high'?'Autonomous / high-compute'
-  :hu[1]==='—'||ma[1]==='—'?'Not enough recorded history':'Balanced';
-
-$('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
-$('#chips').innerHTML=[chip(n(lt.scored_commits,0)+' / '+n(data.commits_in_history,0)+' commits'),
-  chip(days===null?'span unknown':n(days,0)+(days===1?' day':' days')),chip(dur(lt.span_ms)+' recorded'),
-  chip((lt.algorithms||[]).join(', ')||'no algorithm')].join('');
-
-$('#content').innerHTML=`
-<div class="pagehead"><div><h1>${esc(data.project)} · AI development history</h1>
-  <p class="sub">Per-commit rates over the recorded first-parent history. Pooled ratios are recomputed from pooled totals, never averaged per commit, and unknown values stay unknown.</p></div>
-  <div class="meta">${chip(n(lt.sessions,0)+' sessions')}${chip(n(lt.model_calls,0)+' model calls')}${chip(short(lt.artifact_operations)+' edits')}</div>
-</div>
-<div class="grid g4">
-  ${stat('Human steering',n(lastOf(ratesHuman),1),'tok/edit','pooled '+n(perOperation,1)+' · '+short(lt.human_tokens)+' tokens',delta(ratesHuman))}
-  ${stat('Unit cost',isNum(lastOf(ratesCost))?lastOf(ratesCost).toFixed(4):NA,'AWC/edit','pooled '+(isNum(awcPerEdit)?awcPerEdit.toFixed(4):NA)+' · '+(lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':NA),delta(ratesCost))}
-  ${stat('Retention',pct(lastOf(survival),1),'survived','pooled '+pct(lt.artifact_survival,1)+' · rework '+pct(rework,1),delta(survival))}
-  ${stat('Autonomy',n(lastOf(ratesTools),2),'calls/edit','pooled '+n(rate(lt.tool_calls,opsTotal),2)+' · '+short(lt.tool_calls)+' calls',delta(ratesTools))}
-</div>
-<div class="grid g4">
-  ${stat('Duration',dur(lastOf(durations)*3600000),'per commit','total '+dur(lt.span_ms),delta(durations))}
-  ${stat('Cache reads',pct(lastOf(cacheShare),0),'of input','pooled '+(isNum(lt.cached_input_tokens)&&lt.input_tokens?pct(lt.cached_input_tokens/lt.input_tokens,0):NA),delta(cacheShare))}
-  ${stat('Failed tools',pct(lastOf(failShare),1),'of calls','total '+n(lt.failed_tool_calls,0)+' failures',delta(failShare))}
-  ${stat('Paid',lt.actual_priced_calls?usd(lt.actual_usd_known_subtotal):NA,'actual','reference '+(lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':NA))}
-</div>
-<div class="grid g2">
-  ${panel('Human tokens per surviving edit','oldest → newest','<div id="chart-effort"></div>')}
-  ${panel('AWC per surviving edit','oldest → newest','<div id="chart-cost"></div>')}
-</div>
-<div class="grid g2">
-  ${panel('Retention and rework','share of observed edits','<div id="chart-retention"></div><div class="legend"><span><i style="background:#39c2b4"></i>survived</span><span><i style="background:#ff9c31"></i>reworked</span></div>')}
-  ${panel('Surviving edits per commit','volume','<div id="chart-volume"></div>')}
-</div>
-<div class="grid">
-  ${panel('Development style','descriptive, not a score',
-    `<div class="pattern"><b>${esc(pattern)}</b><span class="hint">Derived from the pooled ratios below.</span></div>
-     <div style="margin-top:10px">
-     <div class="lvl"><span>Human input</span><span class="tag ${hu[0]}">${hu[1]}</span><span class="why">${isNum(perOperation)?n(perOperation,1)+' prompt tokens per semantic edit · high ≥ 40, low ≤ 15':'not recorded'}</span></div>
-     <div class="lvl"><span>Machine compute</span><span class="tag ${ma[0]}">${ma[1]}</span><span class="why">${isNum(awcPerEdit)?awcPerEdit.toFixed(4)+' AWC per semantic edit · high ≥ 0.05, low ≤ 0.02':'not recorded'}</span></div>
-     <div class="lvl"><span>Rework</span><span class="tag ${rw[0]}">${rw[1]}</span><span class="why">${isNum(rework)?pct(rework,0)+' of observed edits did not survive · high ≥ 40%, low ≤ 20%':'not recorded'}</span></div>
-     </div>`)}
-</div>
-<div class="grid">
-  ${panel('Commits','newest first · open one for its proof',
-    `<div class="scroll"><table class="compact"><thead><tr><th>Date</th><th>Commit</th><th>Subject</th>
-      <th class="r opt">Duration</th><th class="r opt">AWC</th><th class="r">Edits</th><th class="r">Survival</th><th class="r opt">Score</th></tr></thead><tbody>`
-    +rows.map(p=>{const sv=p.operations?p.retained/p.operations:null;
-      return `<tr><td>${esc(dayOf(p.date))}</td>
-        <td><a href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.commit.slice(0,7))}</a></td>
-        <td class="key">${esc(p.title)}</td><td class="r opt">${dur(p.span_ms)}</td>
-        <td class="r opt num">${isNum(p.awc)?Number(p.awc).toFixed(2):NA}</td><td class="r num">${n(p.retained,0)}</td>
-        <td class="r"><span class="bar"><span class="track"><i style="width:${Math.round((sv||0)*100)}%"></i></span><span class="num">${pct(sv,0)}</span></span></td>
-        <td class="r opt num">${p.score?esc(p.score.value):NA}</td></tr>`}).join('')
-    +'</tbody></table></div>','flush')}
-</div>
-<div class="grid g3">
-  ${panel('Pooled machine','totals',[kv('Reference compute',lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':null),
-    kv('Actually paid',lt.actual_priced_calls?usd(lt.actual_usd_known_subtotal):null),
-    kv('Model tokens',short(isNum(lt.input_tokens)&&isNum(lt.output_tokens)?lt.input_tokens+lt.output_tokens:null)),
-    kv('Reasoning tokens',short(lt.reasoning_tokens)),kv('Model calls',n(lt.model_calls,0))].join(''))}
-  ${panel('Pooled agent','totals',[kv('Tool calls',n(lt.tool_calls,0)),kv('Failed results',n(lt.failed_tool_calls,0)),
-    kv('Sub-agents',n(lt.sub_agents,0)),kv('Skills / MCP',n(lt.skills_used,0)+' / '+n(lt.mcp_used,0)),
-    kv('Wrapped runs',n(lt.runs,0)),kv('Coverage gaps',n(lt.coverage_gaps,0))].join(''))}
-  ${panel('Pooled artifact','totals',[kv('Semantic edits',n(lt.artifact_operations,0)),kv('Surviving',n(lt.artifact_retained,0)),
-    kv('Survival',pct(lt.artifact_survival,1)),kv('Rework',pct(rework,1)),
-    kv('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment,1):null),
-    kv('Commits scored',n(lt.scored_commits,0)+' / '+n(lt.commits,0))].join(''))}
-</div>
-${total?`<div class="grid">
-  ${panel('Cumulative score','derived · '+total.algorithm,
-    `<div class="big-total"><b class="num">${n(total.value,1)}</b>
-      <span class="hint">${n(total.previous,1)} + ${n(total.delta,1)} = ${n(total.value,1)} · ${n(total.rated_commits,0)} scored commits · started at 0</span></div>
-     <p class="note">Every recorded commit score added once and unchanged. It grows with the number of recorded commits, so it measures accumulated recorded work, not quality. Average commit score ${n(stats.average,1)}.</p>`)}
-</div>`:''}`;
-
-function line(host,sets,opts){
-  const el=$(host);if(!el)return;
-  const w=el.clientWidth||600,h=(opts&&opts.height)||150,left=34,right=8,top=10,bottom=20;
-  const all=sets.flatMap(s=>s.values).filter(isNum);
-  if(!all.length)return el.innerHTML='<p class="hint">not recorded</p>';
-  const hi=(opts&&opts.max)||Math.max(...all)*1.1||1,lo=0,count=sets[0].values.length;
-  const x=i=>left+(w-left-right)*i/Math.max(1,count-1),y=v=>top+(h-top-bottom)*(1-(v-lo)/(hi-lo||1));
-  let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(opts&&opts.label||'')}">`;
-  for(let i=0;i<=2;i++){const v=hi*i/2;
-    svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#1a222d"/>`
-      +`<text class="axis" x="0" y="${(y(v)+3).toFixed(1)}">${esc(opts&&opts.fmt?opts.fmt(v):n(v,1))}</text>`}
-  for(const set of sets){
-    let d='';set.values.forEach((v,i)=>{if(!isNum(v))return;d+=(d?' L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
-    svg+=`<path d="${d}" fill="none" stroke="${set.color}" stroke-width="1.8"/>`;
-    set.values.forEach((v,i)=>{if(!isNum(v))return;svg+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="${i===count-1?3.5:2}" fill="${set.color}"><title>${esc(set.name+' · '+n(v,3))}</title></circle>`})}
-  svg+=`<text class="axis" x="${left}" y="${h-4}">${esc(series.length?dayOf(series[0].date):'')}</text>`
-    +`<text class="axis" x="${w-right}" y="${h-4}" text-anchor="end">latest</text>`;
-  el.innerHTML=svg+'</svg>';
-}
-function bars(host,values,labels){
-  const el=$(host);if(!el)return;
-  const w=el.clientWidth||600,h=150,left=34,right=8,top=10,bottom=20;
-  const hi=Math.max(...values.filter(isNum),1);
-  const slot=(w-left-right)/Math.max(1,values.length),width=Math.max(3,Math.min(26,slot*.62));
-  let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Surviving edits per commit">`;
-  for(let i=0;i<=2;i++){const v=hi*i/2,y=top+(h-top-bottom)*(1-v/hi);
-    svg+=`<line x1="${left}" x2="${w-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1a222d"/><text class="axis" x="0" y="${(y+3).toFixed(1)}">${short(v)}</text>`}
-  values.forEach((v,i)=>{if(!isNum(v))return;const bh=(h-top-bottom)*v/hi,x=left+slot*i+(slot-width)/2;
-    svg+=`<rect x="${x.toFixed(1)}" y="${(h-bottom-bh).toFixed(1)}" width="${width.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${i===values.length-1?'#ff9c31':'#39c2b4'}" opacity="${i===values.length-1?1:.65}"><title>${esc(labels[i])}</title></rect>`});
-  el.innerHTML=svg+'</svg>';
-}
-function draw(){
-  line('#chart-effort',[{name:'human tokens / edit',values:ratesHuman,color:'#ff9c31'}],
-    {label:'Human tokens per surviving edit',fmt:v=>short(v)});
-  line('#chart-cost',[{name:'AWC / edit',values:ratesCost,color:'#39c2b4'}],
-    {label:'AWC per surviving edit',fmt:v=>v>=1?v.toFixed(1):v.toFixed(3)});
-  line('#chart-retention',[{name:'survived',values:survival.map(v=>isNum(v)?v*100:null),color:'#39c2b4'},
-    {name:'reworked',values:survival.map(v=>isNum(v)?(1-v)*100:null),color:'#ff9c31'}],{max:100,fmt:v=>Math.round(v)+'%',label:'Retention and rework'});
-  bars('#chart-volume',series.map(p=>p.retained),series.map(p=>p.commit.slice(0,7)+' · '+n(p.retained,0)+' surviving edits'));
-}
-draw();
-let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(draw,150)});
-"""
-
-FAVICON = ("data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E"
-           "%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E"
-           "%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E"
-           "%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E")
-
-
-def _text(value):
-    return (str(value or "").replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace('"', "&quot;")[:120])
-
-
-def _page(data, script, title, action):
-    payload = json.dumps(data, ensure_ascii=True, separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    script = script + "\ndocument.getElementById('print').addEventListener('click',()=>window.print());"
-    script_hash = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
-    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-            + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'sha256-' + script_hash
-            + '\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'">'
-            + '<link rel="icon" href="' + FAVICON + '">'
-            + "<title>" + title + "</title><style>" + CSS + "</style></head><body>"
-            + '<a class="skip" href="#content">Skip to content</a>'
-            + '<div class="topbar"><div class="shell"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW</span>'
-            + '<span class="crumb" id="crumb"></span><span class="spacer"></span>'
-            + '<span class="crumb" id="chips"></span>' + action
-            + '<button class="btn" id="print">Print</button></div></div>'
-            + '<main class="shell" id="content"></main>'
-            + '<noscript>This page requires JavaScript to render its embedded data. Use the aipow CLI for the JSON form.</noscript>'
-            + '<div class="shell"><div class="foot"><span>AI-PoW · ' + _text(data.get("project")) + '</span>'
-            + '<span>Process record · not a measure of code quality</span></div></div>'
-            + '<script id="report-data" type="application/json">' + payload + '</script><script>' + script
-            + "</script></body></html>")
-
-
-def render(data):
-    """The per-commit run view."""
-    link = (data.get("links") or {}).get("index")
-    action = '<a class="btn" href="' + link + '">Repository ▸</a>' if link else ""
-    return _page(data, JS_COMMIT, "AI-PoW · Commit run", action)
-
-
-def render_index(data):
-    """The repository dashboard."""
-    return _page(data, JS_INDEX, "AI-PoW · Repository history", "")
+document.getElementById('print').addEventListener('click',()=>window.print());</script></body></html>

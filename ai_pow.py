@@ -26,7 +26,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.6.0"
+APP_VERSION = "0.7.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -742,6 +742,14 @@ class Recorder:
                             "tool_calls": (metrics.get("event_counts") or {}).get("tool.call", 0),
                             "sub_agents": (metrics.get("event_counts") or {}).get("agent.spawn", 0),
                             "sessions": activity.get("sessions"),
+                            "failed_tool_calls": activity.get("failed_tool_calls"),
+                            "coverage_gaps": activity.get("coverage_gaps"),
+                            "input_tokens": sum((b.get("input_tokens") or 0) for b in (metrics.get("models") or {}).values()),
+                            "cached_input_tokens": sum((b.get("cached_input_tokens") or 0) for b in (metrics.get("models") or {}).values()),
+                            "output_tokens": sum((b.get("output_tokens") or 0) for b in (metrics.get("models") or {}).values()),
+                            "reasoning_tokens": sum((b.get("reasoning_tokens") or 0) for b in (metrics.get("models") or {}).values()),
+                            "actual_usd": metrics.get("actual_usd_known_subtotal"),
+                            "tasks": (evidence.get("task") or {}).get("attempts"),
                             "operations": artifact.get("operations"), "retained": artifact.get("retained")})
         latest = history[0] if history else None
         first, last = (self.commit_meta_row(lineage[-1]), self.commit_meta_row(lineage[0])) if lineage else (None, None)

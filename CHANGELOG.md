@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0
+
+- Rebuild both pages as observability views: a dense, monospace, dark run view per commit and a dashboard over the recorded history.
+- Lead both pages with comparable rates instead of totals - human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share - because totals only scale with the size of a change.
+- Draw a session timeline from the recorded timestamps, with task changes and rework marked on it.
+- Add per-model and per-tool tables with share bars, event volume by type, and the agent spawn tree next to the per-file table.
+- Add per-commit trend charts with deltas against the previous commit, a surviving-edits bar chart, and the development style with its thresholds.
+- Pool cache-read tokens across the history, and carry per-commit cache, reasoning, failure and payment fields into the dashboard rows.
+- Suppress the throughput rate when the observed window is under a minute instead of printing a meaningless number.
+- Keep every derived score out of both first screens; the browser check now fails if one moves up.
+
 ## 0.6.0
 
 - Split the single tabbed report into two pages: `reports/<commit>.html` proves one commit, `index.html` summarises the repository. Both are written after every commit.
