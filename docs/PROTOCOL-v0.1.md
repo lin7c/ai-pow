@@ -58,7 +58,8 @@ Provider-reported means obtained from a local response/transcript, not provider-
 - `reasoning_tokens`: subset of output; null when undisclosed.
 - Missing buckets remain null/unknown; no inference that absent means zero.
 
-Current summaries use `algorithm: observed-v3`, which is `observed-v2` plus an `agent` block. A model bucket with missing usage
+Current summaries use `algorithm: observed-v4`, which is `observed-v2` plus an `agent` block
+(added in `observed-v3`) and the interval, activity and payment facts below. A model bucket with missing usage
 reports a null total for that field, its `known_token_subtotals`, and a
 `missing_field_calls` count. Text buckets retain per-method observations and
 unknown-event counts. UTF-8 byte estimates aggregate bytes before rounding, so
@@ -83,6 +84,23 @@ string means the adapter reported no parent, and such a node is treated as a roo
 At most 128 agents and 32 tool names are retained, after which `truncated` is true and
 the remaining calls are summed into `other_tool_calls`. Repeated spawns of one agent id
 count once as a node. A cycle in reported parents is bounded, not resolved.
+
+`observed-v4` additionally reduces:
+
+```json
+{"window": {"first_ms": 1789171200000, "last_ms": 1789189200000, "span_ms": 18000000,
+            "basis": "local-observation-times"},
+ "activity": {"runs": 2, "run_stops": 2, "nonzero_exits": 0, "sessions": 2,
+              "sessions_truncated": false, "failed_tool_calls": 3, "coverage_gaps": 1},
+ "actual_usd_known_subtotal": "1.32", "actual_priced_calls": 38}
+```
+
+`window` spans the first and last recorded event of the interval. These are local
+observation times: they bound when events were written, not how long a person or a model
+worked, and a clock change moves them. `sessions` counts distinct `session_id` values only
+(run ids are a separate namespace) and stops counting at 512, setting `sessions_truncated`.
+`actual_usd` is what the operator says was paid; it is summed separately from the
+reference price and is never mixed into it.
 
 Example price file (illustrative rates, NOT real provider prices):
 

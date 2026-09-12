@@ -18,14 +18,15 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent architecture, and sampled artifact revisions. It binds those observations to the resulting commit as a **proof vector**, derives a transparent process score from the part that can be checked against the commit, and writes an offline HTML report.
 
-**v0.4 includes:**
+**v0.5 includes:**
 
-- A six-part proof vector per commit: human input, AI visible output, machine work, agent architecture, artifact work, task work.
+- An eight-part proof vector per commit: the interval, human input, AI visible output, machine work, agent architecture, artifact work, task work, and the proof identity.
+- The facts a process record needs and most tools drop: **elapsed time** between the first and last recorded event, **sessions and wrapped runs**, **what was actually paid** next to the reference price, cache-read and reasoning tokens, failed tool results, coverage gaps, and the commit's own Git diff.
 - A smooth 0–100 retention score with three visible dimensions, evidence confidence, and explicit uncertainty.
 - Two separated views, each with a single headline number: **Latest commit** shows the 0–100 commit score, **Project iterations** shows the cumulative project total. Neither view shows the other's number.
 - A zero-based cumulative project score: the exact sum of recorded commit scores, with the running total per commit.
 - Pooled repository totals whose ratios are recomputed from the pooled quantities, not averaged per commit.
-- An observed agent structure: spawns, parent links where reported, depth, and per-tool call counts.
+- The observed agent structure drawn as a tree: spawns, reported parent links, depth, and per-tool call counts.
 - Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
@@ -86,7 +87,7 @@ Reports are generated after committing and remain outside the tracked source tre
 
 The report never mixes them on one screen: the **Latest commit** view answers the first question, the **Project iterations** view answers the second.
 
-**Latest commit: 0–100.** How much of the observed work survived into this commit? That view also carries the proof vector and the proof identity.
+**Latest commit: 0–100.** How much of the observed work survived into this commit? That view also carries the interval, the proof vector and the proof identity.
 
 **Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 
@@ -179,7 +180,7 @@ Verification checks the proof hash, event chain and sequence, recomputed measure
 
 It proves **local consistency**, not truthful execution, complete capture, accurate timestamps, or correct software. An operator can fabricate an entire local chain. Unqualified payment systems and developer leaderboards should not rely on it.
 
-The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is separately versioned as `retention-v2`, and the accounting reducer as `observed-v3`. Verification recomputes a proof under the algorithms **it** recorded, so proofs sealed with `balanced-v1` / `observed-v2` keep verifying unchanged and an unknown algorithm fails instead of being reinterpreted.
+The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is separately versioned as `retention-v2`, and the accounting reducer as `observed-v4`. Verification recomputes a proof under the algorithms **it** recorded, so proofs sealed with `balanced-v1` / `observed-v2` keep verifying unchanged and an unknown algorithm fails instead of being reinterpreted.
 
 ## Storage, privacy, and overhead
 

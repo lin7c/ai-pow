@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Record and show the facts a process record needs and the report was dropping: elapsed interval between the first and last recorded event, sessions and wrapped runs, non-zero exits, failed tool results, coverage gaps, cache-read tokens, and what was actually paid next to the reference price (summary reducer observed-v4).
+- Show the commit's own Git diff (files, insertions, deletions) in the latest-commit header.
+- Draw the agent structure as a real tree with branch connectors instead of a flat indented list.
+- Restore the bolder report styling - angular tabs, display type, the cream score panel and the orange total card - on top of the separated views.
+- Generate the demo from this repository's own commits and diff sizes instead of a fictional project.
+- Fix a stylesheet precedence bug that shrank the project total and its equation to body text.
+
 ## 0.4.1
 
 - Rebuild the report around one headline per view: the latest-commit view shows the 0-100 commit score, the iteration view shows the cumulative project total, and neither shows the other.

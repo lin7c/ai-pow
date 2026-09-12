@@ -75,6 +75,20 @@ class ScoringTests(unittest.TestCase):
         self.assertEqual(totals["task_fulfillment"], "0.5000")
         self.assertEqual(totals["commits"], 2)
 
+    def test_lifetime_pools_interval_and_payment_facts(self):
+        def row(span, sessions, paid):
+            return {"summary": {"window": {"span_ms": span}, "activity": {"sessions": sessions, "runs": 1,
+                                                                          "failed_tool_calls": 2, "coverage_gaps": 1},
+                                "actual_usd_known_subtotal": paid, "actual_priced_calls": 1 if paid else 0}}
+        totals = lifetime([row(60000, 2, "1.50"), row(30000, 1, "0.50"), row(None, 1, None)])
+        self.assertEqual(totals["span_ms"], 90000)
+        self.assertEqual(totals["timed_commits"], 2)
+        self.assertEqual(totals["sessions"], 4)
+        self.assertEqual(totals["runs"], 3)
+        self.assertEqual(totals["failed_tool_calls"], 6)
+        self.assertEqual(totals["actual_usd_known_subtotal"], "2.00")
+        self.assertEqual(totals["actual_priced_calls"], 2)
+
     def test_lifetime_keeps_unknown_unknown(self):
         known = {"summary": {"human": {"tokens_measured": 5, "messages": 1, "tokens_complete": True},
                              "priced_calls": 1, "unpriced_calls": 0,
@@ -219,7 +233,7 @@ class ReportTests(unittest.TestCase):
         self.commit()
         sealed = self.rec.seal()
         self.assertEqual(sealed["score"]["algorithm"], "retention-v2")
-        self.assertEqual(sealed["summary"]["algorithm"], "observed-v3")
+        self.assertEqual(sealed["summary"]["algorithm"], "observed-v4")
         with self.rec.connection() as db:
             events = list(self.rec._events(db, sealed["epoch"]))
         legacy = {key: value for key, value in sealed.items() if key != "proof_hash"}

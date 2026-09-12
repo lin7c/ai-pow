@@ -5,108 +5,121 @@ import hashlib
 import json
 
 CSS = r"""
-:root{--bg:#0f1319;--panel:#161b24;--raised:#1b212c;--line:#273040;--hair:#1e2531;--ink:#eceff4;--muted:#94a0b2;--dim:#6f7c8f;--accent:#ff9c31;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif}
+:root{--paper:#141a24;--card:#1e2836;--raised:#243040;--line:#3a4759;--hair:#2a3543;--ink:#f2f5f9;--muted:#a9b8cb;--dim:#7c8ca1;--accent:#ff9c31;--warm:#ffb45f;--paper-ink:#16202c;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;--sans:'Lato','Trebuchet MS','Segoe UI',Arial,sans-serif;--display:'Lato','Arial Narrow',Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.55 var(--sans)}
 button,select{font:inherit;color:inherit}button{cursor:pointer}
-button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--warm);outline-offset:3px}
 h1,h2,h3,p,dl,dd{margin:0}
-.wrap{max-width:1060px;margin:0 auto;padding:0 32px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 40px}
 .skip{position:absolute;top:-90px;left:20px;background:#fff;color:#111;padding:12px;z-index:10}.skip:focus{top:10px}
 .num{font-variant-numeric:tabular-nums}
-.mast{border-bottom:1px solid var(--line)}
-.mast .wrap{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.logo{display:flex;align-items:center;gap:12px;font:700 16px var(--sans);letter-spacing:.02em}
-.mark{display:flex;gap:3px;transform:skew(-16deg)}.mark i{width:6px;height:18px;background:var(--accent)}.mark i:last-child{height:12px;align-self:flex-end;background:var(--ink)}
-.edition{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
-.ghost{background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;min-height:38px}
-.ghost:hover{color:var(--ink);border-color:var(--muted)}
-.tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:44px}
-.tabs button{background:none;border:0;padding:18px 0;font:600 13px var(--sans);color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
-.tabs button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.banner{background:var(--raised);text-align:center;padding:9px 20px;font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.mast{background:#0e141d;border-bottom:3px solid var(--accent)}
+.mast .wrap{height:74px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;gap:14px;font:900 italic 27px var(--display);letter-spacing:-.03em}
+.mark{display:flex;gap:4px;transform:skew(-16deg)}.mark i{width:8px;height:24px;background:var(--accent)}.mark i:last-child{height:17px;align-self:flex-end;background:var(--ink)}
+.edition{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase;font-style:normal;font-weight:400}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 16px;font:900 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;min-height:40px}
+.ghost:hover{background:var(--raised);color:var(--ink)}
+.tabs{display:flex;gap:6px;margin:34px 0 30px}
+.tabs button{border:0;background:var(--raised);color:var(--muted);padding:13px 26px;font:900 italic 13px var(--display);letter-spacing:.04em;text-transform:uppercase;clip-path:polygon(9px 0,100% 0,calc(100% - 9px) 100%,0 100%)}
+.tabs button[aria-pressed=true]{background:var(--accent);color:var(--paper-ink)}
 .tabs button:disabled{opacity:.35;cursor:default}
-.banner{background:var(--raised);border-bottom:1px solid var(--line);text-align:center;padding:9px 20px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .eyebrow{font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
-.hero{padding:8px 0 4px}
-.hero h1{font:600 clamp(24px,3vw,34px)/1.25 var(--sans);letter-spacing:-.01em;margin:14px 0 0;max-width:760px;overflow-wrap:anywhere}
-.headline{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:26px 0 0}
-.big{font:700 clamp(64px,10vw,108px)/.9 var(--sans);letter-spacing:-.045em}
-.over{font:13px var(--mono);color:var(--dim);padding-bottom:10px}
-.grade{display:grid;place-items:center;width:34px;height:34px;background:var(--accent);color:#14181f;font:700 16px var(--sans);margin-bottom:8px}
-.pill{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);padding:5px 9px;margin-bottom:12px}
-.bar{height:3px;background:var(--hair);margin:22px 0 0;max-width:620px}.bar span{display:block;height:100%;background:var(--accent)}
-.lede{color:var(--muted);font-size:13px;margin:16px 0 0;max-width:620px}
-.meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin:26px 0 0;padding-top:18px;border-top:1px solid var(--hair);font:11px var(--mono);color:var(--dim)}
-.meta b{color:var(--muted);font-weight:400}
-.copy{background:none;border:0;padding:0;font:11px var(--mono);color:var(--accent)}
-.section{margin-top:52px}
-.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:24px}
-.section-head h2{font:11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:400}
-.section-head .note{font:11px var(--mono);color:var(--dim);text-align:right}
-.dim{padding:18px 0;border-bottom:1px solid var(--hair)}.dim:last-child{border-bottom:0}
+.hero{display:grid;grid-template-columns:320px 1fr;background:var(--card);border-top:3px solid var(--accent)}
+.score{background:#eef2f6;color:var(--paper-ink);padding:26px 28px 24px;display:flex;flex-direction:column;justify-content:space-between}
+.score .eyebrow{color:#5d6b7e}
+.score-figure{display:flex;align-items:baseline;gap:10px;margin:14px 0 6px}
+.score-figure b{font:900 italic 92px/.92 var(--display);letter-spacing:-.06em}
+.score-figure span{font:12px var(--mono);color:#5d6b7e}
+.grade-row{display:flex;align-items:center;gap:12px}
+.grade{display:grid;place-items:center;width:34px;height:34px;background:var(--paper-ink);color:#fff;font:900 italic 19px var(--display)}
+.grade-word{font:11px/1.35 var(--sans);font-weight:700;text-transform:uppercase;letter-spacing:.04em;max-width:190px}
+.ticks{display:flex;gap:3px;margin-top:18px}.ticks i{flex:1;height:7px;background:#ccd6e0;transform:skew(-16deg)}.ticks i.on{background:var(--accent)}
+.scale{display:flex;justify-content:space-between;font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#5d6b7e;margin-top:7px}
+.status{font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase;border:1px solid #b9c4d1;padding:4px 8px}
+.hero-main{padding:30px 34px 26px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;min-width:0}
+.hero-main h1{font:900 italic clamp(26px,3.1vw,42px)/1.06 var(--display);letter-spacing:-.02em;text-transform:uppercase;margin:12px 0 0;overflow-wrap:anywhere}
+.hero-note{font-size:12px;color:var(--muted);max-width:640px;margin-top:14px}
+.strip{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);margin-top:20px}
+.strip div{padding:16px 18px 0}.strip div+div{border-left:1px solid var(--line)}
+.strip span{display:block;font:9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.strip b{display:block;font:900 italic 23px var(--display);letter-spacing:-.02em;margin-top:6px;overflow-wrap:anywhere}
+.strip small{font:10px var(--mono);color:var(--dim)}
+.total-card{display:grid;grid-template-columns:minmax(300px,1fr) 1fr;gap:26px;background:var(--accent);color:var(--paper-ink);padding:30px 34px;position:relative;overflow:hidden}
+.total-card:after{content:'\03A3';position:absolute;right:32px;top:-52px;font:900 italic 210px/1 var(--display);opacity:.09}
+.total-card .eyebrow{color:#4a3a22;font-weight:700}
+.total-figure{font:900 italic 84px/.95 var(--display);letter-spacing:-.05em;margin:10px 0 4px}
+.total-figure small{font:900 16px var(--sans);letter-spacing:0;margin-left:14px}
+.total-card .blurb{font-size:12px;max-width:430px;margin:12px 0 0;position:relative}
+.equation{font:900 italic 25px var(--display);letter-spacing:-.02em;position:relative}
+.total-meta{font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
+.section{margin-top:44px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px}
+.section-head h2{font:900 italic 22px var(--display);letter-spacing:-.01em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+.section-head h2:before{content:'';width:6px;height:17px;background:var(--accent);transform:skew(-16deg)}
+.section-head .note{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
+.dim{padding:15px 0;border-bottom:1px solid var(--hair)}.dim:last-child{border-bottom:0}
 .dim-top{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
-.dim-name{font-size:14px;font-weight:600}
-.dim-val{font:600 22px var(--sans)}
-.dim .bar{margin:12px 0 0;max-width:none}
-.dim-foot{display:flex;justify-content:space-between;gap:18px;margin-top:10px;font:11px var(--mono);color:var(--dim);flex-wrap:wrap}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
-.card{background:var(--panel);padding:22px 22px 24px;min-width:0}
-.card h3{font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);font-weight:400;margin-bottom:16px}
-.card .figure{font:600 30px/1 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
-.card .unit{font:11px var(--mono);color:var(--dim);margin-left:7px;letter-spacing:.04em}
-.card .sub{font-size:12px;color:var(--muted);margin:10px 0 14px;min-height:32px}
-.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-top:1px solid var(--hair);font:11px var(--mono);color:var(--dim)}
+.dim-name{font-weight:700;font-size:14px}
+.dim-val{font:900 italic 24px var(--display)}
+.bar{height:5px;background:var(--hair);margin-top:11px}.bar i{display:block;height:100%;background:var(--accent)}
+.dim-foot{display:flex;justify-content:space-between;gap:18px;margin-top:9px;font:10px var(--mono);color:var(--dim);flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--line)}
+.panel{background:var(--card);padding:20px 20px 22px;min-width:0;border-top:2px solid var(--line)}
+.panel.lead{border-top-color:var(--accent)}
+.panel h3{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:400;margin-bottom:14px}
+.panel .figure{font:900 italic 30px/1 var(--display);letter-spacing:-.03em;overflow-wrap:anywhere}
+.panel .figure em{font:10px var(--mono);font-style:normal;color:var(--dim);margin-left:6px;letter-spacing:.06em}
+.panel .sub{font-size:11.5px;color:var(--muted);margin:9px 0 12px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;border-top:1px solid var(--hair);font:10.5px var(--mono);color:var(--dim)}
 .kv b{color:var(--ink);font-weight:400;text-align:right;overflow-wrap:anywhere}
 .kv.none b{color:var(--dim)}
-.tree{margin-top:12px;font:11px/1.7 var(--mono);color:var(--muted);max-height:128px;overflow:auto}
-.tree div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tree i{color:var(--accent);font-style:normal}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
-.tile{background:var(--panel);padding:20px 20px 22px;min-width:0}
-.tile span{display:block;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.tile strong{display:block;font:600 26px/1.2 var(--sans);letter-spacing:-.02em;margin:10px 0 4px;overflow-wrap:anywhere}
-.tile small{font:11px var(--mono);color:var(--muted)}
-.equation{font:600 18px var(--sans);color:var(--accent);letter-spacing:-.01em}
-.chart-box{background:var(--panel);border:1px solid var(--line);padding:20px 22px 8px}
-.chart-top{display:flex;justify-content:space-between;gap:14px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.chart{display:block;margin-top:6px;overflow:visible}
-.chart text{font:10px var(--mono);fill:var(--dim)}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 0;font:11px var(--mono);color:var(--dim)}
-.toolbar select{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:8px 10px;font:11px var(--mono);min-height:38px}
-.rows{margin-top:14px;border-top:1px solid var(--line)}
-.row{width:100%;display:grid;grid-template-columns:74px 1fr 96px 84px 84px;align-items:center;gap:16px;background:none;border:0;border-bottom:1px solid var(--hair);padding:15px 6px;text-align:left}
-.row:hover{background:var(--raised)}
-.row .hash{font:11px var(--mono);color:var(--accent)}
-.row .subject{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .when{font:11px var(--mono);color:var(--dim)}
-.row .delta{font:11px var(--mono);color:var(--muted);text-align:right}
-.row .total{font:600 15px var(--sans);text-align:right}
-.row.is-latest .subject:after{content:'LATEST';font:9px var(--mono);letter-spacing:.12em;color:var(--accent);margin-left:10px}
-.empty{padding:26px 6px;color:var(--dim);font-size:13px}
-.facts{display:grid;grid-template-columns:1fr 1fr;gap:24px 40px}
-.facts p{font-size:12px;color:var(--muted)}
-.facts code{font:11px var(--mono);color:var(--muted);overflow-wrap:anywhere}
-.foot{margin:60px 0 0;border-top:1px solid var(--line);padding:22px 0 40px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font:10px/1.8 var(--mono);color:var(--dim)}
-.foot .id{max-width:70%;overflow-wrap:anywhere}
-dialog{border:1px solid var(--line);border-top:2px solid var(--accent);background:var(--panel);color:var(--ink);padding:26px;max-width:min(520px,calc(100% - 32px))}
-dialog::backdrop{background:#070a0fcc}
-dialog header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
-dialog h2{font:600 20px var(--sans);margin:10px 0;overflow-wrap:anywhere}
-.dialog-figure{font:700 40px var(--sans);letter-spacing:-.03em;margin:8px 0}
+.tree{margin:12px 0 0;font:10.5px/1.65 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:140px}
+.tree b{color:var(--accent);font-weight:400}
+.chart-box{background:var(--card);border-top:2px solid var(--line);padding:18px 22px 10px}
+.chart-top{display:flex;justify-content:space-between;gap:14px;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.chart{display:block;margin-top:8px;overflow:visible}.chart text{font:10px var(--mono);fill:#8595aa}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:22px;font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.toolbar select{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:9px 11px;font:11px var(--mono);min-height:40px;text-transform:none;letter-spacing:0}
+.rows{margin-top:12px;border-top:2px solid var(--line)}
+.row{width:100%;display:grid;grid-template-columns:78px 1fr 96px 78px 86px;align-items:center;gap:16px;background:var(--card);border:0;border-bottom:1px solid var(--hair);padding:15px 14px;text-align:left}
+.row:nth-child(even){background:var(--paper)}
+.row:hover{background:var(--raised);box-shadow:inset 4px 0 var(--accent)}
+.row .hash{font:10px var(--mono);color:var(--accent)}
+.row .subject{font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .when{font:10px var(--mono);color:var(--dim)}
+.row .delta{font:10px var(--mono);color:var(--muted);text-align:right}
+.row .total{font:900 italic 19px var(--display);text-align:right}
+.row.is-latest .subject:after{content:'LATEST';font:9px var(--mono);letter-spacing:.1em;color:var(--accent);margin-left:10px}
+.empty{padding:26px 14px;color:var(--dim);font-size:13px;background:var(--card)}
+.legend{margin-top:14px;font:10px/1.8 var(--mono);color:var(--dim)}
+.foot{margin-top:52px;border-top:1px solid var(--line);padding:20px 0 40px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font:9.5px/1.8 var(--mono);color:var(--dim)}
+.foot .id{max-width:68%;overflow-wrap:anywhere}
+dialog{border:1px solid var(--line);border-top:3px solid var(--accent);background:var(--card);color:var(--ink);padding:28px;max-width:min(540px,calc(100% - 32px))}
+dialog::backdrop{background:#070b11cc}
+dialog header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}
+dialog h2{font:900 italic 26px var(--display);text-transform:uppercase;margin:10px 0;overflow-wrap:anywhere}
+.dialog-figure{font:900 italic 52px var(--display);color:var(--accent);letter-spacing:-.04em}
 .small{font-size:12px;color:var(--muted);margin-top:8px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--accent);color:#14181f;font:600 12px var(--sans);padding:12px 20px;z-index:9;max-width:90%}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--accent);color:var(--paper-ink);font:900 12px var(--sans);padding:13px 22px;z-index:9;max-width:90%}
 [hidden]{display:none!important}
-@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){
-.wrap{padding:0 18px}.tabs{gap:20px;margin-bottom:32px}.mast .wrap{height:58px}.edition{display:none}
-.cards,.tiles,.facts{grid-template-columns:1fr}.headline{gap:12px}.section{margin-top:40px}
-.row{grid-template-columns:62px 1fr 56px 70px;gap:9px;padding:14px 4px}.row .when{display:none}
-.row .total{font-size:14px}.card .sub{min-height:0}.dim-foot{font-size:10px}
+@media(max-width:1040px){.grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:280px 1fr}.strip{grid-template-columns:repeat(3,1fr)}.strip div:nth-child(4){border-left:0}}
+@media(max-width:760px){
+.wrap{padding:0 18px}.mast .wrap{height:62px}.logo{font-size:22px}.edition{display:none}
+.hero,.total-card{grid-template-columns:1fr}.grid{grid-template-columns:1fr}
+.strip{grid-template-columns:repeat(2,1fr)}.strip div{border-left:0!important;border-top:1px solid var(--line)}
+.score-figure b{font-size:74px}.total-figure{font-size:62px}.total-card:after{display:none}
+.row{grid-template-columns:66px 1fr 58px 72px;gap:10px;padding:14px 8px}.row .when{display:none}
+.section{margin-top:34px}.tabs button{flex:1;padding:12px 10px;text-align:center}
 }
 @media print{
-body{background:#fff;color:#14181f}.tabs,.ghost,.toolbar,dialog,.toast,.banner{display:none}
-.card,.tile,.chart-box{background:#fff;border:1px solid #d5dae2}.cards,.tiles{background:#d5dae2}
-.muted,.lede,.kv,.meta,.foot,.tile small,.section-head .note{color:#4b5563}
-.section,.row,.card{break-inside:avoid}.wrap{max-width:none;padding:0 12px}
+body{background:#fff;color:#16202c}.tabs,.ghost,.toolbar,dialog,.toast,.banner{display:none}
+.hero,.panel,.card,.chart-box,.row,.empty{background:#fff;border-color:#ccd4de}.grid{background:#ccd4de}
+.total-card{background:#fff;color:#16202c;border:2px solid var(--accent)}.total-card:after{display:none}
+.kv,.dim-foot,.foot,.panel .sub,.hero-note,.strip small{color:#4b5563}
+.section,.row,.panel{break-inside:avoid}.wrap{max-width:none;padding:0 12px}
 }
 """
 
@@ -115,7 +128,8 @@ const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const current=data.current,s=current.score,m=current.summary,e=s.evidence;
-const stats=data.statistics||{},total=data.iteration,lt=data.lifetime,counts=m.event_counts||{},agent=m.agent||null,models=m.models||{};
+const stats=data.statistics||{},total=data.iteration,lt=data.lifetime,diff=data.diff;
+const counts=m.event_counts||{},agent=m.agent||null,models=m.models||{},act=m.activity||null,win=m.window||null;
 const unknown='not recorded';
 const n=x=>x===null||x===undefined?unknown:Number(x).toLocaleString('en-US',{maximumFractionDigits:1});
 const short=x=>x===null||x===undefined?unknown:Number(x)>=1e6?(Number(x)/1e6).toFixed(2)+'M':Number(x)>=1000?(Number(x)/1e3).toFixed(1)+'K':n(x);
@@ -123,60 +137,103 @@ const pct=x=>x===null||x===undefined?unknown:Math.round(Number(x)*100)+'%';
 const points=x=>x===null||x===undefined?unknown:Number(x).toFixed(1);
 const money=x=>x===null||x===undefined?unknown:'$'+Number(x).toFixed(2);
 const date=x=>new Date(x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const span=ms=>{if(ms===null||ms===undefined)return unknown;const sec=Math.round(ms/1000);
+  if(sec<90)return sec+'s';const min=Math.round(sec/60);if(min<90)return min+'m';
+  const hr=Math.floor(min/60);if(hr<48)return hr+'h '+String(min%60).padStart(2,'0')+'m';
+  return Math.floor(hr/24)+'d '+(hr%24)+'h'};
 const tokens=b=>b.tokens_complete===false?null:(b.tokens_estimated||0)+(b.tokens_measured||0);
 const basis=b=>b.tokens_complete===false?'partial capture':b.tokens_estimated?'includes estimates':'tokenizer counted';
-const share=(part,whole)=>whole?part/whole:null;
-const modelSum=field=>{let t=0;for(const b of Object.values(models)){if(b[field]===null||b[field]===undefined)return null;t+=b[field]}return t};
+const ratio=(part,whole)=>whole?part/whole:null;
+const modelSum=f=>{let t=0;for(const b of Object.values(models)){if(b[f]===null||b[f]===undefined)return null;t+=b[f]}return t};
 const modelCalls=Object.values(models).reduce((t,b)=>t+(b.calls||0),0);
-const words={S:'Almost nothing was discarded',A:'Most observed work was retained',B:'Steady retention',C:'Mixed retention',D:'Heavy rework before the commit',E:'Most observed work was discarded'};
+const observedCalls=(m.priced_calls||0)+(m.unpriced_calls||0);
+const words={S:'Almost nothing discarded',A:'Most work retained',B:'Steady retention',C:'Mixed retention',D:'Heavy rework',E:'Most work discarded'};
 document.title=current.commit.slice(0,7)+' · '+data.project+' · AI-PoW';
-if(data.demo){const b=document.createElement('div');b.className='banner';b.textContent='Demonstration data · synthetic commits, production algorithms';document.body.insertBefore(b,document.body.children[1])}
+if(data.demo){const b=document.createElement('div');b.className='banner';b.textContent='Demonstration · real commit subjects from this repository, synthetic evidence';document.body.insertBefore(b,document.body.children[1])}
 
-const kv=(name,value)=>`<div class="kv${value===null||value===undefined?' none':''}"><span>${esc(name)}</span><b>${esc(value===null||value===undefined?unknown:value)}</b></div>`;
-const card=(title,figure,unit,sub,rows,extra)=>`<article class="card"><h3>${esc(title)}</h3><p class="figure num">${esc(figure)}${unit?`<span class="unit">${esc(unit)}</span>`:''}</p><p class="sub">${esc(sub)}</p>${rows.join('')}${extra||''}</article>`;
-const tile=(label,value,hint)=>`<div class="tile"><span>${esc(label)}</span><strong class="num">${esc(value)}</strong><small>${esc(hint)}</small></div>`;
+const kv=(k,v)=>`<div class="kv${v===null||v===undefined?' none':''}"><span>${esc(k)}</span><b>${esc(v===null||v===undefined?unknown:v)}</b></div>`;
+const panel=(title,figure,unit,sub,rows,extra,lead)=>`<article class="panel${lead?' lead':''}"><h3>${esc(title)}</h3><p class="figure num">${esc(figure)}${unit?`<em>${esc(unit)}</em>`:''}</p><p class="sub">${esc(sub)}</p>${(rows||[]).join('')}${extra||''}</article>`;
+const cell=(label,value,hint)=>`<div><span>${esc(label)}</span><b class="num">${esc(value)}</b><small>${esc(hint)}</small></div>`;
 
-function agentTree(){
+function tree(){
   if(!agent||!agent.graph.length)return '';
-  const parents=new Map(agent.graph);
-  const depth=node=>{let d=0,seen=new Set();while(parents.get(node)&&!seen.has(node)&&d<16){seen.add(node);node=parents.get(node);d++}return d};
-  const lines=agent.graph.slice(0,20).map(([node])=>`<div>${'&nbsp;&nbsp;&nbsp;'.repeat(depth(node))}<i>&#9492;</i> ${esc(node.slice(0,30))}</div>`);
-  if(agent.graph.length>20)lines.push('<div>&hellip;</div>');
-  return `<div class="tree">${lines.join('')}</div>`;
+  const spawned=new Set(agent.graph.map(([id])=>id)),kids=new Map(),roots=[];
+  const push=(key,id)=>{if(!kids.has(key))kids.set(key,[]);kids.get(key).push(id)};
+  for(const [id,parent] of agent.graph){
+    if(!parent)roots.push(id);
+    else if(spawned.has(parent))push(parent,id);
+    else{if(!kids.has(parent)){kids.set(parent,[]);roots.push(parent)}push(parent,id)}
+  }
+  const lines=[],seen=new Set();
+  const walk=(id,prefix,last,top)=>{
+    if(lines.length>=24||seen.has(id))return;
+    seen.add(id);
+    const label=spawned.has(id)?esc(id.slice(0,28)):esc(id.slice(0,28))+' (primary, never spawned)';
+    lines.push(top?`<b>${label}</b>`:prefix+'<b>'+(last?'└─ ':'├─ ')+'</b>'+label);
+    const children=kids.get(id)||[];
+    children.forEach((child,i)=>walk(child,top?'':prefix+(last?'   ':'│  '),i===children.length-1,false));
+  };
+  roots.forEach(id=>walk(id,'',true,true));
+  if(seen.size<agent.graph.length||agent.truncated)lines.push('… bounded by capture limits');
+  return `<div class="tree">${lines.join('\n')}</div>`;
 }
 
 function vector(){
-  const visible=tokens(m.visible_ai),output=modelSum('output_tokens');
+  const visible=tokens(m.visible_ai),output=modelSum('output_tokens'),cached=modelSum('cached_input_tokens');
   return [
-    card('Human input',short(tokens(m.human)),'tokens',`${n(m.human.messages||0)} prompts, ${basis(m.human)}.`,[
+    panel('01 / Interval',span(win?win.span_ms:null),'observed',
+      win&&win.span_ms!==null?`From the first to the last recorded event before this commit.`:'No timing was recorded for this interval.',[
+      kv('Sessions',act?n(act.sessions)+(act.sessions_truncated?'+':''):null),
+      kv('Wrapped runs',act?`${n(act.runs)} started, ${n(act.run_stops)} ended`:null),
+      kv('Non-zero exits',act?n(act.nonzero_exits):null),
+      kv('Coverage gaps',act?n(act.coverage_gaps):e.gaps===undefined?null:n(e.gaps))],null,true),
+    panel('02 / Human input',short(tokens(m.human)),'tokens',
+      `${n(m.human.messages||0)} prompts, ${basis(m.human)}.`,[
       kv('Linked to observed edits',`${n(e.human.linked_prompts)} / ${n(e.human.prompts)} prompts`),
-      kv('Attribution',e.human.attribution)]),
-    card('AI visible output',short(visible),'tokens',`${n(m.visible_ai.events||0)} messages a person had to read.`,[
+      kv('Attribution',e.human.attribution),
+      kv('Average per prompt',m.human.messages?short(Math.round((tokens(m.human)||0)/m.human.messages))+' tokens':null),
+      ...Object.entries(m.human.methods||{}).slice(0,2).map(([method,b])=>kv(method,`${n(b.events)} events`)),
+      kv('Events without a token count',m.human.unknown_token_events===undefined?null:n(m.human.unknown_token_events))]),
+    panel('03 / AI visible output',short(visible),'tokens',
+      `${n(m.visible_ai.events||0)} messages a person had to read.`,[
       kv('Model output tokens',short(output)),
-      kv('Share shown to the reader',output&&visible!==null?pct(share(visible,output)):null)]),
-    card('Machine work',m.priced_calls?money(m.reference_usd_known_subtotal):unknown,m.priced_calls?'reference':'',
-      `${n(m.priced_calls)} of ${n((m.priced_calls||0)+(m.unpriced_calls||0))} observed calls priced at list rates, not the amount paid.`,[
-      kv('Model calls',n(modelCalls)),kv('Input tokens',short(modelSum('input_tokens'))),
-      kv('Output tokens',short(output)),kv('Of which reasoning',short(modelSum('reasoning_tokens'))),
-      ...Object.entries(models).slice(0,3).map(([name,b])=>kv(name,`${n(b.calls)} calls`))]),
-    card('Agent architecture',n(counts['tool.call']||0),'tool calls',
+      kv('Share shown to the reader',output&&visible!==null?pct(ratio(visible,output)):null),
+      kv('Average per message',m.visible_ai.events&&visible!==null?short(Math.round(visible/m.visible_ai.events))+' tokens':null),
+      kv('Events without a token count',m.visible_ai.unknown_token_events===undefined?null:n(m.visible_ai.unknown_token_events)),
+      kv('Counting basis',basis(m.visible_ai))]),
+    panel('04 / Machine work',m.priced_calls?money(m.reference_usd_known_subtotal):unknown,m.priced_calls?'reference':'',
+      `${n(m.priced_calls)} of ${n(observedCalls)} observed calls priced at list rates.`,[
+      kv('Actually paid',m.actual_priced_calls?money(m.actual_usd_known_subtotal):null),
+      kv('Model calls',n(modelCalls)),
+      kv('Input tokens',short(modelSum('input_tokens'))),
+      kv('Of which cache reads',short(cached)),
+      kv('Output tokens',short(output)),
+      kv('Of which reasoning',short(modelSum('reasoning_tokens'))),
+      ...Object.entries(models).slice(0,3).map(([name,b])=>kv(name.split('/')[0],`${n(b.calls)} calls`))]),
+    panel('05 / Agent architecture',n(counts['tool.call']||0),'tool calls',
       `${n((m.tools_used||[]).length)} distinct tools, ${n(counts['agent.spawn']||0)} sub-agents spawned.`,[
-      kv('Skills used',n((m.skills_used||[]).length)),kv('MCP servers',n((m.mcp_used||[]).length)),
+      kv('Failed tool results',act?n(act.failed_tool_calls):null),
+      kv('Skills / MCP servers',`${n((m.skills_used||[]).length)} / ${n((m.mcp_used||[]).length)}`),
       kv('Observed depth',agent?n(agent.max_depth):null),
-      kv('Parent links reported',agent?`${n(agent.parents_known)} / ${n(agent.nodes)}`:null),
       ...(agent?agent.tool_calls_by_name.slice(0,3).map(([name,calls])=>kv(name,n(calls))):[])],
-      agent?agentTree():'<p class="sub">Agent structure predates this proof&#39;s summary algorithm.</p>'),
-    card('Artifact work',e.artifact.operations?pct(share(e.artifact.retained,e.artifact.operations)):unknown,
+      agent?tree():'<p class="sub">Agent structure predates this proof&#39;s summary algorithm.</p>'),
+    panel('06 / Artifact work',e.artifact.operations?pct(ratio(e.artifact.retained,e.artifact.operations)):unknown,
       e.artifact.operations?'survived':'',
       `${n(e.artifact.retained)} of ${n(e.artifact.operations)} observed edit operations are still in the committed tree.`,[
       kv('Checked against the tree',`${n(e.artifact.checked_operations)} operations`),
-      kv('Scope',`${n(e.scope.units)} units, ${n(e.scope.files)} files`),
+      kv('Committed units / files',`${n(e.scope.units)} / ${n(e.scope.files)}`),
       kv('Capture',e.limited?'bounded by capture limits':'complete for observed files')]),
-    card('Task work',e.task.attempts?pct(share(e.task.completed,e.task.attempts)):unknown,e.task.attempts?'fulfilled':'',
+    panel('07 / Task work',e.task.attempts?pct(ratio(e.task.completed,e.task.attempts)):unknown,e.task.attempts?'fulfilled':'',
       e.task.declared?`${n(e.task.completed)} completed over ${n(e.task.attempts)} attempts on ${n(e.task.declared)} declared tasks.`
-        :'No tasks were declared for this interval, so this dimension was not scored.',[
+        :'No tasks were declared, so this dimension was not scored.',[
       kv('Re-opened attempts',e.task.declared?n(e.task.attempts-e.task.declared):null),
-      kv('Basis',e.task.basis)])
+      kv('Basis',e.task.basis)]),
+    panel('08 / Proof',data.demo?'demo':data.verification.integrity_verified?'checked':'unchecked','',
+      'Hash-chained trace bound to this commit, its tree and its parents.',[
+      kv('Score algorithm',s.algorithm),kv('Accounting',m.algorithm||'observed-v1'),
+      kv('Events in interval',n(counts&&Object.values(counts).reduce((t,v)=>t+v,0))),
+      kv('Trust','local, self-reported')],
+      `<div class="tree">${esc(current.proof_hash)}</div>`)
   ].join('');
 }
 
@@ -184,10 +241,9 @@ function dimensions(){
   const notes={human:'Temporal attribution proxy',artifact:'Compared with the committed tree',task:'Declared tasks with committed evidence'};
   return Object.entries(s.components).map(([key,c])=>{
     const used=Number(c.effective_weight??c.weight),nominal=Number(c.weight);
-    const scored=used>0;
-    return `<div class="dim"><div class="dim-top"><span class="dim-name">${esc(c.label)}</span><span class="dim-val num">${c.ratio===null?'<span class="unit">no evidence</span>':pct(c.ratio)}</span></div>
-    <div class="bar"><span style="width:${scored?Math.round(Number(c.quality)*100):0}%"></span></div>
-    <div class="dim-foot"><span>${esc(notes[key]||'')}</span><span>${scored?`weight ${Math.round(used*100)}%${Math.abs(used-nominal)>.001?` (${Math.round(nominal*100)}% ceded up)`:''} · evidence ${pct(c.confidence)}`:'not scored, weight ceded to the observed dimensions'}</span></div></div>`;
+    return `<div class="dim"><div class="dim-top"><span class="dim-name">${esc(c.label)}</span><span class="dim-val num">${c.ratio===null?'<em class="eyebrow">no evidence</em>':pct(c.ratio)}</span></div>
+    <div class="bar"><i style="width:${used>0?Math.round(Number(c.quality)*100):0}%"></i></div>
+    <div class="dim-foot"><span>${esc(notes[key]||'')}</span><span>${used>0?`weight ${Math.round(used*100)}%${Math.abs(used-nominal)>.001?` (${Math.round(nominal*100)}% + ceded)`:''} · evidence ${pct(c.confidence)}`:'not scored · weight ceded to the observed dimensions'}</span></div></div>`;
   }).join('');
 }
 
@@ -197,13 +253,13 @@ function chart(){
   const rows=[...data.history].reverse().filter(p=>p.iteration).concat([{...current,iteration:total}]);
   const values=rows.map(p=>Number(p.iteration.value));
   const high=Math.max(100,Math.ceil((Math.max(...values)*1.15)/50)*50);
-  const w=host.clientWidth,h=210,left=Math.min(56,w/5),right=14,top=16,bottom=30;
+  const w=host.clientWidth,h=220,left=Math.min(58,w/5),right=14,top=16,bottom=30;
   const x=i=>left+(w-left-right)*i/Math.max(1,rows.length-1),y=v=>top+(h-top-bottom)*(1-v/high);
   let svg=`<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Cumulative project score across ${rows.length} recorded commits">`;
-  for(let i=0;i<=2;i++){const v=high*i/2;svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v)}" y2="${y(v)}" stroke="#273040"/><text x="0" y="${y(v)+4}">${n(v)}</text>`}
-  svg+=`<polyline points="${rows.map((p,i)=>x(i)+','+y(Number(p.iteration.value))).join(' ')}" fill="none" stroke="#ff9c31" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+  for(let i=0;i<=2;i++){const v=high*i/2;svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v)}" y2="${y(v)}" stroke="#2a3543"/><text x="0" y="${y(v)+4}">${n(v)}</text>`}
+  svg+=`<polyline points="${rows.map((p,i)=>x(i)+','+y(Number(p.iteration.value))).join(' ')}" fill="none" stroke="#ff9c31" stroke-width="2.5"/>`;
   rows.forEach((p,i)=>{const last=i===rows.length-1;
-    svg+=`<circle cx="${x(i)}" cy="${y(Number(p.iteration.value))}" r="${last?5:3}" fill="${last?'#ff9c31':'#5c6a7e'}"><title>${esc(p.commit.slice(0,7)+' · total '+points(p.iteration.value))}</title></circle>`;
+    svg+=`<circle cx="${x(i)}" cy="${y(Number(p.iteration.value))}" r="${last?6:3.5}" fill="${last?'#ff9c31':'#6f8098'}"><title>${esc(p.commit.slice(0,7)+' · total '+points(p.iteration.value))}</title></circle>`;
     if(i===0||last)svg+=`<text x="${x(i)}" y="${h-8}" text-anchor="${last?'end':'start'}">${last?'LATEST':esc(p.commit.slice(0,7))}</text>`});
   host.innerHTML=svg+'</svg>';
 }
@@ -215,8 +271,7 @@ function journal(){
   const rows=[{...current,iteration:total,latest:true},...data.history].filter(p=>grade==='all'||p.score?.grade===grade);
   $('#journal').innerHTML=rows.length?rows.map(p=>`<button class="row${p.latest?' is-latest':''}" data-commit="${esc(p.commit)}">
     <span class="hash">${esc(p.commit.slice(0,7))}</span><span class="subject">${esc(p.title)}</span>
-    <span class="when">${esc(date(p.date))}</span>
-    <span class="delta">${p.score?'+'+points(p.score.value):'no proof'}</span>
+    <span class="when">${esc(date(p.date))}</span><span class="delta">${p.score?'+'+points(p.score.value):'no proof'}</span>
     <span class="total num">${p.iteration?points(p.iteration.value):'—'}</span></button>`).join('')
     :'<p class="empty">No recorded commit matches this filter.</p>';
   document.querySelectorAll('.row').forEach(b=>b.addEventListener('click',()=>inspect(rows.find(p=>p.commit===b.dataset.commit))));
@@ -225,7 +280,7 @@ function journal(){
 function inspect(p){
   $('#dialog-body').innerHTML=`<span class="eyebrow">${esc(p.commit.slice(0,10))} · ${esc(date(p.date))}</span><h2>${esc(p.title)}</h2>
   <p class="dialog-figure num">${p.iteration?points(p.iteration.value):'—'}</p>
-  <p class="small">Project total after this commit${p.score?`, including its contribution of ${points(p.score.value)}`:'. No AI-PoW proof was recorded for this commit, so it added nothing.'}</p>
+  <p class="small">Project total after this commit${p.score?`, including its contribution of ${points(p.score.value)}.`:'. No AI-PoW proof was recorded for it, so it added nothing.'}</p>
   ${p.score?`<p class="small">Commit score ${esc(p.score.value)} (${esc(p.score.grade)}) · ${esc(p.score.cohort)} scope · ${pct(p.score.confidence)} evidence · ${esc(p.score.algorithm)}</p>`:''}`;
   $('#commit-dialog').showModal();
 }
@@ -237,42 +292,47 @@ $('#content').innerHTML=`
 </div>
 <section id="view-latest" hidden>
   <div class="hero">
-    <p class="eyebrow">Latest recorded commit</p>
-    <h1>${esc(current.title)}</h1>
-    <div class="headline"><span class="big num">${esc(s.value)}</span><span class="over">/ 100</span>
-      <span class="grade">${esc(s.grade)}</span><span class="pill">${s.status==='provisional'?'Provisional · limited evidence':'Established evidence'}</span></div>
-    <div class="bar"><span style="width:${Number(s.value)}%"></span></div>
-    <p class="lede">${esc(words[s.grade]||'')}. This is a retention score: how much of the observed work survived into the commit. Resource use is recorded below but never scored, and nothing here judges whether the code is correct.</p>
-    <dl class="meta"><dd><button class="copy" id="copy-commit" title="Copy the full commit hash">${esc(current.commit.slice(0,10))}</button></dd>
-      <dd>${esc(date(current.date))}</dd><dd><b>scope</b> ${esc(s.cohort)}, ${n(e.scope.units)} units</dd>
-      <dd><b>algorithm</b> ${esc(s.algorithm)}</dd>
-      <dd><b>scored on</b> ${s.dimensions?n(s.dimensions.scored.length)+' of '+n(s.dimensions.scored.length+s.dimensions.unscored.length)+' dimensions':'—'}</dd></dl>
+    <div class="score">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="eyebrow">AI-PoW score</span><span class="status">${s.status==='provisional'?'provisional':'established'}</span></div>
+        <p class="score-figure"><b class="num">${esc(s.value)}</b><span>/ 100</span></p>
+        <div class="grade-row"><span class="grade">${esc(s.grade)}</span><span class="grade-word">${esc(words[s.grade]||'')}</span></div>
+      </div>
+      <div><div class="ticks" aria-hidden="true">${Array.from({length:20},(_,i)=>`<i class="${i<Number(s.value)/5?'on':''}"></i>`).join('')}</div>
+      <div class="scale"><span>rework</span><span>retained work</span></div></div>
+    </div>
+    <div class="hero-main">
+      <div>
+        <span class="eyebrow">${esc(data.project)} · latest recorded commit</span>
+        <h1>${esc(current.title)}</h1>
+        <p class="hero-note">Retention score for the work recorded between the previous commit and this one. Resource use below is recorded, never scored, and nothing here judges whether the code is correct.</p>
+      </div>
+      <div class="strip">
+        ${cell('Commit',current.commit.slice(0,7),date(current.date))}
+        ${cell('Diff',diff?n(diff.files)+' files':n(e.scope.files)+' files',diff?`+${n(diff.insertions)} / −${n(diff.deletions)} lines`:'line counts unavailable')}
+        ${cell('Interval',span(win?win.span_ms:null),act?`${n(act.sessions)} sessions`:'')}
+        ${cell('Human',short(tokens(m.human)),`${n(m.human.messages||0)} prompts`)}
+        ${cell('Machine',m.priced_calls?money(m.reference_usd_known_subtotal):unknown,`${n(modelCalls)} model calls`)}
+      </div>
+    </div>
   </div>
   <div class="section">
-    <div class="section-head"><h2>What the score is made of</h2><span class="note">Retention only · 40 / 40 / 20</span></div>
+    <div class="section-head"><h2>Score construction</h2><span class="note">Retention only · 40 / 40 / 20 · ${s.dimensions?esc(s.dimensions.scored.length)+' of '+esc(s.dimensions.scored.length+s.dimensions.unscored.length)+' scored':''}</span></div>
     ${dimensions()}
   </div>
   <div class="section">
-    <div class="section-head"><h2>Proof vector</h2><span class="note">Recorded facts, not a ranking</span></div>
-    <div class="cards">${vector()}</div>
-  </div>
-  <div class="section">
-    <div class="section-head"><h2>Proof</h2><span class="note">${data.demo?'Demonstration data':data.verification.integrity_verified?'Trace and Git objects checked':'Integrity not checked'}</span></div>
-    <div class="facts">
-      <div><p>The trace is hash-chained and bound to this commit, its tree and its parents. Verification recomputes the measurements, the evidence and the score from the recorded events and the committed blobs, under the algorithms this proof recorded.</p></div>
-      <div><p>Consistency is not authenticity: local records can be incomplete or fabricated, file sampling can miss rapid writes, and a declared task is a claim, not a passed test.</p>
-      <p><code>proof ${esc(current.proof_hash)}</code></p></div>
-    </div>
+    <div class="section-head"><h2>Proof vector</h2><span class="note">Recorded facts · not a ranking</span></div>
+    <div class="grid">${vector()}</div>
+    <p class="legend">Consistency is not authenticity: a local recorder can be incomplete or fabricated, file sampling can miss rapid writes, prompt attribution is temporal, and a declared task is a claim, not a passed test.</p>
   </div>
 </section>
 <section id="view-iteration" hidden>
-  ${total?`<div class="hero">
-    <p class="eyebrow">${esc(data.project)} · project total</p>
-    <div class="headline"><span class="big num">${points(total.value)}</span><span class="over">points</span></div>
-    <p class="lede">Every recorded commit score, added once and unchanged, starting from zero. ${n(total.rated_commits)} of ${n(lt?lt.commits:total.rated_commits)} commits in this history carried a sealed score.</p>
-    <p class="equation num" style="margin-top:22px">${points(total.previous)} + ${points(total.delta)} = ${points(total.value)}</p>
-    <dl class="meta"><dd><b>policy</b> ${esc(total.algorithm)}</dd><dd>no weighting, deductions, tiers or upper limit</dd>
-      <dd>average commit score ${points(stats.average)}${stats.count?` over ${n(stats.count)} earlier commits`:''}</dd></dl>
+  ${total?`<div class="total-card">
+    <div><span class="eyebrow">${esc(data.project)} · project total</span>
+      <p class="total-figure num">${points(total.value)}<small>+${points(total.delta)} THIS COMMIT</small></p>
+      <p class="total-meta">${n(total.rated_commits)} scored commits · started at 0 · ${esc(total.algorithm)}</p></div>
+    <div style="align-self:center"><p class="equation num">${points(total.previous)} + ${points(total.delta)} = ${points(total.value)}</p>
+      <p class="blurb">Every recorded commit score, added once and unchanged. No weighting, deductions, tiers or upper limit, so this total grows with the number of recorded commits.</p></div>
   </div>
   <div class="section">
     <div class="section-head"><h2>Cumulative total</h2><span class="note">First-parent history · latest last</span></div>
@@ -280,35 +340,49 @@ $('#content').innerHTML=`
   </div>
   ${lt?`<div class="section">
     <div class="section-head"><h2>Repository totals</h2><span class="note">Pooled over ${n(lt.commits)} recorded commits</span></div>
-    <div class="tiles">
-      ${tile('Human input',short(lt.human_tokens),n(lt.prompts)+' prompts')}
-      ${tile('AI visible output',short(lt.visible_tokens),n(lt.visible_events)+' messages')}
-      ${tile('Machine work',lt.priced_calls?money(lt.reference_usd_known_subtotal):unknown,n(lt.model_calls)+' model calls'+(lt.reference_cost_complete?'':' · known subtotal'))}
-      ${tile('Model tokens',short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens),'input + output')}
-      ${tile('Agent activity',n(lt.tool_calls),n(lt.sub_agents)+' sub-agents · '+n(lt.skills_used)+' skills')}
-      ${tile('Artifact survival',lt.artifact_operations?pct(lt.artifact_survival):unknown,n(lt.artifact_retained)+' of '+n(lt.artifact_operations)+' operations')}
-      ${tile('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment):unknown,n(lt.task_completed)+' of '+n(lt.task_attempts)+' attempts')}
-      ${tile('Recorded commits',n(lt.commits),n(lt.scored_commits)+' with a sealed score')}
+    <div class="grid">
+      ${panel('Recorded time',span(lt.span_ms),'observed',`${n(lt.timed_commits)} of ${n(lt.commits)} intervals carried timestamps.`,[
+        kv('Sessions',n(lt.sessions)),kv('Wrapped runs',n(lt.runs))],null,true)}
+      ${panel('Human input',short(lt.human_tokens),'tokens',`${n(lt.prompts)} prompts across the recorded history.`,[
+        kv('AI visible output',short(lt.visible_tokens)+' tokens'),kv('Messages read',n(lt.visible_events))])}
+      ${panel('Machine work',lt.priced_calls?money(lt.reference_usd_known_subtotal):unknown,'reference',
+        `${n(lt.model_calls)} model calls${lt.reference_cost_complete?'':', known subtotal only'}.`,[
+        kv('Actually paid',lt.actual_priced_calls?money(lt.actual_usd_known_subtotal):null),
+        kv('Model tokens',short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens)),
+        kv('Reasoning tokens',short(lt.reasoning_tokens))])}
+      ${panel('Agent activity',n(lt.tool_calls),'tool calls',`${n(lt.sub_agents)} sub-agents over the recorded history.`,[
+        kv('Failed tool results',n(lt.failed_tool_calls)),kv('Skills / MCP',`${n(lt.skills_used)} / ${n(lt.mcp_used)}`),
+        kv('Coverage gaps',n(lt.coverage_gaps))])}
+      ${panel('Artifact survival',lt.artifact_operations?pct(lt.artifact_survival):unknown,'pooled',
+        'Recomputed from pooled totals, never averaged per commit.',[
+        kv('Retained / observed',`${n(lt.artifact_retained)} / ${n(lt.artifact_operations)}`)])}
+      ${panel('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment):unknown,'pooled',
+        'Completed attempts with committed evidence.',[
+        kv('Completed / attempts',`${n(lt.task_completed)} / ${n(lt.task_attempts)}`)])}
+      ${panel('Commits',n(lt.commits),'recorded',`${n(lt.scored_commits)} carry a sealed score.`,[
+        kv('Average commit score',points(stats.average)),kv('Score algorithms',lt.algorithms.join(', ')||unknown)])}
+      ${panel('Not measured','—','','Result quality lives on a separate axis: tests, review, performance and users are outside this record.',[
+        kv('Ranking eligible','no'),kv('Quality verified','no')])}
     </div>
-    <p class="note" style="margin-top:14px;font:11px var(--mono);color:var(--dim)">Ratios are recomputed from the pooled totals, never averaged per commit. Unknown values stay unknown and are never counted as zero.</p>
+    <p class="legend">Unknown values stay unknown and are never counted as zero. Timestamps are local observation times, not authenticated execution times.</p>
   </div>`:''}
   <div class="section">
-    <div class="section-head"><h2>Recorded commits</h2><span class="note">Contribution and running total</span></div>
-    <div class="toolbar"><span>Up to 30 earlier commits</span>
-      <label>Grade <select id="grade-filter" aria-label="Filter commits by grade"><option value="all">All</option>${['S','A','B','C','D','E'].map(g=>`<option value="${g}">${g}</option>`).join('')}</select></label></div>
+    <div class="section-head"><h2>Recorded commits</h2><span class="note">Contribution · running total</span></div>
+    <div class="toolbar"><span>Latest commit and up to 30 earlier ones</span>
+      <label>Grade <select id="grade-filter" aria-label="Filter commits by grade"><option value="all">All grades</option>${['S','A','B','C','D','E'].map(g=>`<option value="${g}">${g}</option>`).join('')}</select></label></div>
     <div class="rows" id="journal"></div>
   </div>`:''}
 </section>
-<footer class="foot"><span class="id">AI-PoW · commit ${esc(current.commit)}</span><span>Process record. Not a measure of code quality.</span></footer>`;
+<footer class="foot"><span class="id">AI-PoW · ${esc(data.project)} · commit ${esc(current.commit)}</span><span>Process record. Not a measure of code quality.</span></footer>`;
 
 function setView(view){
   const iteration=view==='iteration'&&!!total;
-  // The fragment names no element on the page, so updating it never scrolls.
   $('#view-latest').hidden=iteration;
   $('#view-iteration').hidden=!iteration;
   $('#tab-latest').setAttribute('aria-pressed',String(!iteration));
   $('#tab-iteration').setAttribute('aria-pressed',String(iteration));
   if(iteration)chart();
+  // The fragment names no element on the page, so updating it never scrolls.
   try{history.replaceState(null,'','#'+(iteration?'iteration':'latest'))}catch{}
 }
 $('#tab-latest').addEventListener('click',()=>setView('latest'));
@@ -317,7 +391,6 @@ if(total){journal();$('#grade-filter').addEventListener('change',journal)}
 setView(location.hash==='#latest'?'latest':location.hash==='#iteration'?'iteration':(data.view==='iteration'&&total?'iteration':'latest'));
 $('#close-dialog').addEventListener('click',()=>$('#commit-dialog').close());
 $('#print').addEventListener('click',()=>window.print());
-$('#copy-commit').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(current.commit);notify('Commit hash copied')}catch{notify('Commit '+current.commit)}});
 function notify(message){const t=$('#toast');t.textContent=message;t.hidden=false;setTimeout(()=>{t.hidden=true},4000)}
 """
 
@@ -328,7 +401,7 @@ def render(data):
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
             + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'sha256-' + script_hash
             + '\'; style-src \'unsafe-inline\'; img-src data:; base-uri \'none\'; form-action \'none\'">'
-            + "<link rel=\"icon\" href=\"data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230f1319&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E\"><title>AI-PoW · Commit report</title><style>" + CSS + "</style></head><body>"
+            + "<link rel=\"icon\" href=\"data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230e141d&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E\"><title>AI-PoW · Commit report</title><style>" + CSS + "</style></head><body>"
             + '<a class="skip" href="#content">Skip to report</a><header class="mast"><div class="wrap"><div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW<span class="edition"> / commit report</span></div><button class="ghost" id="print">Print</button></div></header>'
             + '<main class="wrap" id="content"></main><noscript>This report requires JavaScript to display its embedded data. Use aipow report for the JSON version.</noscript>'
             + '<dialog id="commit-dialog" aria-label="Commit details"><header><span class="eyebrow">Commit</span><button class="ghost" id="close-dialog">Close</button></header><div id="dialog-body"></div></dialog><div id="toast" class="toast" role="status" hidden></div>'

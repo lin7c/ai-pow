@@ -24,8 +24,10 @@ The standalone suite covers:
 - Proofs sealed with balanced-v1/observed-v2 verifying under their own algorithms, and rejection of a proof relabelled with another or an unknown algorithm.
 - Pooled repository totals: ratios recomputed from pooled quantities rather than averaged, unknown values never counted as zero.
 - Agent-structure reduction: parent links, depth, per-tool counts, node/name bounds, repeated spawns, and reported parent cycles.
+- Interval windows, session/run counting across separate id namespaces, failed tool results, non-zero exits, coverage gaps, and amounts actually paid kept separate from reference prices.
+- Commit diff statistics read from Git, and older reducers left unchanged by the newer one.
 
-The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the six proof-vector blocks, the three scored dimensions, the rendered agent structure, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
+The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the eight proof-vector panels, the three scored dimensions, the agent structure drawn as a tree, the interval and payment facts, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
 
 Run the current suite with:
 

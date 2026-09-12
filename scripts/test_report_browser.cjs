@@ -20,11 +20,12 @@ const {chromium} = require('playwright');
     // Each view carries exactly one headline: the commit score or the project total.
     assert.equal(await page.locator('#view-latest').isVisible(), false, 'iteration view hides the commit score');
     assert.equal(await page.locator('#view-iteration').isVisible(), true);
-    assert.equal(await page.locator('#view-iteration .big').count(), 1);
+    assert.equal(await page.locator('#view-iteration .total-figure').count(), 1);
+    assert.equal(await page.locator('#view-iteration .score-figure').count(), 0, 'no commit score here');
     assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
     assert.equal(await page.locator('.row').count(), 7, 'latest commit plus its history');
     assert.equal(await page.locator('.row.is-latest').count(), 1);
-    assert.equal(await page.locator('.tile').count(), 8);
+    assert.equal(await page.locator('#view-iteration .panel').count(), 8, 'pooled repository totals');
 
     const totals = await page.evaluate(() => {
       const d = JSON.parse(document.querySelector('#report-data').textContent);
@@ -50,10 +51,17 @@ const {chromium} = require('playwright');
     await page.locator('#tab-latest').click();
     assert.equal(await page.locator('#view-iteration').isVisible(), false, 'latest view hides the project total');
     assert.equal(await page.locator('#view-latest').isVisible(), true);
-    assert.equal(await page.locator('#view-latest .big').count(), 1);
-    assert.equal(await page.locator('.card').count(), 6, 'six proof-vector cards');
+    assert.equal(await page.locator('#view-latest .score-figure').count(), 1);
+    assert.equal(await page.locator('#view-latest .total-figure').count(), 0, 'no project total here');
+    assert.equal(await page.locator('#view-latest .panel').count(), 8, 'proof vector plus proof identity');
     assert.equal(await page.locator('.dim').count(), 3, 'retention-v2 scores three dimensions');
-    assert.ok(await page.locator('.tree div').count() > 0, 'agent structure is drawn');
+    assert.equal(await page.locator('.strip div').count(), 5, 'commit, diff, interval, human, machine');
+    const tree = await page.locator('#view-latest .tree').first().textContent();
+    assert.ok(/├─|└─/.test(tree), 'the agent structure is drawn as a tree');
+    assert.ok(!/…/.test(tree), 'no truncation marker when nothing was truncated');
+    const facts = await page.locator('#view-latest').textContent();
+    for (const label of ['Interval', 'Actually paid', 'Failed tool results', 'Sessions', 'Of which cache reads'])
+      assert.ok(facts.includes(label), `the vector shows ${label}`);
     if (process.env.REPORT_SCREENSHOT) await page.screenshot({path: process.env.REPORT_SCREENSHOT, fullPage: true});
 
     for (const width of [375, 720, 1024]) {

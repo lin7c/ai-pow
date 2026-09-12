@@ -13,6 +13,7 @@ from decimal import Decimal, localcontext
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shlex
 import signal
@@ -25,7 +26,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.4.1"
+APP_VERSION = "0.5.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -268,7 +269,10 @@ def _agent_block(agents, tools):
             "truncated": agents["truncated"] or len(ranked) > MAX_TOOL_NAMES}
 
 
-def summary(events, algorithm="observed-v3"):
+MAX_SESSIONS = 512
+
+
+def summary(events, algorithm="observed-v4"):
     """Keep unknown totals null and make byte estimates stream-chunk invariant.
 
     Retain the original reducers for verification of proofs created before the
@@ -278,10 +282,14 @@ def summary(events, algorithm="observed-v3"):
         with localcontext() as ctx:
             ctx.prec = 28
             return _summary_v1(events)
-    if algorithm not in {"observed-v2", "observed-v3"}:
+    if algorithm not in {"observed-v2", "observed-v3", "observed-v4"}:
         raise ValueError("Unsupported summary algorithm")
     agents = {"parent": {}, "order": [], "spawns": 0, "stops": 0, "truncated": False}
     tool_names = {}
+    window = {"first_ms": None, "last_ms": None}
+    activity = {"runs": 0, "run_stops": 0, "failed_tool_calls": 0, "gaps": 0,
+                "nonzero_exits": 0, "sessions": set(), "truncated": False}
+    paid = {"total": Decimal(0), "calls": 0}
     text = {kind: {"events": 0, "methods": {}, "unknown_token_events": 0}
             for kind in ("human.message", "assistant.visible")}
     missing, prices, calls = {}, {}, {}
@@ -303,6 +311,26 @@ def summary(events, algorithm="observed-v3"):
                         bucket["tokens"] = (bucket["bytes"] + 3) // 4
                     else:
                         bucket["tokens"] += tokens
+            when = event.get("time_ms")
+            if type(when) is int:
+                window["first_ms"] = when if window["first_ms"] is None else min(window["first_ms"], when)
+                window["last_ms"] = when if window["last_ms"] is None else max(window["last_ms"], when)
+            # Session and run ids are separate namespaces; never pool them.
+            session = data.get("session_id")
+            if isinstance(session, str) and session:
+                if len(activity["sessions"]) < MAX_SESSIONS:
+                    activity["sessions"].add(session)
+                elif session not in activity["sessions"]:
+                    activity["truncated"] = True
+            if kind == "run.start":
+                activity["runs"] += 1
+            elif kind == "run.stop":
+                activity["run_stops"] += 1
+                activity["nonzero_exits"] += int(bool(data.get("exit_code")))
+            elif kind == "coverage.gap":
+                activity["gaps"] += 1
+            elif kind == "tool.result" and data.get("ok") is False:
+                activity["failed_tool_calls"] += 1
             if kind == "tool.call":
                 name = str(data.get("name", "unknown"))[:128]
                 tool_names[name] = tool_names.get(name, 0) + 1
@@ -327,6 +355,10 @@ def summary(events, algorithm="observed-v3"):
                 counts["priced" if priced else "unpriced"] += 1
                 if priced:
                     prices[measurement] = prices.get(measurement, Decimal(0)) + Decimal(data["reference_usd"])
+                # What was actually paid is a separate fact from the list price.
+                if data.get("actual_usd") is not None:
+                    paid["total"] += Decimal(data["actual_usd"])
+                    paid["calls"] += 1
             yield event
     with localcontext() as ctx:
         ctx.prec = 80
@@ -356,8 +388,21 @@ def summary(events, algorithm="observed-v3"):
     result["overall_score"] = None
     result["efficiency"] = None
     result["ranking_eligible"] = False
-    if algorithm == "observed-v3":
+    if algorithm in {"observed-v3", "observed-v4"}:
         result["agent"] = _agent_block(agents, tool_names)
+    if algorithm == "observed-v4":
+        first, last = window["first_ms"], window["last_ms"]
+        result["window"] = {"first_ms": first, "last_ms": last,
+                            "span_ms": None if first is None else last - first,
+                            "basis": "local-observation-times"}
+        result["activity"] = {"runs": activity["runs"], "run_stops": activity["run_stops"],
+                              "nonzero_exits": activity["nonzero_exits"],
+                              "sessions": len(activity["sessions"]),
+                              "sessions_truncated": activity["truncated"],
+                              "failed_tool_calls": activity["failed_tool_calls"],
+                              "coverage_gaps": activity["gaps"]}
+        result["actual_usd_known_subtotal"] = format(paid["total"], "f") if paid["calls"] else None
+        result["actual_priced_calls"] = paid["calls"]
     return result
 
 
@@ -625,6 +670,20 @@ class Recorder:
     def evaluate(self, db, proof):
         return evaluate_score(self.root, proof, self._events(db, proof["epoch"]))
 
+    def diff_stats(self, proof):
+        """Derived from Git, not from the proof: what the commit itself changed."""
+        try:
+            args = ("diff", "--shortstat", proof["base"], proof["commit"]) if proof["base"] else (
+                "show", "--shortstat", "--format=", proof["commit"])
+            text = git(self.root, *args).decode("utf-8", "replace")
+        except Exception:
+            return None
+        numbers = {}
+        for field, word in (("files", "file"), ("insertions", "insertion"), ("deletions", "deletion")):
+            match = re.search(r"(\d+) " + word, text)
+            numbers[field] = int(match.group(1)) if match else 0
+        return numbers
+
     def report_data(self, ref="HEAD", view="iteration"):
         from ai_pow_scoring import history_stats, ladder_step, lifetime_add, lifetime_finish, lifetime_start
         if view not in {"iteration", "latest"}:
@@ -673,6 +732,7 @@ class Recorder:
                     history[-1]["iteration"] = ratings[commit]
             return {"project": self.root.name, "view": view, "current": decorate(current), "history": history,
                     "iteration": iteration, "lifetime": lifetime_finish(totals) if totals else None,
+                    "diff": self.diff_stats(current),
                     "statistics": history_stats(current["score"], history) if view == "iteration" else None,
                     "verification": verification, "demo": False}
 

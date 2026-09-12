@@ -134,13 +134,15 @@ Iteration reports include up to 30 previous first-parent commits. Averages exclu
 
 Proofs include the algorithm, score, components, and evidence in their hash. Verification rebuilds measurements from the trace, evidence against Git blobs, and the score **under the algorithm the proof recorded** — an installed newer algorithm never reinterprets an older proof, and an unknown algorithm fails. It does not trust a supplied evidence subtotal. Scoring analyzes up to 4,096 relevant events and 128 bounded committed blobs; limits are explicit. The complete trace is still verified.
 
-Application 0.4 retains protocol 0.1. Proofs sealed with `balanced-v1` (which included a 30% resource-discipline term) keep verifying with that algorithm and are not rewritten. Accounting reducers `observed-v1` and `observed-v2` remain available for older proofs; new proofs use `observed-v3`, which adds the agent-architecture block.
+Application 0.5 retains protocol 0.1. Proofs sealed with `balanced-v1` (which included a 30% resource-discipline term) keep verifying with that algorithm and are not rewritten. Accounting reducers `observed-v1`, `observed-v2` and `observed-v3` remain available for older proofs; new proofs use `observed-v4`.
 
 ## Accounting remains separate
 
 Unknown usage totals are null with known subtotals. Estimates retain their basis. Text estimates aggregate UTF-8 bytes before rounding by four, avoiding stream-chunk inflation. Reference prices are frozen per event, use explicit decimal precision, and separate estimated from provider-reported usage. Cached input and reasoning are subsets, not extra parent-bucket tokens. Price is money, not measured intelligence or physical computation.
 
 The agent block records observed spawns, parent links where the adapter reports them, maximum observed depth, and per-tool call counts, bounded to 128 agents and 32 tool names. Adapters that do not report parent links produce a flat structure; that is a capture limit, not a claim about the run.
+
+`observed-v4` also records the interval window (first to last recorded event), the activity counts (sessions, wrapped runs, non-zero exits, failed tool results, coverage gaps) and the amount actually paid, kept separate from the reference price. The window bounds when events were written, not how long a person or a model worked.
 
 The raw summary's legacy overall_score and efficiency fields remain null for compatibility. The implemented score is at `proof.score.value`. Ranking eligibility remains false because this is not a controlled benchmark.
 

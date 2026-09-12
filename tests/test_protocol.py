@@ -289,6 +289,43 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(pow.summary(iter(repeated))["agent"]["nodes"], 1)
         self.assertFalse(pow.summary(iter(repeated))["agent"]["truncated"])
 
+    def test_interval_activity_and_payment_are_reduced(self):
+        def item(kind, when, **payload):
+            return {"type": kind, "time_ms": when, "data": payload}
+        events = [item("run.start", 1000, run_id="r1", session_id="s1", command="laintas-cli"),
+                  item("human.message", 2000, tokens=12, token_method="tokenizer", session_id="s1"),
+                  item("model.usage", 3000, model="m", measurement="provider_reported",
+                       input_tokens=10, output_tokens=4, actual_usd="0.75"),
+                  item("tool.call", 4000, name="shell"), item("tool.result", 5000, name="shell", ok=False),
+                  item("coverage.gap", 6000, reason="scan_exclusions_or_limits"),
+                  item("run.stop", 905000, run_id="r1", exit_code=2)]
+        totals = pow.summary(iter(events))
+        self.assertEqual(totals["window"]["span_ms"], 904000)
+        self.assertEqual(totals["activity"], {"runs": 1, "run_stops": 1, "nonzero_exits": 1, "sessions": 1,
+                                              "sessions_truncated": False, "failed_tool_calls": 1,
+                                              "coverage_gaps": 1})
+        self.assertEqual(totals["actual_usd_known_subtotal"], "0.75")
+        self.assertEqual(totals["actual_priced_calls"], 1)
+        # Run ids never inflate the session count, and older reducers stay unchanged.
+        self.assertEqual(pow.summary(iter(events))["activity"]["sessions"], 1)
+        for algorithm in ("observed-v2", "observed-v3"):
+            self.assertNotIn("window", pow.summary(iter(events), algorithm=algorithm))
+            self.assertNotIn("actual_usd_known_subtotal", pow.summary(iter(events), algorithm=algorithm))
+        empty = pow.summary(iter([]))
+        self.assertEqual(empty["window"]["span_ms"], None)
+        self.assertIsNone(empty["actual_usd_known_subtotal"])
+
+    def test_commit_diff_stats_come_from_git(self):
+        self.commit("one\ntwo\nthree\n")
+        self.rec.seal()
+        (self.root / "app.txt").write_text("one\n")
+        self.rec.sample()
+        self.git("add", "app.txt")
+        self.git("commit", "-qm", "trim")
+        proof = self.rec.seal()
+        self.assertEqual(self.rec.diff_stats(proof), {"files": 1, "insertions": 0, "deletions": 2})
+        self.assertEqual(self.rec.report_data()["diff"], {"files": 1, "insertions": 0, "deletions": 2})
+
     def test_sealed_agent_structure_verifies(self):
         self.rec.record("agent.spawn", {"agent_id": "worker", "parent_agent_id": "main"}, "test")
         self.rec.record("tool.call", {"name": "shell", "call_id": "1"}, "test")

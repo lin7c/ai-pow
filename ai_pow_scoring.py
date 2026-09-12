@@ -252,7 +252,10 @@ def lifetime_start():
             "tool_calls": 0, "sub_agents": 0, "skills": set(), "mcp": set(),
             "artifact_operations": 0, "artifact_retained": 0,
             "task_attempts": 0, "task_completed": 0, "priced_calls": 0,
-            "unpriced_calls": 0, "cost": Decimal(0), "algorithms": set()}
+            "unpriced_calls": 0, "cost": Decimal(0), "algorithms": set(),
+            "span_ms": 0, "timed_commits": 0, "sessions": 0, "runs": 0,
+            "failed_tool_calls": 0, "coverage_gaps": 0,
+            "paid": Decimal(0), "actual_priced_calls": 0}
 
 
 def lifetime_add(totals, proof):
@@ -278,10 +281,19 @@ def lifetime_add(totals, proof):
     totals["mcp"].update(metrics.get("mcp_used") or [])
     totals["priced_calls"] += metrics.get("priced_calls") or 0
     totals["unpriced_calls"] += metrics.get("unpriced_calls") or 0
-    if metrics.get("reference_usd_known_subtotal") is not None:
-        with localcontext() as context:
-            context.prec = 50
+    window, activity = metrics.get("window") or {}, metrics.get("activity") or {}
+    if window.get("span_ms") is not None:
+        totals["span_ms"] += window["span_ms"]
+        totals["timed_commits"] += 1
+    for field in ("sessions", "runs", "failed_tool_calls", "coverage_gaps"):
+        totals[field] += activity.get(field) or 0
+    totals["actual_priced_calls"] += metrics.get("actual_priced_calls") or 0
+    with localcontext() as context:
+        context.prec = 50
+        if metrics.get("reference_usd_known_subtotal") is not None:
             totals["cost"] += Decimal(metrics["reference_usd_known_subtotal"])
+        if metrics.get("actual_usd_known_subtotal") is not None:
+            totals["paid"] += Decimal(metrics["actual_usd_known_subtotal"])
     result = proof.get("score")
     if not result:
         return totals
@@ -305,8 +317,9 @@ def lifetime_finish(totals):
     def ratio(kept, observed):
         return None if not observed else format(kept / observed, ".4f")
     result = {key: value for key, value in totals.items()
-              if key not in {"skills", "mcp", "cost", "algorithms"}}
+              if key not in {"skills", "mcp", "cost", "paid", "algorithms"}}
     result.update(skills_used=len(totals["skills"]), mcp_used=len(totals["mcp"]),
+                  actual_usd_known_subtotal=format(totals["paid"], "f") if totals["actual_priced_calls"] else None,
                   reference_usd_known_subtotal=format(totals["cost"], "f") if totals["priced_calls"] else None,
                   reference_cost_complete=bool(totals["priced_calls"]) and not totals["unpriced_calls"],
                   artifact_survival=ratio(totals["artifact_retained"], totals["artifact_operations"]),
