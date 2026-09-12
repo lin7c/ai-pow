@@ -25,7 +25,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.4.1"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000

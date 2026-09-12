@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-pow"
-version = "0.4.0"
+version = "0.4.1"
 description = "Local, bounded AI work provenance bound to Git commits"
 readme = "README.md"
 license = {file = "LICENSE"}

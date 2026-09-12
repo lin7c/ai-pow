@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1
+
+- Rebuild the report around one headline per view: the latest-commit view shows the 0-100 commit score, the iteration view shows the cumulative project total, and neither shows the other.
+- Calmer layout: a single accent, restrained type, clearer section titles, and labels that state what each number is and is not.
+- Fix a fragment/id collision that scrolled the page past its own header on load.
+- Draw the cumulative chart at pixel size so axis labels stay legible on narrow screens, and keep each commit's contribution visible there.
+- Show one decimal on every score that feeds the sum, so the reported arithmetic matches the displayed numbers.
+
 ## 0.4.0
 
 - Make the proof vector the body of the report: human input, AI visible output, machine work, agent architecture, artifact work and task work, each with its own recorded quantities.

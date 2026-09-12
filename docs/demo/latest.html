@@ -1,104 +1,314 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tBDz3jJpouSPKCIatTI9yu/Pj7tuHZ2q6SVyRaJPYec='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%23101620&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Commit report</title><style>
-:root{--paper:#171d29;--card:#242d3c;--ink:#f5f7fa;--muted:#b1bfd0;--line:#455164;--accent:#ff9c31;--deep:#ffac4d;--mono:'Liberation Mono',Consolas,monospace;--sans:'Lato','Trebuchet MS',sans-serif;--display:'Lato','Arial Narrow',sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 var(--sans);background-image:linear-gradient(120deg,transparent 62%,#ffffff03 62%,#ffffff03 79%,transparent 79%)}button,select{font:inherit;color:inherit;min-height:44px}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #61cfff;outline-offset:4px}a{color:inherit}.wrap{max-width:1320px;margin:auto;padding:0 48px}.skip{position:absolute;top:-90px;left:20px;background:#fff;color:#171d29;padding:12px;z-index:10}.skip:focus{top:10px}
-.mast{background:#101620;border-bottom:3px solid var(--accent)}.mast .wrap{height:78px;display:flex;justify-content:space-between;align-items:center;gap:20px}.logo{display:flex;gap:15px;align-items:center;font:900 italic 30px var(--display);letter-spacing:-1px}.mark{display:flex;gap:4px;transform:skew(-16deg)}.mark i{width:9px;height:27px;background:var(--accent)}.mark i:last-child{height:19px;align-self:end;background:#fff}.edition{font:10px var(--mono);letter-spacing:1.5px;color:var(--muted)}.top-actions{display:flex;align-items:center;gap:22px}.quiet{background:transparent;border:1px solid #66758c;padding:8px 17px;text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:1px}.quiet:hover{background:#344155;border-color:#fff}
-.modebar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:30px 0}.breadcrumb{color:var(--muted);font:11px var(--mono);max-width:45%;overflow-wrap:anywhere}.breadcrumb strong{color:var(--ink)}.switch{display:flex;gap:5px}.switch button{border:0;background:#303b4d;padding:12px 23px;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.7px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}.switch button[aria-pressed=true]{background:var(--accent);color:#171d29}.switch button:disabled{opacity:.4;cursor:default}
-.intro{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px;gap:20px}.eyebrow,.label{font:11px var(--mono);letter-spacing:1.4px;text-transform:uppercase}.eyebrow{color:var(--muted)}.live{font:10px var(--mono);text-transform:uppercase;color:#b6d8ed;display:flex;align-items:center;gap:8px}.live:before{content:'';width:6px;height:6px;background:#7fe0ff}
-.hero{display:grid;grid-template-columns:330px 1fr;background:#242e3e;min-height:350px;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,0 100%);position:relative}.hero:after{content:'';position:absolute;right:0;bottom:0;width:130px;height:5px;background:var(--accent)}.score-panel{background:#eef2f5;color:#202938;padding:28px 30px 25px;border-top:5px solid var(--accent);position:relative}.score-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.score-top .label{font-size:10px}.pill{font:9px var(--mono);text-transform:uppercase;border:1px solid currentColor;padding:4px 7px;letter-spacing:.4px}.score-number{font:900 italic 108px/1.15 var(--display);letter-spacing:-7px;margin:20px 0 8px;font-variant-numeric:tabular-nums;white-space:nowrap}.score-number small{font:14px var(--mono);letter-spacing:0;margin-left:8px;color:#596579}.grade-line{display:flex;align-items:center;gap:12px}.grade{background:#26344a;color:#fff;display:inline-grid;place-items:center;min-width:31px;height:31px;font:900 italic 20px var(--display)}.grade-label{font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.5px}.scale{display:flex;gap:3px;margin-top:25px}.scale span{height:7px;background:#c2cad4;flex:1;transform:skew(-20deg)}.scale .on{background:#ed8a1c}.scale-caption{display:flex;justify-content:space-between;font:8px var(--mono);margin-top:9px;color:#526074}.hero-compare{font-size:10px;margin-top:18px;color:#465369}.hero-compare strong{font-weight:900;color:#26344a}
-.hero-copy{padding:35px 44px 26px;display:flex;flex-direction:column;justify-content:space-between;gap:22px;min-width:0}.hero-copy .eyebrow{color:var(--accent)}.hero-copy h1{font:900 italic clamp(32px,3.4vw,52px)/1.05 var(--display);letter-spacing:-1.8px;text-transform:uppercase;margin:14px 0 18px;max-width:750px;overflow-wrap:anywhere}.hero-copy p{font-size:12px;color:var(--muted);max-width:540px;margin:0}.commit-meta{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding-top:18px;border-top:1px solid var(--line);font:10px var(--mono);color:var(--muted)}.commit-id{border:1px solid #728197;background:transparent;padding:7px 12px;font:11px var(--mono);color:#fff;max-width:100%;overflow-wrap:anywhere}
-.ladder-card{display:grid;grid-template-columns:1fr 1fr;background:#f4a33c;color:#182333;margin:10px 0 0;padding:22px 32px;gap:25px;position:relative;overflow:hidden}.ladder-card:after{content:'Σ';position:absolute;right:27px;top:-30px;font:900 italic 180px/1 var(--display);opacity:.075;pointer-events:none}.ladder-card .eyebrow{color:#293548;font-weight:bold}.ladder-number{font:900 italic 66px/1.05 var(--display);letter-spacing:-3px;margin:8px 0 4px;overflow-wrap:anywhere}.ladder-number small{font:900 15px var(--sans);letter-spacing:0;display:inline-block;margin-left:22px}.ladder-count{font:10px var(--mono);text-transform:uppercase;letter-spacing:1px}.ladder-context{align-self:center;position:relative;z-index:1}.ladder-context .equation{font:900 italic 22px var(--display);letter-spacing:-.5px}.ladder-context p{font-size:11px;max-width:390px;margin:8px 0}.ladder-context .small{color:#2c3c50}
-.vector{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#141c28;margin:10px 0 0}.vblock{background:#1e2735;padding:21px 24px;border-top:2px solid #3f4d63;min-width:0}.vblock .label{display:block;color:var(--muted);font-size:9px;letter-spacing:1px}.vblock .number{display:block;font:900 italic 34px/1.35 var(--display);letter-spacing:-1px;overflow-wrap:anywhere}.vblock .number small{font:11px var(--mono);letter-spacing:0;margin-left:7px;color:var(--muted)}.vblock .hint{display:block;font-size:10px;color:var(--muted);margin-bottom:9px;overflow-wrap:anywhere}.vrow{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font:10px var(--mono);color:var(--muted);padding:6px 0;border-top:1px solid #33405366}.vrow b{color:var(--ink);font-weight:700;text-align:right;overflow-wrap:anywhere}.vrow.unknown b{color:#8f9fb4}.tree{font:10px var(--mono);color:var(--muted);margin-top:10px;max-height:132px;overflow:auto}.tree div{padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tree b{color:var(--accent);font-weight:400}.lifetime{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:#141c28;margin:16px 0 0}.lt{background:#212b3a;padding:18px 21px;min-width:0}.lt span{display:block;font:10px var(--mono);color:var(--muted);text-transform:uppercase}.lt strong{display:block;font:900 italic 28px/1.3 var(--display);overflow-wrap:anywhere}.lt small{font-size:10px;color:var(--muted)}
-.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:32px 0 14px;border-bottom:1px solid var(--line);padding-bottom:12px}.section-heading h2{font:900 italic 25px var(--display);letter-spacing:-.6px;text-transform:uppercase;margin:0}.section-heading h2:before{content:'';display:inline-block;width:6px;height:19px;background:var(--accent);transform:skew(-16deg);margin-right:12px}.note{font:10px var(--mono);color:var(--muted)}.breakdown{display:grid;grid-template-columns:1.3fr 1fr;gap:10px}.panel{padding:25px 28px;background:#222c3b;border-top:2px solid #637187}.component{padding:14px 0;border-bottom:1px solid #3a4658}.component:first-child{padding-top:0}.component:last-child{padding-bottom:0;border:0}.component-head{display:flex;justify-content:space-between;gap:15px;font-size:13px;font-weight:700}.component-head strong{font:900 italic 22px var(--display)}.weight{font:10px var(--mono);margin-left:10px;color:var(--muted)}.meter{height:4px;background:#455064;margin:9px 0}.meter span{display:block;height:100%;background:var(--accent)}.component-foot{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--muted)}.aside-title{font:900 italic 21px var(--display);text-transform:uppercase;margin:0 0 15px}.confidence{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:15px}.confidence strong{font:900 italic 42px var(--display);color:var(--accent)}.small{font-size:11px;color:var(--muted)}.evidence-line{display:flex;justify-content:space-between;gap:14px;font-size:11px;margin:14px 0}.evidence-line b{font:11px var(--mono)}.explain{font-size:11px;color:#c4cfdd;border-left:3px solid #7f95b2;padding:10px 13px;background:#2c384a;margin:16px 0 0}
-.history-stats{display:grid;grid-template-columns:repeat(4,1fr);margin:20px 0}.history-stat{padding:0 20px;border-right:1px solid var(--line)}.history-stat:first-child{padding-left:0}.history-stat:last-child{border:0}.history-stat span{display:block;font:10px var(--mono);color:var(--muted);text-transform:uppercase}.history-stat strong{font:900 italic 32px var(--display);display:block;margin:6px 0}.history-stat small{font-size:10px;color:var(--muted)}
-.chart-panel{padding:20px 25px 10px;background:#1c2533}.chart-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:10px var(--mono);color:var(--muted)}.chart-tabs{display:flex;gap:5px}.chart-tabs button{border:0;background:#334158;padding:8px 12px;font:900 10px var(--sans);letter-spacing:.5px;text-transform:uppercase}.chart-tabs button[aria-pressed=true]{color:#182333;background:var(--accent)}.chart{width:100%;height:230px;display:block;overflow:visible}.chart text{font:10px var(--mono);fill:#b1bfd0}.legend{display:flex;gap:18px;font-size:10px}.legend span:before{content:'';display:inline-block;width:7px;height:7px;background:var(--accent);margin-right:6px}.legend span:last-child:before{background:#c1cede}
-.timeline-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:25px 0 12px}.timeline-toolbar h3{font:900 italic 20px var(--display);text-transform:uppercase;margin:0}.filters{display:flex;gap:12px}.filters select{border:1px solid #5c6b82;background:#263247;padding:7px 10px;font-size:11px;max-width:160px}.history-list{border-top:2px solid #7b8a9f}.history-row{width:100%;display:grid;grid-template-columns:80px 1fr 95px 100px 28px;align-items:center;gap:16px;border:0;border-bottom:1px solid #3c485b;background:#222c3b;text-align:left;padding:17px 16px}.history-row:nth-child(even){background:#1e2735}.history-row:hover{background:#35465e;box-shadow:inset 4px 0 var(--accent)}.hash{font:10px var(--mono);color:var(--accent)}.subject{font-size:12px;font-weight:700;overflow-wrap:anywhere}.date{font:10px var(--mono);color:var(--muted)}.row-score{font:900 italic 23px var(--display)}.row-rating{font:9px var(--mono);display:block;color:var(--muted);font-style:normal;white-space:nowrap}.row-grade{font:900 13px var(--sans);color:#d3deeb}.empty{padding:25px;color:var(--muted);font-size:12px;text-align:center;border:1px dashed #56647a}
-.method{border-top:1px solid var(--line);margin-top:32px;padding:14px 0}.method summary{display:flex;align-items:center;gap:12px;list-style:none;min-height:44px;cursor:pointer;font-weight:900;text-transform:uppercase;font-size:11px;letter-spacing:.6px}.method summary:before{content:'+';font:22px var(--mono);color:var(--accent)}.method[open] summary:before{content:'−'}.method-body{display:grid;grid-template-columns:1fr 1fr;gap:30px;color:var(--muted);font-size:12px;padding:12px 0}.method code{font:11px var(--mono);overflow-wrap:anywhere}.footer{border-top:1px solid var(--line);padding:22px 0 32px;display:flex;justify-content:space-between;gap:24px;color:var(--muted)}.proof{font:9px/1.6 var(--mono);max-width:65%;overflow-wrap:anywhere}.footer-brand{font:900 italic 20px var(--display);white-space:nowrap}.footer-brand .small{font:10px var(--mono)}.demo-banner{font:10px var(--mono);text-transform:uppercase;text-align:center;padding:8px 20px;background:#303a4b;color:#d1dbe8}.latest-only .history-section,.latest-only .hero-compare{display:none!important}
-dialog{border:1px solid #7e91aa;border-top:5px solid var(--accent);background:#222e40;color:var(--ink);padding:28px;max-width:min(600px,calc(100% - 32px))}dialog::backdrop{background:#060c16cc}dialog header{display:flex;justify-content:space-between;align-items:center;gap:15px}dialog h2{font:900 italic 30px var(--display);text-transform:uppercase;overflow-wrap:anywhere}dialog .dialog-score{font:900 italic 64px var(--display);color:var(--accent)}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:14px 22px;background:#f4a33c;color:#172234;font-weight:900;font-size:12px;z-index:8;max-width:90%;overflow-wrap:anywhere}[hidden]{display:none!important}
-.fade{animation:enter .35s ease-out both}@keyframes enter{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}@media(prefers-reduced-motion:reduce){.fade{animation:none}}
-@media(max-width:1000px){.wrap{padding:0 28px}.hero{grid-template-columns:290px 1fr}.score-panel{padding:23px}.score-number{font-size:96px}.hero-copy{padding:30px}.vector{grid-template-columns:repeat(2,1fr)}.lifetime{grid-template-columns:repeat(2,1fr)}.hero-copy h1{font-size:37px}}
-@media(max-width:720px){.wrap{padding:0 18px}.mast .wrap{height:68px}.edition{display:none}.logo{font-size:25px}.top-actions{gap:0}.quiet{padding:8px 11px}.modebar{flex-direction:column;align-items:stretch;gap:17px;margin:22px 0}.breadcrumb{max-width:100%}.switch button{flex:1;padding:11px 12px;font-size:12px}.intro{gap:12px;align-items:flex-start}.eyebrow,.live{font-size:9px}.hero{grid-template-columns:1fr;clip-path:none}.score-panel{padding:22px 26px}.score-number{font-size:105px;margin:8px 0}.scale{margin-top:17px}.hero-copy{padding:27px}.hero-copy h1{font-size:35px}.ladder-card{grid-template-columns:1fr;gap:15px;padding:23px 26px}.ladder-number{font-size:58px}.ladder-number small{font-size:12px;margin-left:15px}.ladder-context .equation{font-size:19px}.vector,.lifetime{grid-template-columns:1fr}.vblock{padding:18px 20px}.vblock .number{font-size:30px}.lt strong{font-size:25px}.breakdown{grid-template-columns:1fr}.panel{padding:22px}.component-foot{font-size:9px}.section-heading{align-items:flex-start}.section-heading h2{font-size:21px}.section-heading .note{max-width:40%;font-size:9px;text-align:right}.history-stats{grid-template-columns:1fr 1fr;row-gap:20px}.history-stat:nth-child(3){padding-left:0}.history-stat:nth-child(2){border:0}.chart-panel{padding:15px}.chart-top{gap:12px}.chart-tabs button{padding:7px;font-size:9px}.chart{height:180px}.legend{display:none}.timeline-toolbar{align-items:flex-start;flex-direction:column}.history-row{grid-template-columns:53px 1fr 70px 18px;gap:9px;padding:16px 10px}.history-row .date{display:none}.hash{font-size:9px}.subject{font-size:11px}.row-score{font-size:20px}.row-rating{font-size:8px}.method-body{grid-template-columns:1fr;gap:8px}.footer{flex-direction:column}.proof{max-width:100%}}
-@media print{body{background:#fff;color:#172234;-webkit-print-color-adjust:exact;print-color-adjust:exact}.mast,.hero-copy,.panel,.vector,.vblock,.lifetime,.lt,.history-list,.history-row,.method,.footer{color:#172234;background:#fff}.top-actions,.switch,.filters,.chart-tabs,dialog,.toast{display:none}.wrap{padding:0 14px;max-width:none}.hero,.panel,.history-row{break-inside:avoid}.hero-copy p,.small,.note,.component-foot,.proof,.date,.row-rating,.method-body{color:#465369}.fade{animation:none}.chart-panel{background:#222c3b}.history-stat span,.history-stat small{color:#465369}}
-</style></head><body><a class="skip" href="#content">Skip to report</a><header class="mast"><div class="wrap"><div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW<span class="edition"> / COMMIT REPORT</span></div><div class="top-actions"><span class="edition">BUILD RECORD / 04</span><button class="quiet" id="print">Print / PDF</button></div></div></header><main class="wrap" id="content"></main><noscript>This report requires JavaScript to display its embedded data. Use aipow report for the JSON version.</noscript><dialog id="commit-dialog" aria-label="Historical commit details"><header><span class="eyebrow">Commit inspection</span><button class="quiet" id="close-dialog">Close</button></header><div id="dialog-body"></div></dialog><div id="toast" class="toast" role="status" hidden></div><script id="report-data" type="application/json">{"project":"fieldwork / commerce","view":"latest","current":{"commit":"26a9fde3f4e3aa9d52636d961925e741e6593a9a","title":"Ship a calmer, more reliable checkout","date":"2026-09-07T10:30:00+00:00","score":{"algorithm":"retention-v2","value":"85.6","grade":"A","confidence":"0.8012","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.982857","quality":"0.972067","confidence":"0.977654","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.888889","confidence":"0.777778","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":172,"operations":175,"checked_operations":175},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":14,"attempts":14,"declared":14,"basis":"declared-with-committed-evidence"},"scope":{"units":87,"files":10},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"summary":{"human":{"events":40,"methods":{"tokenizer":{"tokens":4320,"bytes":0,"events":40}},"unknown_token_events":0,"messages":40,"tokens_estimated":0,"tokens_measured":4320,"tokens_complete":true,"attention_seconds":null},"visible_ai":{"events":22,"methods":{"tokenizer":{"tokens":1892,"bytes":0,"events":22}},"unknown_token_events":0,"tokens_estimated":0,"tokens_measured":1892,"tokens_complete":true,"attention_seconds":null},"models":{"example-small/provider_reported":{"calls":13,"input_tokens":67600,"output_tokens":11700,"cached_input_tokens":23400,"reasoning_tokens":3380,"cache_write_tokens":0,"unknown_fields":[],"known_token_subtotals":{"input_tokens":67600,"output_tokens":11700,"cached_input_tokens":23400,"reasoning_tokens":3380,"cache_write_tokens":0},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}},"example-large/provider_reported":{"calls":25,"input_tokens":130000,"output_tokens":22500,"cached_input_tokens":45000,"reasoning_tokens":6500,"cache_write_tokens":0,"unknown_fields":[],"known_token_subtotals":{"input_tokens":130000,"output_tokens":22500,"cached_input_tokens":45000,"reasoning_tokens":6500,"cache_write_tokens":0},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}}},"reference_usd_known_subtotal":"2.400004","priced_calls":38,"unpriced_calls":0,"tools_used":["apply_patch","mcp__docs__lookup","read_file","search","shell"],"skills_used":["frontend-design","release","review","testing"],"mcp_used":["docs"],"event_counts":{"human.message":40,"assistant.visible":22,"model.usage":38,"tool.call":73,"skill.used":4,"agent.spawn":4},"human_survival":null,"artifact_survival":null,"task_survival":null,"semantic_edits":null,"quality":null,"algorithm":"observed-v3","reference_usd_by_measurement":{"provider_reported":{"known_subtotal":"2.400004","complete_for_observed_calls":true,"priced":38,"unpriced":0}},"reference_cost_complete_for_observed_calls":true,"overall_score":null,"efficiency":null,"ranking_eligible":false,"agent":{"spawns":4,"stops":0,"nodes":4,"parents_known":3,"max_depth":3,"graph":[["planner",""],["builder","planner"],["reviewer","builder"],["tester","planner"]],"tool_calls_by_name":[["apply_patch",18],["read_file",18],["search",18],["shell",18],["mcp__docs__lookup",1]],"other_tool_calls":0,"truncated":false}},"proof_hash":"7690cc622f52d735dcd9e3b647da8466a85044e59d1bf8c0fa9818dd86bc3aa0"},"history":[],"statistics":null,"iteration":null,"lifetime":null,"verification":{"integrity_verified":false},"demo":true}</script><script>
-const data=JSON.parse(document.getElementById('report-data').textContent);
-const $=s=>document.querySelector(s),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const current=data.current,s=current.score,m=current.summary,e=s.evidence,stats=data.statistics||{},ladder=data.iteration;
-const n=x=>x===null||x===undefined?'—':Number(x).toLocaleString('en-US',{maximumFractionDigits:1});
-const short=x=>x===null||x===undefined?'—':Number(x)>=1e6?(Number(x)/1e6).toFixed(2)+'M':Number(x)>=1000?(Number(x)/1000).toFixed(1)+'K':n(x);
-const pct=x=>x===null||x===undefined?'Not observed':Math.round(Number(x)*100)+'%';
-const date=x=>new Date(x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-const words={S:'Exceptional consistency',A:'Strong process',B:'Steady progress',C:'Building momentum',D:'High iteration cost',E:'Significant rework'};
-const textTokens=b=>b.tokens_complete===false?null:(b.tokens_estimated||0)+(b.tokens_measured||0);
-const tokenLabel=b=>b.tokens_complete===false?'partial capture':b.tokens_estimated?'tokens (includes estimates)':'tokens';
-const basis=b=>b.tokens_complete===false?'partial capture':b.tokens_estimated?'includes estimates':'tokenizer counted';
-const counts=m.event_counts||{},delta=stats.delta,agent=m.agent||null,models=m.models||{},lt=data.lifetime;
-const sumModels=field=>{let total=0;for(const bucket of Object.values(models)){if(bucket[field]===null||bucket[field]===undefined)return null;total+=bucket[field]}return total};
-const modelCalls=Object.values(models).reduce((total,bucket)=>total+(bucket.calls||0),0);
-const ratio=(kept,all)=>all?kept/all:null;
-const money=x=>x===null||x===undefined?'—':'$'+Number(x).toFixed(2);
-const row=(name,value)=>`<div class="vrow${value===null||value===undefined?' unknown':''}"><span>${esc(name)}</span><b>${value===null||value===undefined?'not observed':esc(value)}</b></div>`;
-const block=(label,number,unit,hint,rows,extra)=>`<div class="vblock"><span class="label">${esc(label)}</span><span class="number">${esc(number)}${unit?`<small>${esc(unit)}</small>`:''}</span><span class="hint">${esc(hint)}</span>${rows.join('')}${extra||''}</div>`;
-function tree(){if(!agent||!agent.graph.length)return '';const parents=new Map(agent.graph);
-  const depth=node=>{let level=0,seen=new Set();while(parents.get(node)&&!seen.has(node)&&level<16){seen.add(node);node=parents.get(node);level++}return level};
-  return `<div class="tree">${agent.graph.slice(0,24).map(([node])=>`<div>${'&nbsp;&nbsp;&nbsp;'.repeat(depth(node))}<b>&#9492;&#9472;</b> ${esc(node.slice(0,32))}</div>`).join('')}${agent.graph.length>24?'<div>&hellip;</div>':''}</div>`}
-document.title=`${current.commit.slice(0,7)} · ${data.project} · AI-PoW`;
-if(data.demo){const banner=document.createElement('div');banner.className='demo-banner';banner.textContent='INTERACTIVE DEMO · Synthetic commit history, evaluated with the production scoring algorithm.';document.body.prepend(banner)}
-$('#content').innerHTML=`
-<div class="modebar"><div class="breadcrumb">Workspace / <strong>${esc(data.project)}</strong></div><div class="switch" aria-label="Report view"><button id="iteration" aria-pressed="true" ${data.view==='latest'?'disabled':''}>Iteration history</button><button id="latest" aria-pressed="false">Latest commit</button></div></div>
-<div class="intro"><span class="eyebrow">01 / Latest recorded commit</span><span class="live">${data.demo?'Demonstration data':data.verification.integrity_verified?'Trace integrity checked':'Integrity not checked'}</span></div>
-<section class="hero fade" aria-label="Current commit score"><div class="score-panel"><div class="score-top"><span class="label">AI-POW SCORE</span><span class="pill">${esc(s.status)}</span></div><div class="score-number">${esc(s.value)}<small>/ 100</small></div><div class="grade-line"><span class="grade">${esc(s.grade)}</span><span class="grade-label">${esc(words[s.grade])}</span></div><div class="scale" aria-hidden="true">${Array.from({length:20},(_,i)=>`<span class="${i<Number(s.value)/5?'on':''}"></span>`).join('')}</div><div class="scale-caption"><span>MORE REWORK</span><span>MORE RETAINED WORK</span></div><div class="hero-compare">${delta===null||delta===undefined?'Your first comparable commit.':`<strong>${delta>=0?'+':''}${n(delta)} pts</strong> vs. previous scored commit`}</div></div>
-<div class="hero-copy"><div><span class="eyebrow">Latest version / recorded</span><h1>${esc(current.title)}</h1><p>Observed work, retained changes, and resource use for this commit. Process measurements — not a code-quality verdict.</p></div><div class="commit-meta"><button class="commit-id" id="copy-commit" title="Copy full commit hash">↳ ${esc(current.commit.slice(0,10))}</button><span>${esc(date(current.date))}</span><span>${esc(s.cohort.toUpperCase())} SCOPE · ${n(e.scope.units)} units</span></div></div></section>
-${ladder?`<section class="ladder-card history-section" aria-label="Cumulative project score"><div><span class="eyebrow">Total project score</span><div class="ladder-number">${n(ladder.value)}<small>+${n(ladder.delta)} THIS COMMIT</small></div><span class="ladder-count">${n(ladder.rated_commits)} SCORED COMMITS · STARTED AT 0</span></div><div class="ladder-context"><div class="equation">${n(ladder.previous)} + ${n(ladder.delta)} = ${n(ladder.value)}</div><p>Every recorded commit score, added as-is. No extra weights, deductions, tiers, or upper limit.</p><p class="small">${esc(ladder.algorithm)} · Full recorded first-parent history.</p></div></section>`:''}
-<div class="section-heading"><h2>Proof vector</h2><span class="note">Recorded facts / not a ranking</span></div>
-<section class="vector" aria-label="Proof vector">${[
-  block('01 / HUMAN INPUT',short(textTokens(m.human)),'tokens',`${n(m.human.messages||0)} prompts · ${basis(m.human)}`,[
-    row('Prompts linked to observed edits',`${n(e.human.linked_prompts)} / ${n(e.human.prompts)}`),
-    row('Attribution',e.human.attribution)]),
-  block('02 / AI VISIBLE OUTPUT',short(textTokens(m.visible_ai)),'tokens',`${n(m.visible_ai.events||0)} messages · text a person had to read`,[
-    row('Model output tokens (internal)',short(sumModels('output_tokens'))),
-    row('Shown to the reader',sumModels('output_tokens')&&textTokens(m.visible_ai)!==null?pct(ratio(textTokens(m.visible_ai),sumModels('output_tokens'))):null)]),
-  block('03 / MACHINE WORK',m.priced_calls?money(m.reference_usd_known_subtotal):'—','reference',`${n(m.priced_calls)} priced of ${n((m.priced_calls||0)+(m.unpriced_calls||0))} observed calls · list price, not the amount paid`,[
-    row('Model calls',n(modelCalls)),
-    row('Input tokens',short(sumModels('input_tokens'))),
-    row('Output tokens',short(sumModels('output_tokens'))),
-    row('Of which reasoning',short(sumModels('reasoning_tokens'))),
-    ...Object.entries(models).slice(0,3).map(([name,bucket])=>row(name,`${n(bucket.calls)} calls`))]),
-  block('04 / AGENT ARCHITECTURE',n(counts['tool.call']||0),'tool calls',`${n((m.tools_used||[]).length)} distinct tools · ${n(counts['agent.spawn']||0)} sub-agents spawned`,[
-    row('Skills used',n((m.skills_used||[]).length)),
-    row('MCP servers',n((m.mcp_used||[]).length)),
-    row('Max observed depth',agent?n(agent.max_depth):null),
-    row('Parent links reported',agent?`${n(agent.parents_known)} / ${n(agent.nodes)}`:null),
-    ...(agent?agent.tool_calls_by_name.slice(0,4).map(([name,calls])=>row(name,n(calls))):[])],
-    agent?tree():'<p class="hint">Agent structure predates this proof&#39;s summary algorithm.</p>'),
-  block('05 / ARTIFACT WORK',e.artifact.operations?pct(ratio(e.artifact.retained,e.artifact.operations)):'—','survived',`${n(e.artifact.retained)} of ${n(e.artifact.operations)} observed edit operations are still in the committed tree`,[
-    row('Checked against the tree',n(e.artifact.checked_operations)),
-    row('Scope',`${n(e.scope.units)} units · ${n(e.scope.files)} files`),
-    row('Capture',e.limited?'bounded by capture limits':'complete for observed files')]),
-  block('06 / TASK WORK',e.task.attempts?pct(ratio(e.task.completed,e.task.attempts)):'—','fulfilled',e.task.declared?`${n(e.task.completed)} completed across ${n(e.task.attempts)} attempts on ${n(e.task.declared)} declared tasks`:'No tasks were declared for this interval.',[
-    row('Re-opened attempts',e.task.declared?n(e.task.attempts-e.task.declared):null),
-    row('Basis',e.task.basis)])
-].join("")}</section>
-<div class="section-heading"><h2>Score breakdown</h2><span class="note">Four components / fixed weights</span></div><section class="breakdown" aria-label="Score breakdown"><div class="panel">${Object.entries(s.components).map(([key,c])=>`<div class="component"><div class="component-head"><span>${esc(c.label)}<span class="weight">${Math.round(Number(c.effective_weight??c.weight)*100)}%${c.effective_weight&&Math.abs(c.effective_weight-c.weight)>.001?' of '+Math.round(Number(c.weight)*100)+'%':''}</span></span><strong>${c.ratio===null?'—':pct(c.ratio)}</strong></div><div class="meter"><span style="width:${Number(c.quality)*100}%"></span></div><div class="component-foot"><span>${key==='human'?'Temporal attribution proxy':key==='artifact'?'Compared with the committed tree':'Declared tasks with artifact evidence'}</span><span>${pct(c.confidence)} evidence</span></div></div>`).join('')}</div><aside class="panel"><h3 class="aside-title">Capture overview</h3><div class="confidence"><div><span class="small">Evidence confidence</span><br><strong>${pct(s.confidence)}</strong></div><span class="pill">${esc(s.algorithm)}</span></div><div class="evidence-line"><span>Retained artifact operations</span><b>${n(e.artifact.retained)} / ${n(e.artifact.operations)}</b></div><div class="evidence-line"><span>Inputs linked to observed edits</span><b>${n(e.human.linked_prompts)} / ${n(e.human.prompts)}</b></div><div class="evidence-line"><span>Completed / declared task attempts</span><b>${n(e.task.completed)} / ${n(e.task.attempts)}</b></div><div class="evidence-line"><span>Changed files in this commit</span><b>${n(e.scope.files)}</b></div><div class="evidence-line"><span>Dimensions scored</span><b>${s.dimensions?n(s.dimensions.scored.length)+' of '+n(s.dimensions.scored.length+s.dimensions.unscored.length):'—'}</b></div><p class="explain">${s.status==='provisional'?'This score is provisional. Sparse or missing evidence stays near a neutral 50 instead of becoming a perfect score.':'Enough evidence supports a more stable score. Additional observations still improve the reliability of the estimate.'} ${e.limited?'Some artifacts exceeded capture limits.':''} ${s.dimensions&&s.dimensions.unscored.length?'No evidence for: '+esc(s.dimensions.unscored.map(k=>(s.components[k]||{}).label||k).join(', '))+'. Their weight moved to the observed dimensions instead of diluting the result.':''}</p></aside></section>
-${lt?`<div class="section-heading history-section"><h2>Repository totals</h2><span class="note">Pooled over ${n(lt.commits)} recorded commits</span></div><section class="lifetime history-section" aria-label="Repository totals"><div class="lt"><span>Recorded commits</span><strong>${n(lt.commits)}</strong><small>${n(lt.scored_commits)} with a sealed score</small></div><div class="lt"><span>Human input</span><strong>${short(lt.human_tokens)}</strong><small>${n(lt.prompts)} prompts</small></div><div class="lt"><span>AI visible output</span><strong>${short(lt.visible_tokens)}</strong><small>${n(lt.visible_events)} messages</small></div><div class="lt"><span>Reference compute</span><strong>${lt.priced_calls?money(lt.reference_usd_known_subtotal):'—'}</strong><small>${n(lt.model_calls)} model calls${lt.reference_cost_complete?'':' · known subtotal'}</small></div><div class="lt"><span>Model tokens</span><strong>${short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens)}</strong><small>in + out</small></div><div class="lt"><span>Agent activity</span><strong>${n(lt.tool_calls)}</strong><small>${n(lt.sub_agents)} sub-agents · ${n(lt.skills_used)} skills · ${n(lt.mcp_used)} MCP</small></div><div class="lt"><span>Artifact survival</span><strong>${pct(lt.artifact_survival)}</strong><small>${n(lt.artifact_retained)} / ${n(lt.artifact_operations)} operations</small></div><div class="lt"><span>Task fulfillment</span><strong>${lt.task_attempts?pct(lt.task_fulfillment):'—'}</strong><small>${n(lt.task_completed)} / ${n(lt.task_attempts)} attempts</small></div></section><p class="note history-section">Pooled totals, not averages of per-commit percentages. Unknown values stay unknown and are never counted as zero.${lt.algorithms.length?' Score algorithms in this history: '+esc(lt.algorithms.join(', '))+'.':''}</p>`:''}
-<section class="history-section" aria-label="Iteration history"><div class="section-heading"><h2>Iteration history</h2><span class="note">Previous first-parent commits · up to 30</span></div><div class="history-stats"><div class="history-stat"><span>Average commit score</span><strong>${n(stats.average)}</strong><small>${n(stats.count||0)} prior scored commits</small></div><div class="history-stat"><span>Same-scope average</span><strong>${n(stats.peer_average)}</strong><small>${n(stats.peer_count||0)} ${esc(s.cohort)}-scope comparisons</small></div><div class="history-stat"><span>Local percentile</span><strong>${stats.percentile===null||stats.percentile===undefined?'—':n(stats.percentile)+'%'}</strong><small>${(stats.peer_count||0)<3?'Needs 3 comparable prior commits':'Within this repository and scope'}</small></div><div class="history-stat"><span>Same score grade</span><strong>${n(stats.same_grade||0)}</strong><small>Prior commits in grade ${esc(s.grade)}</small></div></div><div class="panel chart-panel"><div class="chart-top"><span id="chart-label">CUMULATIVE SCORE</span><div class="chart-tabs"><button id="chart-ladder" aria-pressed="true">Cumulative total</button><button id="chart-scores" aria-pressed="false">Commit scores</button></div><div class="legend"><span>Latest</span><span>Previous</span></div></div><div id="chart"></div></div><div class="timeline-toolbar"><h3>Recorded commits</h3><div class="filters"><label class="small">Grade <select id="grade-filter" aria-label="Filter history by grade"><option value="all">All grades</option>${['S','A','B','C','D','E'].map(g=>`<option value="${g}">Grade ${g}</option>`).join('')}</select></label><label class="small">Scope <select id="scope-filter" aria-label="Filter history by scope"><option value="all">All scopes</option><option value="same">Same scope</option></select></label></div></div><div class="history-list" id="journal"></div></section>
-<details class="method"><summary>How the score is calculated</summary><div class="method-body"><div><p><strong>The score measures retention only.</strong> Input retention, artifact survival and task fulfillment carry 40:40:20. Machine cost, tool volume and output length are recorded in the proof vector and are deliberately not scored: efficiency needs a comparable result, and this recorder cannot observe results.</p><p>Each observed ratio uses a Beta(2,2) prior, so one observation can never reach 0 or 100. A dimension with no evidence hands its weight to the observed ones and is listed as unscored.</p><p><code>score = 100 / (1 + exp(-5 × (L - 0.5)))</code></p></div><div><p><strong>L</strong> starts at 0.5 and adds each dimension&#39;s effective-weighted, confidence-adjusted deviation from 0.5. Grades: S &ge; 90, A &ge; 80, B &ge; 65, C &ge; 50, D &ge; 35, E below 35.</p><p>Same-scope comparisons exclude this commit, unscored history, and other score algorithms. Input attribution and task declarations remain local claims. The score is not a benchmark of developer ability or a security audit.</p><p><strong>Cumulative project score:</strong> starts at 0 and adds the existing score of each recorded commit exactly once, with no extra weighting or limit. <strong>Repository totals</strong> pool the raw quantities instead; their ratios are recomputed from the pooled totals, never averaged per commit.</p></div></div></details>
-<footer class="footer"><div class="proof">PROOF ${esc(current.proof_hash)}<br>Local consistency ${data.demo?'illustrated':'checked'} · execution authenticity and complete capture are not attested.</div><div class="footer-brand">AI-PoW <span class="small">/ COMMIT RECORDS</span></div></footer>`;
-function setView(view){document.body.classList.toggle('latest-only',view==='latest');$('#iteration').setAttribute('aria-pressed',String(view==='iteration'));$('#latest').setAttribute('aria-pressed',String(view==='latest'));try{history.replaceState(null,'','#'+view)}catch{}}
-$('#iteration').addEventListener('click',()=>setView('iteration'));$('#latest').addEventListener('click',()=>setView('latest'));setView(data.view==='latest'||location.hash==='#latest'?'latest':'iteration');
-let chartMode=ladder?'ladder':'scores';
-function chart(){
-  const isLadder=chartMode==='ladder';
-  const rows=isLadder?[...data.history.filter(p=>p.iteration).reverse(),{...current,iteration:ladder}]:[...data.history.filter(p=>p.score&&p.score.algorithm===s.algorithm).reverse(),current];
-  const value=p=>Number(isLadder?p.iteration?.value||0:p.score.value),values=rows.map(value);
-  const low=0,high=isLadder?Math.max(100,Math.ceil((Math.max(0,...values)+20)/100)*100):100;
-  const w=1060,h=225,left=isLadder?50:34,right=24,top=20,bottom=40,x=i=>left+(w-left-right)*i/Math.max(1,rows.length-1),y=v=>top+(h-top-bottom)*(1-(v-low)/(high-low));
-  let svg=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${isLadder?'Cumulative project score':'Individual commit scores'} across recorded commits, with latest last">`;
-  for(let v=isLadder?low:20;v<=high;v+=isLadder?Math.max(50,Math.ceil((high-low)/500)*100):20)svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v)}" y2="${y(v)}" stroke="#3a475c"/><text x="0" y="${y(v)+3}">${v}</text>`;
-  if(rows.length>1)svg+=`<polyline points="${rows.map((p,i)=>`${x(i)},${y(value(p))}`).join(' ')}" fill="none" stroke="#eb9b39" stroke-width="2.5"/>`;
-  rows.forEach((p,i)=>{const latest=i===rows.length-1;svg+=`<circle cx="${x(i)}" cy="${y(value(p))}" r="${latest?6:4}" fill="${latest?'#ffac4d':'#b7c9df'}"><title>${esc(p.commit.slice(0,7)+' · '+value(p)+' · '+p.title)}</title></circle>`;if(i===0||latest||rows.length<9)svg+=`<text x="${x(i)}" y="${h-12}" text-anchor="${latest?'end':i===0?'start':'middle'}">${latest?'LATEST':esc(p.commit.slice(0,7))}</text>`;if(latest)svg+=`<text x="${x(i)-10}" y="${y(value(p))-12}" text-anchor="end" style="fill:#ffac4d;font-weight:bold">${n(value(p))}</text>`});
-  $('#chart').innerHTML=svg+'</svg>';$('#chart-label').textContent=isLadder?'CUMULATIVE SCORE / COMMIT-SUM-V1':'COMMIT SCORE / 100';$('#chart-ladder').setAttribute('aria-pressed',String(isLadder));$('#chart-scores').setAttribute('aria-pressed',String(!isLadder));
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7L/zaDECLwC+z/UXejBUBcomnaR1OFvtqY4/nQ+NYds='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230f1319&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Commit report</title><style>
+:root{--bg:#0f1319;--panel:#161b24;--raised:#1b212c;--line:#273040;--hair:#1e2531;--ink:#eceff4;--muted:#94a0b2;--dim:#6f7c8f;--accent:#ff9c31;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+button,select{font:inherit;color:inherit}button{cursor:pointer}
+button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3,p,dl,dd{margin:0}
+.wrap{max-width:1060px;margin:0 auto;padding:0 32px}
+.skip{position:absolute;top:-90px;left:20px;background:#fff;color:#111;padding:12px;z-index:10}.skip:focus{top:10px}
+.num{font-variant-numeric:tabular-nums}
+.mast{border-bottom:1px solid var(--line)}
+.mast .wrap{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;gap:12px;font:700 16px var(--sans);letter-spacing:.02em}
+.mark{display:flex;gap:3px;transform:skew(-16deg)}.mark i{width:6px;height:18px;background:var(--accent)}.mark i:last-child{height:12px;align-self:flex-end;background:var(--ink)}
+.edition{font:10px var(--mono);letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;min-height:38px}
+.ghost:hover{color:var(--ink);border-color:var(--muted)}
+.tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:44px}
+.tabs button{background:none;border:0;padding:18px 0;font:600 13px var(--sans);color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button:disabled{opacity:.35;cursor:default}
+.banner{background:var(--raised);border-bottom:1px solid var(--line);text-align:center;padding:9px 20px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font:10px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.hero{padding:8px 0 4px}
+.hero h1{font:600 clamp(24px,3vw,34px)/1.25 var(--sans);letter-spacing:-.01em;margin:14px 0 0;max-width:760px;overflow-wrap:anywhere}
+.headline{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:26px 0 0}
+.big{font:700 clamp(64px,10vw,108px)/.9 var(--sans);letter-spacing:-.045em}
+.over{font:13px var(--mono);color:var(--dim);padding-bottom:10px}
+.grade{display:grid;place-items:center;width:34px;height:34px;background:var(--accent);color:#14181f;font:700 16px var(--sans);margin-bottom:8px}
+.pill{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);padding:5px 9px;margin-bottom:12px}
+.bar{height:3px;background:var(--hair);margin:22px 0 0;max-width:620px}.bar span{display:block;height:100%;background:var(--accent)}
+.lede{color:var(--muted);font-size:13px;margin:16px 0 0;max-width:620px}
+.meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin:26px 0 0;padding-top:18px;border-top:1px solid var(--hair);font:11px var(--mono);color:var(--dim)}
+.meta b{color:var(--muted);font-weight:400}
+.copy{background:none;border:0;padding:0;font:11px var(--mono);color:var(--accent)}
+.section{margin-top:52px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:11px;margin-bottom:24px}
+.section-head h2{font:11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);font-weight:400}
+.section-head .note{font:11px var(--mono);color:var(--dim);text-align:right}
+.dim{padding:18px 0;border-bottom:1px solid var(--hair)}.dim:last-child{border-bottom:0}
+.dim-top{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.dim-name{font-size:14px;font-weight:600}
+.dim-val{font:600 22px var(--sans)}
+.dim .bar{margin:12px 0 0;max-width:none}
+.dim-foot{display:flex;justify-content:space-between;gap:18px;margin-top:10px;font:11px var(--mono);color:var(--dim);flex-wrap:wrap}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.card{background:var(--panel);padding:22px 22px 24px;min-width:0}
+.card h3{font:10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);font-weight:400;margin-bottom:16px}
+.card .figure{font:600 30px/1 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
+.card .unit{font:11px var(--mono);color:var(--dim);margin-left:7px;letter-spacing:.04em}
+.card .sub{font-size:12px;color:var(--muted);margin:10px 0 14px;min-height:32px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-top:1px solid var(--hair);font:11px var(--mono);color:var(--dim)}
+.kv b{color:var(--ink);font-weight:400;text-align:right;overflow-wrap:anywhere}
+.kv.none b{color:var(--dim)}
+.tree{margin-top:12px;font:11px/1.7 var(--mono);color:var(--muted);max-height:128px;overflow:auto}
+.tree div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tree i{color:var(--accent);font-style:normal}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+.tile{background:var(--panel);padding:20px 20px 22px;min-width:0}
+.tile span{display:block;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.tile strong{display:block;font:600 26px/1.2 var(--sans);letter-spacing:-.02em;margin:10px 0 4px;overflow-wrap:anywhere}
+.tile small{font:11px var(--mono);color:var(--muted)}
+.equation{font:600 18px var(--sans);color:var(--accent);letter-spacing:-.01em}
+.chart-box{background:var(--panel);border:1px solid var(--line);padding:20px 22px 8px}
+.chart-top{display:flex;justify-content:space-between;gap:14px;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.chart{display:block;margin-top:6px;overflow:visible}
+.chart text{font:10px var(--mono);fill:var(--dim)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:26px 0 0;font:11px var(--mono);color:var(--dim)}
+.toolbar select{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:8px 10px;font:11px var(--mono);min-height:38px}
+.rows{margin-top:14px;border-top:1px solid var(--line)}
+.row{width:100%;display:grid;grid-template-columns:74px 1fr 96px 84px 84px;align-items:center;gap:16px;background:none;border:0;border-bottom:1px solid var(--hair);padding:15px 6px;text-align:left}
+.row:hover{background:var(--raised)}
+.row .hash{font:11px var(--mono);color:var(--accent)}
+.row .subject{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .when{font:11px var(--mono);color:var(--dim)}
+.row .delta{font:11px var(--mono);color:var(--muted);text-align:right}
+.row .total{font:600 15px var(--sans);text-align:right}
+.row.is-latest .subject:after{content:'LATEST';font:9px var(--mono);letter-spacing:.12em;color:var(--accent);margin-left:10px}
+.empty{padding:26px 6px;color:var(--dim);font-size:13px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:24px 40px}
+.facts p{font-size:12px;color:var(--muted)}
+.facts code{font:11px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.foot{margin:60px 0 0;border-top:1px solid var(--line);padding:22px 0 40px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font:10px/1.8 var(--mono);color:var(--dim)}
+.foot .id{max-width:70%;overflow-wrap:anywhere}
+dialog{border:1px solid var(--line);border-top:2px solid var(--accent);background:var(--panel);color:var(--ink);padding:26px;max-width:min(520px,calc(100% - 32px))}
+dialog::backdrop{background:#070a0fcc}
+dialog header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}
+dialog h2{font:600 20px var(--sans);margin:10px 0;overflow-wrap:anywhere}
+.dialog-figure{font:700 40px var(--sans);letter-spacing:-.03em;margin:8px 0}
+.small{font-size:12px;color:var(--muted);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--accent);color:#14181f;font:600 12px var(--sans);padding:12px 20px;z-index:9;max-width:90%}
+[hidden]{display:none!important}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.tiles{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){
+.wrap{padding:0 18px}.tabs{gap:20px;margin-bottom:32px}.mast .wrap{height:58px}.edition{display:none}
+.cards,.tiles,.facts{grid-template-columns:1fr}.headline{gap:12px}.section{margin-top:40px}
+.row{grid-template-columns:62px 1fr 56px 70px;gap:9px;padding:14px 4px}.row .when{display:none}
+.row .total{font-size:14px}.card .sub{min-height:0}.dim-foot{font-size:10px}
 }
-$('#chart-ladder').addEventListener('click',()=>{chartMode='ladder';chart()});$('#chart-scores').addEventListener('click',()=>{chartMode='scores';chart()});chart();
-function journal(){const grade=$('#grade-filter').value,scope=$('#scope-filter').value,rows=data.history.filter(p=>(grade==='all'||p.score?.grade===grade)&&(scope==='all'||p.score?.cohort===s.cohort));$('#journal').innerHTML=rows.length?rows.map(p=>`<button class="history-row" data-commit="${esc(p.commit)}" aria-label="Inspect commit ${esc(p.commit.slice(0,7))}"><span class="hash">${esc(p.commit.slice(0,7))}</span><span class="subject">${esc(p.title)}</span><span class="date">${esc(date(p.date))}</span><span class="row-score">${p.score?esc(p.score.value):'—'}${p.iteration?`<small class="row-rating">${n(p.iteration.value)} TOTAL</small>`:''}</span><span class="row-grade">${p.score?esc(p.score.grade):'N/A'}</span></button>`).join(''):'<p class="empty">'+(data.history.length?'No commits match these filters.':'No previous commits yet. Your next report can start the trend.')+'</p>';document.querySelectorAll('.history-row').forEach(button=>button.addEventListener('click',()=>inspect(data.history.find(p=>p.commit===button.dataset.commit))))}journal();$('#grade-filter').addEventListener('change',journal);$('#scope-filter').addEventListener('change',journal);
-function inspect(p){const dialog=$('#commit-dialog');$('#dialog-body').innerHTML=`<span class="eyebrow">Historical commit · ${esc(p.commit.slice(0,10))}</span><h2>${esc(p.title)}</h2><div class="dialog-score">${p.score?esc(p.score.value):'—'} <span class="grade">${p.score?esc(p.score.grade):'?'}</span></div><p class="small">${p.score?esc(p.score.cohort)+' scope · '+pct(p.score.confidence)+' evidence confidence':'No AI-PoW proof was recorded for this commit.'}</p><p class="small">${esc(date(p.date))}</p>${p.iteration?`<p class="small">Cumulative score: ${n(p.iteration.value)} · +${n(p.iteration.delta)} this commit</p>`:''}<p class="small">The latest commit stays the main report. This panel only inspects a prior version.</p>`;dialog.showModal()}
-$('#close-dialog').addEventListener('click',()=>$('#commit-dialog').close());$('#print').addEventListener('click',()=>window.print());$('#copy-commit').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(current.commit);notify('Commit hash copied')}catch{notify('Commit: '+current.commit)}});function notify(message){const t=$('#toast');t.textContent=message;t.hidden=false;setTimeout(()=>{t.hidden=true},4500)}
+@media print{
+body{background:#fff;color:#14181f}.tabs,.ghost,.toolbar,dialog,.toast,.banner{display:none}
+.card,.tile,.chart-box{background:#fff;border:1px solid #d5dae2}.cards,.tiles{background:#d5dae2}
+.muted,.lede,.kv,.meta,.foot,.tile small,.section-head .note{color:#4b5563}
+.section,.row,.card{break-inside:avoid}.wrap{max-width:none;padding:0 12px}
+}
+</style></head><body><a class="skip" href="#content">Skip to report</a><header class="mast"><div class="wrap"><div class="logo"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW<span class="edition"> / commit report</span></div><button class="ghost" id="print">Print</button></div></header><main class="wrap" id="content"></main><noscript>This report requires JavaScript to display its embedded data. Use aipow report for the JSON version.</noscript><dialog id="commit-dialog" aria-label="Commit details"><header><span class="eyebrow">Commit</span><button class="ghost" id="close-dialog">Close</button></header><div id="dialog-body"></div></dialog><div id="toast" class="toast" role="status" hidden></div><script id="report-data" type="application/json">{"project":"fieldwork / commerce","view":"latest","current":{"commit":"26a9fde3f4e3aa9d52636d961925e741e6593a9a","title":"Ship a calmer, more reliable checkout","date":"2026-09-07T10:30:00+00:00","score":{"algorithm":"retention-v2","value":"85.6","grade":"A","confidence":"0.8012","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.982857","quality":"0.972067","confidence":"0.977654","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.888889","confidence":"0.777778","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":172,"operations":175,"checked_operations":175},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":14,"attempts":14,"declared":14,"basis":"declared-with-committed-evidence"},"scope":{"units":87,"files":10},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"summary":{"human":{"events":40,"methods":{"tokenizer":{"tokens":4320,"bytes":0,"events":40}},"unknown_token_events":0,"messages":40,"tokens_estimated":0,"tokens_measured":4320,"tokens_complete":true,"attention_seconds":null},"visible_ai":{"events":22,"methods":{"tokenizer":{"tokens":1892,"bytes":0,"events":22}},"unknown_token_events":0,"tokens_estimated":0,"tokens_measured":1892,"tokens_complete":true,"attention_seconds":null},"models":{"example-small/provider_reported":{"calls":13,"input_tokens":67600,"output_tokens":11700,"cached_input_tokens":23400,"reasoning_tokens":3380,"cache_write_tokens":0,"unknown_fields":[],"known_token_subtotals":{"input_tokens":67600,"output_tokens":11700,"cached_input_tokens":23400,"reasoning_tokens":3380,"cache_write_tokens":0},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}},"example-large/provider_reported":{"calls":25,"input_tokens":130000,"output_tokens":22500,"cached_input_tokens":45000,"reasoning_tokens":6500,"cache_write_tokens":0,"unknown_fields":[],"known_token_subtotals":{"input_tokens":130000,"output_tokens":22500,"cached_input_tokens":45000,"reasoning_tokens":6500,"cache_write_tokens":0},"missing_field_calls":{"input_tokens":0,"output_tokens":0,"cached_input_tokens":0,"reasoning_tokens":0,"cache_write_tokens":0}}},"reference_usd_known_subtotal":"2.400004","priced_calls":38,"unpriced_calls":0,"tools_used":["apply_patch","mcp__docs__lookup","read_file","search","shell"],"skills_used":["frontend-design","release","review","testing"],"mcp_used":["docs"],"event_counts":{"human.message":40,"assistant.visible":22,"model.usage":38,"tool.call":73,"skill.used":4,"agent.spawn":4},"human_survival":null,"artifact_survival":null,"task_survival":null,"semantic_edits":null,"quality":null,"algorithm":"observed-v3","reference_usd_by_measurement":{"provider_reported":{"known_subtotal":"2.400004","complete_for_observed_calls":true,"priced":38,"unpriced":0}},"reference_cost_complete_for_observed_calls":true,"overall_score":null,"efficiency":null,"ranking_eligible":false,"agent":{"spawns":4,"stops":0,"nodes":4,"parents_known":3,"max_depth":3,"graph":[["planner",""],["builder","planner"],["reviewer","builder"],["tester","planner"]],"tool_calls_by_name":[["apply_patch",18],["read_file",18],["search",18],["shell",18],["mcp__docs__lookup",1]],"other_tool_calls":0,"truncated":false}},"proof_hash":"7690cc622f52d735dcd9e3b647da8466a85044e59d1bf8c0fa9818dd86bc3aa0"},"history":[],"statistics":null,"iteration":null,"lifetime":null,"verification":{"integrity_verified":false},"demo":true}</script><script>
+const data=JSON.parse(document.getElementById('report-data').textContent);
+const $=s=>document.querySelector(s);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const current=data.current,s=current.score,m=current.summary,e=s.evidence;
+const stats=data.statistics||{},total=data.iteration,lt=data.lifetime,counts=m.event_counts||{},agent=m.agent||null,models=m.models||{};
+const unknown='not recorded';
+const n=x=>x===null||x===undefined?unknown:Number(x).toLocaleString('en-US',{maximumFractionDigits:1});
+const short=x=>x===null||x===undefined?unknown:Number(x)>=1e6?(Number(x)/1e6).toFixed(2)+'M':Number(x)>=1000?(Number(x)/1e3).toFixed(1)+'K':n(x);
+const pct=x=>x===null||x===undefined?unknown:Math.round(Number(x)*100)+'%';
+const points=x=>x===null||x===undefined?unknown:Number(x).toFixed(1);
+const money=x=>x===null||x===undefined?unknown:'$'+Number(x).toFixed(2);
+const date=x=>new Date(x).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const tokens=b=>b.tokens_complete===false?null:(b.tokens_estimated||0)+(b.tokens_measured||0);
+const basis=b=>b.tokens_complete===false?'partial capture':b.tokens_estimated?'includes estimates':'tokenizer counted';
+const share=(part,whole)=>whole?part/whole:null;
+const modelSum=field=>{let t=0;for(const b of Object.values(models)){if(b[field]===null||b[field]===undefined)return null;t+=b[field]}return t};
+const modelCalls=Object.values(models).reduce((t,b)=>t+(b.calls||0),0);
+const words={S:'Almost nothing was discarded',A:'Most observed work was retained',B:'Steady retention',C:'Mixed retention',D:'Heavy rework before the commit',E:'Most observed work was discarded'};
+document.title=current.commit.slice(0,7)+' · '+data.project+' · AI-PoW';
+if(data.demo){const b=document.createElement('div');b.className='banner';b.textContent='Demonstration data · synthetic commits, production algorithms';document.body.insertBefore(b,document.body.children[1])}
+
+const kv=(name,value)=>`<div class="kv${value===null||value===undefined?' none':''}"><span>${esc(name)}</span><b>${esc(value===null||value===undefined?unknown:value)}</b></div>`;
+const card=(title,figure,unit,sub,rows,extra)=>`<article class="card"><h3>${esc(title)}</h3><p class="figure num">${esc(figure)}${unit?`<span class="unit">${esc(unit)}</span>`:''}</p><p class="sub">${esc(sub)}</p>${rows.join('')}${extra||''}</article>`;
+const tile=(label,value,hint)=>`<div class="tile"><span>${esc(label)}</span><strong class="num">${esc(value)}</strong><small>${esc(hint)}</small></div>`;
+
+function agentTree(){
+  if(!agent||!agent.graph.length)return '';
+  const parents=new Map(agent.graph);
+  const depth=node=>{let d=0,seen=new Set();while(parents.get(node)&&!seen.has(node)&&d<16){seen.add(node);node=parents.get(node);d++}return d};
+  const lines=agent.graph.slice(0,20).map(([node])=>`<div>${'&nbsp;&nbsp;&nbsp;'.repeat(depth(node))}<i>&#9492;</i> ${esc(node.slice(0,30))}</div>`);
+  if(agent.graph.length>20)lines.push('<div>&hellip;</div>');
+  return `<div class="tree">${lines.join('')}</div>`;
+}
+
+function vector(){
+  const visible=tokens(m.visible_ai),output=modelSum('output_tokens');
+  return [
+    card('Human input',short(tokens(m.human)),'tokens',`${n(m.human.messages||0)} prompts, ${basis(m.human)}.`,[
+      kv('Linked to observed edits',`${n(e.human.linked_prompts)} / ${n(e.human.prompts)} prompts`),
+      kv('Attribution',e.human.attribution)]),
+    card('AI visible output',short(visible),'tokens',`${n(m.visible_ai.events||0)} messages a person had to read.`,[
+      kv('Model output tokens',short(output)),
+      kv('Share shown to the reader',output&&visible!==null?pct(share(visible,output)):null)]),
+    card('Machine work',m.priced_calls?money(m.reference_usd_known_subtotal):unknown,m.priced_calls?'reference':'',
+      `${n(m.priced_calls)} of ${n((m.priced_calls||0)+(m.unpriced_calls||0))} observed calls priced at list rates, not the amount paid.`,[
+      kv('Model calls',n(modelCalls)),kv('Input tokens',short(modelSum('input_tokens'))),
+      kv('Output tokens',short(output)),kv('Of which reasoning',short(modelSum('reasoning_tokens'))),
+      ...Object.entries(models).slice(0,3).map(([name,b])=>kv(name,`${n(b.calls)} calls`))]),
+    card('Agent architecture',n(counts['tool.call']||0),'tool calls',
+      `${n((m.tools_used||[]).length)} distinct tools, ${n(counts['agent.spawn']||0)} sub-agents spawned.`,[
+      kv('Skills used',n((m.skills_used||[]).length)),kv('MCP servers',n((m.mcp_used||[]).length)),
+      kv('Observed depth',agent?n(agent.max_depth):null),
+      kv('Parent links reported',agent?`${n(agent.parents_known)} / ${n(agent.nodes)}`:null),
+      ...(agent?agent.tool_calls_by_name.slice(0,3).map(([name,calls])=>kv(name,n(calls))):[])],
+      agent?agentTree():'<p class="sub">Agent structure predates this proof&#39;s summary algorithm.</p>'),
+    card('Artifact work',e.artifact.operations?pct(share(e.artifact.retained,e.artifact.operations)):unknown,
+      e.artifact.operations?'survived':'',
+      `${n(e.artifact.retained)} of ${n(e.artifact.operations)} observed edit operations are still in the committed tree.`,[
+      kv('Checked against the tree',`${n(e.artifact.checked_operations)} operations`),
+      kv('Scope',`${n(e.scope.units)} units, ${n(e.scope.files)} files`),
+      kv('Capture',e.limited?'bounded by capture limits':'complete for observed files')]),
+    card('Task work',e.task.attempts?pct(share(e.task.completed,e.task.attempts)):unknown,e.task.attempts?'fulfilled':'',
+      e.task.declared?`${n(e.task.completed)} completed over ${n(e.task.attempts)} attempts on ${n(e.task.declared)} declared tasks.`
+        :'No tasks were declared for this interval, so this dimension was not scored.',[
+      kv('Re-opened attempts',e.task.declared?n(e.task.attempts-e.task.declared):null),
+      kv('Basis',e.task.basis)])
+  ].join('');
+}
+
+function dimensions(){
+  const notes={human:'Temporal attribution proxy',artifact:'Compared with the committed tree',task:'Declared tasks with committed evidence'};
+  return Object.entries(s.components).map(([key,c])=>{
+    const used=Number(c.effective_weight??c.weight),nominal=Number(c.weight);
+    const scored=used>0;
+    return `<div class="dim"><div class="dim-top"><span class="dim-name">${esc(c.label)}</span><span class="dim-val num">${c.ratio===null?'<span class="unit">no evidence</span>':pct(c.ratio)}</span></div>
+    <div class="bar"><span style="width:${scored?Math.round(Number(c.quality)*100):0}%"></span></div>
+    <div class="dim-foot"><span>${esc(notes[key]||'')}</span><span>${scored?`weight ${Math.round(used*100)}%${Math.abs(used-nominal)>.001?` (${Math.round(nominal*100)}% ceded up)`:''} · evidence ${pct(c.confidence)}`:'not scored, weight ceded to the observed dimensions'}</span></div></div>`;
+  }).join('');
+}
+
+function chart(){
+  const host=$('#chart');
+  if(!host||!host.clientWidth)return;
+  const rows=[...data.history].reverse().filter(p=>p.iteration).concat([{...current,iteration:total}]);
+  const values=rows.map(p=>Number(p.iteration.value));
+  const high=Math.max(100,Math.ceil((Math.max(...values)*1.15)/50)*50);
+  const w=host.clientWidth,h=210,left=Math.min(56,w/5),right=14,top=16,bottom=30;
+  const x=i=>left+(w-left-right)*i/Math.max(1,rows.length-1),y=v=>top+(h-top-bottom)*(1-v/high);
+  let svg=`<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Cumulative project score across ${rows.length} recorded commits">`;
+  for(let i=0;i<=2;i++){const v=high*i/2;svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v)}" y2="${y(v)}" stroke="#273040"/><text x="0" y="${y(v)+4}">${n(v)}</text>`}
+  svg+=`<polyline points="${rows.map((p,i)=>x(i)+','+y(Number(p.iteration.value))).join(' ')}" fill="none" stroke="#ff9c31" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+  rows.forEach((p,i)=>{const last=i===rows.length-1;
+    svg+=`<circle cx="${x(i)}" cy="${y(Number(p.iteration.value))}" r="${last?5:3}" fill="${last?'#ff9c31':'#5c6a7e'}"><title>${esc(p.commit.slice(0,7)+' · total '+points(p.iteration.value))}</title></circle>`;
+    if(i===0||last)svg+=`<text x="${x(i)}" y="${h-8}" text-anchor="${last?'end':'start'}">${last?'LATEST':esc(p.commit.slice(0,7))}</text>`});
+  host.innerHTML=svg+'</svg>';
+}
+let resizeTimer;
+addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(chart,150)});
+
+function journal(){
+  const grade=$('#grade-filter').value;
+  const rows=[{...current,iteration:total,latest:true},...data.history].filter(p=>grade==='all'||p.score?.grade===grade);
+  $('#journal').innerHTML=rows.length?rows.map(p=>`<button class="row${p.latest?' is-latest':''}" data-commit="${esc(p.commit)}">
+    <span class="hash">${esc(p.commit.slice(0,7))}</span><span class="subject">${esc(p.title)}</span>
+    <span class="when">${esc(date(p.date))}</span>
+    <span class="delta">${p.score?'+'+points(p.score.value):'no proof'}</span>
+    <span class="total num">${p.iteration?points(p.iteration.value):'—'}</span></button>`).join('')
+    :'<p class="empty">No recorded commit matches this filter.</p>';
+  document.querySelectorAll('.row').forEach(b=>b.addEventListener('click',()=>inspect(rows.find(p=>p.commit===b.dataset.commit))));
+}
+
+function inspect(p){
+  $('#dialog-body').innerHTML=`<span class="eyebrow">${esc(p.commit.slice(0,10))} · ${esc(date(p.date))}</span><h2>${esc(p.title)}</h2>
+  <p class="dialog-figure num">${p.iteration?points(p.iteration.value):'—'}</p>
+  <p class="small">Project total after this commit${p.score?`, including its contribution of ${points(p.score.value)}`:'. No AI-PoW proof was recorded for this commit, so it added nothing.'}</p>
+  ${p.score?`<p class="small">Commit score ${esc(p.score.value)} (${esc(p.score.grade)}) · ${esc(p.score.cohort)} scope · ${pct(p.score.confidence)} evidence · ${esc(p.score.algorithm)}</p>`:''}`;
+  $('#commit-dialog').showModal();
+}
+
+$('#content').innerHTML=`
+<div class="tabs" role="group" aria-label="Report view">
+  <button id="tab-latest" aria-pressed="false">Latest commit</button>
+  <button id="tab-iteration" aria-pressed="false" ${total?'':'disabled'}>Project iterations</button>
+</div>
+<section id="view-latest" hidden>
+  <div class="hero">
+    <p class="eyebrow">Latest recorded commit</p>
+    <h1>${esc(current.title)}</h1>
+    <div class="headline"><span class="big num">${esc(s.value)}</span><span class="over">/ 100</span>
+      <span class="grade">${esc(s.grade)}</span><span class="pill">${s.status==='provisional'?'Provisional · limited evidence':'Established evidence'}</span></div>
+    <div class="bar"><span style="width:${Number(s.value)}%"></span></div>
+    <p class="lede">${esc(words[s.grade]||'')}. This is a retention score: how much of the observed work survived into the commit. Resource use is recorded below but never scored, and nothing here judges whether the code is correct.</p>
+    <dl class="meta"><dd><button class="copy" id="copy-commit" title="Copy the full commit hash">${esc(current.commit.slice(0,10))}</button></dd>
+      <dd>${esc(date(current.date))}</dd><dd><b>scope</b> ${esc(s.cohort)}, ${n(e.scope.units)} units</dd>
+      <dd><b>algorithm</b> ${esc(s.algorithm)}</dd>
+      <dd><b>scored on</b> ${s.dimensions?n(s.dimensions.scored.length)+' of '+n(s.dimensions.scored.length+s.dimensions.unscored.length)+' dimensions':'—'}</dd></dl>
+  </div>
+  <div class="section">
+    <div class="section-head"><h2>What the score is made of</h2><span class="note">Retention only · 40 / 40 / 20</span></div>
+    ${dimensions()}
+  </div>
+  <div class="section">
+    <div class="section-head"><h2>Proof vector</h2><span class="note">Recorded facts, not a ranking</span></div>
+    <div class="cards">${vector()}</div>
+  </div>
+  <div class="section">
+    <div class="section-head"><h2>Proof</h2><span class="note">${data.demo?'Demonstration data':data.verification.integrity_verified?'Trace and Git objects checked':'Integrity not checked'}</span></div>
+    <div class="facts">
+      <div><p>The trace is hash-chained and bound to this commit, its tree and its parents. Verification recomputes the measurements, the evidence and the score from the recorded events and the committed blobs, under the algorithms this proof recorded.</p></div>
+      <div><p>Consistency is not authenticity: local records can be incomplete or fabricated, file sampling can miss rapid writes, and a declared task is a claim, not a passed test.</p>
+      <p><code>proof ${esc(current.proof_hash)}</code></p></div>
+    </div>
+  </div>
+</section>
+<section id="view-iteration" hidden>
+  ${total?`<div class="hero">
+    <p class="eyebrow">${esc(data.project)} · project total</p>
+    <div class="headline"><span class="big num">${points(total.value)}</span><span class="over">points</span></div>
+    <p class="lede">Every recorded commit score, added once and unchanged, starting from zero. ${n(total.rated_commits)} of ${n(lt?lt.commits:total.rated_commits)} commits in this history carried a sealed score.</p>
+    <p class="equation num" style="margin-top:22px">${points(total.previous)} + ${points(total.delta)} = ${points(total.value)}</p>
+    <dl class="meta"><dd><b>policy</b> ${esc(total.algorithm)}</dd><dd>no weighting, deductions, tiers or upper limit</dd>
+      <dd>average commit score ${points(stats.average)}${stats.count?` over ${n(stats.count)} earlier commits`:''}</dd></dl>
+  </div>
+  <div class="section">
+    <div class="section-head"><h2>Cumulative total</h2><span class="note">First-parent history · latest last</span></div>
+    <div class="chart-box"><div class="chart-top"><span>Project total</span><span>${esc(total.algorithm)}</span></div><div id="chart"></div></div>
+  </div>
+  ${lt?`<div class="section">
+    <div class="section-head"><h2>Repository totals</h2><span class="note">Pooled over ${n(lt.commits)} recorded commits</span></div>
+    <div class="tiles">
+      ${tile('Human input',short(lt.human_tokens),n(lt.prompts)+' prompts')}
+      ${tile('AI visible output',short(lt.visible_tokens),n(lt.visible_events)+' messages')}
+      ${tile('Machine work',lt.priced_calls?money(lt.reference_usd_known_subtotal):unknown,n(lt.model_calls)+' model calls'+(lt.reference_cost_complete?'':' · known subtotal'))}
+      ${tile('Model tokens',short(lt.input_tokens===null||lt.output_tokens===null?null:lt.input_tokens+lt.output_tokens),'input + output')}
+      ${tile('Agent activity',n(lt.tool_calls),n(lt.sub_agents)+' sub-agents · '+n(lt.skills_used)+' skills')}
+      ${tile('Artifact survival',lt.artifact_operations?pct(lt.artifact_survival):unknown,n(lt.artifact_retained)+' of '+n(lt.artifact_operations)+' operations')}
+      ${tile('Task fulfillment',lt.task_attempts?pct(lt.task_fulfillment):unknown,n(lt.task_completed)+' of '+n(lt.task_attempts)+' attempts')}
+      ${tile('Recorded commits',n(lt.commits),n(lt.scored_commits)+' with a sealed score')}
+    </div>
+    <p class="note" style="margin-top:14px;font:11px var(--mono);color:var(--dim)">Ratios are recomputed from the pooled totals, never averaged per commit. Unknown values stay unknown and are never counted as zero.</p>
+  </div>`:''}
+  <div class="section">
+    <div class="section-head"><h2>Recorded commits</h2><span class="note">Contribution and running total</span></div>
+    <div class="toolbar"><span>Up to 30 earlier commits</span>
+      <label>Grade <select id="grade-filter" aria-label="Filter commits by grade"><option value="all">All</option>${['S','A','B','C','D','E'].map(g=>`<option value="${g}">${g}</option>`).join('')}</select></label></div>
+    <div class="rows" id="journal"></div>
+  </div>`:''}
+</section>
+<footer class="foot"><span class="id">AI-PoW · commit ${esc(current.commit)}</span><span>Process record. Not a measure of code quality.</span></footer>`;
+
+function setView(view){
+  const iteration=view==='iteration'&&!!total;
+  // The fragment names no element on the page, so updating it never scrolls.
+  $('#view-latest').hidden=iteration;
+  $('#view-iteration').hidden=!iteration;
+  $('#tab-latest').setAttribute('aria-pressed',String(!iteration));
+  $('#tab-iteration').setAttribute('aria-pressed',String(iteration));
+  if(iteration)chart();
+  try{history.replaceState(null,'','#'+(iteration?'iteration':'latest'))}catch{}
+}
+$('#tab-latest').addEventListener('click',()=>setView('latest'));
+$('#tab-iteration').addEventListener('click',()=>setView('iteration'));
+if(total){journal();$('#grade-filter').addEventListener('change',journal)}
+setView(location.hash==='#latest'?'latest':location.hash==='#iteration'?'iteration':(data.view==='iteration'&&total?'iteration':'latest'));
+$('#close-dialog').addEventListener('click',()=>$('#commit-dialog').close());
+$('#print').addEventListener('click',()=>window.print());
+$('#copy-commit').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(current.commit);notify('Commit hash copied')}catch{notify('Commit '+current.commit)}});
+function notify(message){const t=$('#toast');t.textContent=message;t.hidden=false;setTimeout(()=>{t.hidden=true},4000)}
 </script></body></html>

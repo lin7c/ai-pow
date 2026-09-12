@@ -13,55 +13,69 @@ const {chromium} = require('playwright');
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => {if (/^https?:/.test(request.url())) requests.push(request.url());});
     const folder = path.resolve(process.argv[2] || 'docs/demo');
+    const data = () => page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent));
+
     await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
-    await page.locator('.score-number').waitFor();
-    assert.equal(await page.locator('.history-row').count(), 6);
-    assert.equal(await page.locator('.history-section').last().isVisible(), true);
-    assert.equal(await page.locator('.ladder-card').isVisible(), true);
-    assert.equal(await page.locator('.vblock').count(), 6);
-    assert.equal(await page.locator('.component').count(), 3, 'retention-v2 scores three dimensions');
-    assert.equal(await page.locator('.tree div').count() > 0, true, 'agent structure is drawn');
-    assert.equal(await page.locator('.lifetime').isVisible(), true);
-    const pooled = await page.evaluate(() => {
+    await page.locator('#view-iteration').waitFor();
+    // Each view carries exactly one headline: the commit score or the project total.
+    assert.equal(await page.locator('#view-latest').isVisible(), false, 'iteration view hides the commit score');
+    assert.equal(await page.locator('#view-iteration').isVisible(), true);
+    assert.equal(await page.locator('#view-iteration .big').count(), 1);
+    assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
+    assert.equal(await page.locator('.row').count(), 7, 'latest commit plus its history');
+    assert.equal(await page.locator('.row.is-latest').count(), 1);
+    assert.equal(await page.locator('.tile').count(), 8);
+
+    const totals = await page.evaluate(() => {
       const d = JSON.parse(document.querySelector('#report-data').textContent);
       const rows = [d.current, ...d.history];
       const ops = rows.reduce((t, p) => t + p.score.evidence.artifact.operations, 0);
       const kept = rows.reduce((t, p) => t + p.score.evidence.artifact.retained, 0);
-      return {expected: kept / ops, reported: Number(d.lifetime.artifact_survival),
+      return {sum: rows.reduce((t, p) => t + Number(p.score.value), 0), total: Number(d.iteration.value),
+              pooled: kept / ops, reported: Number(d.lifetime.artifact_survival),
               mean: rows.reduce((t, p) => t + p.score.evidence.artifact.retained / p.score.evidence.artifact.operations, 0) / rows.length};
     });
-    assert.ok(Math.abs(pooled.expected - pooled.reported) < 0.0001, 'lifetime ratio is pooled');
-    assert.ok(Math.abs(pooled.mean - pooled.reported) > 0.0001, 'pooled ratio is not the mean of ratios');
-    await page.locator('#chart-scores').click();
-    assert.equal(await page.locator('#chart-label').textContent(), 'COMMIT SCORE / 100');
-    await page.locator('#chart-ladder').click();
-    assert.equal(await page.locator('#chart-label').textContent(), 'CUMULATIVE SCORE / COMMIT-SUM-V1');
-    const totals = await page.evaluate(() => {const d=JSON.parse(document.querySelector('#report-data').textContent); return {sum:[d.current,...d.history].reduce((v,p)=>v+Number(p.score.value),0),total:Number(d.iteration.value)};});
-    assert.ok(Math.abs(totals.sum-totals.total)<0.000001);
-    await page.locator('#latest').click();
-    assert.equal(await page.locator('.history-section').last().isVisible(), false);
-    assert.equal(await page.locator('.ladder-card').isVisible(), false);
-    assert.equal(await page.locator('.lifetime').isVisible(), false);
-    await page.locator('#iteration').click();
-    await page.locator('.history-row').first().click();
+    assert.ok(Math.abs(totals.sum - totals.total) < 1e-6, 'the total is the exact sum of commit scores');
+    assert.ok(Math.abs(totals.pooled - totals.reported) < 1e-4, 'lifetime ratios are pooled');
+    assert.ok(Math.abs(totals.mean - totals.reported) > 1e-4, 'pooled is not the mean of per-commit ratios');
+
+    await page.locator('.row').first().click();
     assert.equal(await page.locator('#commit-dialog').isVisible(), true);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#commit-dialog').isVisible(), false);
     await page.selectOption('#grade-filter', 'S');
-    assert.equal(await page.locator('.history-row').count(), 0);
+    assert.equal(await page.locator('.row').count(), 0);
     await page.selectOption('#grade-filter', 'all');
+
+    await page.locator('#tab-latest').click();
+    assert.equal(await page.locator('#view-iteration').isVisible(), false, 'latest view hides the project total');
+    assert.equal(await page.locator('#view-latest').isVisible(), true);
+    assert.equal(await page.locator('#view-latest .big').count(), 1);
+    assert.equal(await page.locator('.card').count(), 6, 'six proof-vector cards');
+    assert.equal(await page.locator('.dim').count(), 3, 'retention-v2 scores three dimensions');
+    assert.ok(await page.locator('.tree div').count() > 0, 'agent structure is drawn');
     if (process.env.REPORT_SCREENSHOT) await page.screenshot({path: process.env.REPORT_SCREENSHOT, fullPage: true});
+
     for (const width of [375, 720, 1024]) {
       await page.setViewportSize({width, height: 900});
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `Overflow at ${width}px`);
+      for (const tab of ['#tab-iteration', '#tab-latest']) {
+        await page.locator(tab).click();
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
+                     `Overflow at ${width}px`);
+      }
     }
+
+    await page.setViewportSize({width: 1440, height: 1060});
     await page.goto(pathToFileURL(path.join(folder, 'latest.html')).href);
-    await page.locator('.score-number').waitFor();
-    assert.equal(await page.locator('.history-section').last().isVisible(), false);
-    assert.equal(await page.locator('#iteration').isDisabled(), true);
-    assert.equal(await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length), 0);
+    await page.locator('#view-latest').waitFor();
+    assert.equal(await page.locator('#tab-iteration').isDisabled(), true, 'a latest-only export cannot show a total');
+    assert.equal(await page.locator('#view-iteration').isVisible(), false);
+    const latest = await data();
+    assert.equal(latest.history.length, 0);
+    assert.equal(latest.iteration, null);
+    assert.equal(latest.lifetime, null);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
-    console.log('Report browser checks passed: desktop, mobile, modes, filters, dialog, privacy, offline.');
+    console.log('Report browser checks passed: separated views, vector, totals, filters, dialog, privacy, offline.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

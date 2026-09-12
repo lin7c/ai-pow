@@ -22,8 +22,8 @@ A Git diff shows what changed. AI-PoW records more of the work behind it: human 
 
 - A six-part proof vector per commit: human input, AI visible output, machine work, agent architecture, artifact work, task work.
 - A smooth 0–100 retention score with three visible dimensions, evidence confidence, and explicit uncertainty.
-- Two views: **Iteration history** and **Latest commit**.
-- A zero-based cumulative project score: the exact sum of recorded commit scores, with a switchable total/commit-score chart.
+- Two separated views, each with a single headline number: **Latest commit** shows the 0–100 commit score, **Project iterations** shows the cumulative project total. Neither view shows the other's number.
+- A zero-based cumulative project score: the exact sum of recorded commit scores, with the running total per commit.
 - Pooled repository totals whose ratios are recomputed from the pooled quantities, not averaged per commit.
 - An observed agent structure: spawns, parent links where reported, depth, and per-tool call counts.
 - Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
@@ -82,9 +82,11 @@ History follows the current commit's first-parent ancestry, not all branches. Av
 
 Reports are generated after committing and remain outside the tracked source tree. They are **not automatically uploaded to GitHub**. Share an explicit export only after reviewing its contents.
 
-### Two scores, two different questions
+### Two scores, two different questions, two separate views
 
-**Latest commit: 0–100.** How did this observed development interval perform?
+The report never mixes them on one screen: the **Latest commit** view answers the first question, the **Project iterations** view answers the second.
+
+**Latest commit: 0–100.** How much of the observed work survived into this commit? That view also carries the proof vector and the proof identity.
 
 **Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 
