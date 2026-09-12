@@ -1,0 +1,10 @@
+{
+  "model": "example-model",
+  "source_url": "https://example.invalid/pricing",
+  "effective_date": "2026-09-12",
+  "input_per_million": "2",
+  "cached_input_per_million": "0.2",
+  "cache_write_per_million": "2.5",
+  "output_per_million": "10",
+  "note": "Fictional example rates. Replace with the exact applicable model and pricing tier."
+}
