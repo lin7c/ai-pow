@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0
+
+- Add the iteration chain: sealing appends one hash-linked row holding cumulative(T-1) + contribution(T), in the same transaction as the proof. The dashboard reads the chain instead of replaying every proof, so history survives losing an old proof, and a gap (amend, rebase, boundary reset, unrecorded commits) is marked rather than hidden.
+- Add `aipow index --rebuild` to recompute the chain from sealed proofs, and rebuild automatically for repositories sealed before the chain existed.
+- Compare every rate on the run view with the project's own baseline - all commits recorded before this one - and draw a sparkline of the last twelve recorded commits under each one.
+- Raise every type size: 13.5px base, 12.5px tables and key/value rows, 31px stat values, 11px labels and axes.
+- Only recorded commits enter the history; the dashboard states how many of the repository's commits that is.
+
 ## 0.7.0
 
 - Rebuild both pages as observability views: a dense, monospace, dark run view per commit and a dashboard over the recorded history.

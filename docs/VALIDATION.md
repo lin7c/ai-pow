@@ -28,6 +28,7 @@ The standalone suite covers:
 - Commit diff statistics read from Git, and older reducers left unchanged by the newer one.
 - Page separation: the commit run view carries no history or cumulative total, the dashboard carries no per-commit derived detail, and every derived score is positioned below the first screen of both pages.
 - Per-file breakdown: real paths resolved from the committed tree, write events, overwritten edits and survival.
+- Iteration chain: T = T-1 + this commit field by field, hash linkage between rows, rebuild reproducing the same hashes, gaps marked after a boundary reset, and totals surviving the deletion of an older proof.
 
 The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the eight dashboard rates and six run-view rates, the session timeline, the agent tree, the per-file table, the provenance map, the trend charts, the commit table links, and the position of every derived score below the first screen, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
 

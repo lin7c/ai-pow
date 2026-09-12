@@ -99,8 +99,10 @@ commit proof, the project total only in the repository summary, and neither is t
 thing either page shows. Iteration reports
 show two repository-level numbers, and they answer different questions.
 
-**Cumulative project score (commit-sum-v1)** starts at **0** and adds each recorded commit
-score exactly once, unchanged:
+**Cumulative project score (commit-sum-v1)** lives in the iteration chain: each commit
+appends one row holding `cumulative(T-1) + contribution(T)`, so the total is accumulated
+rather than replayed, and it survives losing an old proof. It starts at **0** and adds each
+recorded commit score exactly once, unchanged:
 
 ```text
 total[0] = 0
@@ -109,12 +111,12 @@ total[n] = total[n-1] + recorded_commit_score[n]
 
 Example: 81.4 + 43.6 + 50.0 = 175.0. There is no code-line calculation, confidence or scope
 weighting, eligibility threshold, deduction, tier, or upper limit. All weighting belongs to
-the per-commit score. The full locally available first-parent history is replayed; only the
-latest 30 historical rows are displayed. Missing scores contribute nothing. Scores from
+the per-commit score. Only recorded commits enter the chain; the dashboard reports how many of the repository's
+commits that is. Only the latest rows are displayed. Missing scores contribute nothing. Scores from
 earlier algorithms are added as recorded, not recomputed. Because every commit contributes
 its own score, this total grows with the number of recorded commits.
 
-**Pooled lifetime totals** aggregate the raw quantities instead: human tokens, visible
+**Pooled lifetime totals** are the same chain's `cumulative` fields: human tokens, visible
 tokens, model calls and tokens, reference cost, tool calls, sub-agents, and artifact and
 task operations. Ratios are recomputed from the pooled numerators and denominators:
 

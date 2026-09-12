@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import json
 import os
 from pathlib import Path
@@ -325,6 +326,68 @@ class ProtocolTests(unittest.TestCase):
         proof = self.rec.seal()
         self.assertEqual(self.rec.diff_stats(proof), {"files": 1, "insertions": 0, "deletions": 2})
         self.assertEqual(self.rec.report_data()["diff"], {"files": 1, "insertions": 0, "deletions": 2})
+
+    def test_iteration_chain_is_t_minus_one_plus_this_commit(self):
+        """Each commit appends one hash-linked row; history is not replayed."""
+        first = self.commit("one")
+        self.rec.seal()
+        second = self.commit("two")
+        self.rec.seal()
+        with self.rec.connection() as db:
+            chain, verified = self.rec.iterations(db)
+        self.assertTrue(verified)
+        self.assertEqual([row["commit"] for row in chain], [second, first])
+        latest, earlier = chain
+        self.assertEqual(latest["seq"], 2)
+        self.assertEqual(latest["parent"], first)
+        self.assertEqual(latest["previous"], earlier["hash"])
+        self.assertEqual(earlier["previous"], pow.EMPTY_HASH)
+        self.assertTrue(latest["continues"])
+        # T = T-1 + this commit, field by field.
+        for field in ("operations", "retained", "prompts", "tool_calls"):
+            self.assertEqual(latest["cumulative"][field],
+                             earlier["cumulative"][field] + latest["contribution"][field])
+        self.assertEqual(latest["cumulative"]["commits"], 2)
+        self.assertEqual(latest["cumulative"]["score_total"],
+                         format(Decimal(earlier["cumulative"]["score_total"])
+                                + Decimal(latest["contribution"]["score"]["value"]), ".1f"))
+
+    def test_history_survives_a_lost_proof(self):
+        """The chain carries the history, so pruning a proof cannot shrink it."""
+        self.commit("one")
+        self.rec.seal()
+        self.commit("two")
+        self.rec.seal()
+        before = self.rec.index_data()
+        with self.rec.connection() as db:
+            db.execute("DELETE FROM proofs WHERE commit_id=?", (before["history"][1]["commit"],))
+        after = self.rec.index_data()
+        self.assertEqual(after["lifetime"]["artifact_operations"], before["lifetime"]["artifact_operations"])
+        self.assertEqual(after["iteration"]["value"], before["iteration"]["value"])
+        self.assertEqual(after["lifetime"]["commits"], 2)
+        self.assertTrue(after["chain_verified"])
+
+    def test_rebuild_reproduces_the_chain_and_marks_breaks(self):
+        self.commit("one")
+        self.rec.seal()
+        self.commit("two")
+        self.rec.seal()
+        with self.rec.connection() as db:
+            original = [row["hash"] for row in self.rec.iterations(db)[0]]
+        self.rec.rebuild_iterations()
+        with self.rec.connection() as db:
+            rebuilt = [row["hash"] for row in self.rec.iterations(db)[0]]
+        self.assertEqual(original, rebuilt)
+        # A boundary reset leaves a gap, and the next row says so instead of hiding it.
+        self.git("commit", "--allow-empty", "-qm", "unobserved")
+        self.rec.reset_boundary()
+        self.rec.sample()
+        self.commit("three")
+        self.rec.seal()
+        with self.rec.connection() as db:
+            chain = self.rec.iterations(db)[0]
+        self.assertFalse(chain[0]["continues"])
+        self.assertEqual(chain[0]["cumulative"]["commits"], 3)
 
     def test_sealed_agent_structure_verifies(self):
         self.rec.record("agent.spawn", {"agent_id": "worker", "parent_agent_id": "main"}, "test")

@@ -143,6 +143,31 @@ Unstaged edits can span several windows. Checkouts/amends/rebases/missed windows
 with explicit reset preserving old records. Manual reset creates an unsealed historical epoch.
 Git post-commit can be bypassed; all capture is partial in v0.1.
 
+## 3b. Iteration chain
+
+Sealing appends exactly one row to a local `iterations` table, in the same transaction that
+stores the proof, so a proof never exists without its row:
+
+```json
+{"v": "0.1.0", "algorithm": "iteration-v1", "seq": 12,
+ "commit": "8f31a92…", "parent": "3bd8e14…", "at": 1789189200000,
+ "previous": "<hash of row 11>", "continues": true,
+ "contribution": {"human_tokens": 8421, "retained": 307, "operations": 381, "reference_usd": "7.82", "…": 0},
+ "cumulative": {"human_tokens": 481233, "retained": 32118, "score_total": "449.6", "commits": 182, "…": 0},
+ "hash": "sha256 of this row without `hash`"}
+```
+
+`cumulative` is `cumulative(T-1) + contribution(T)`, field by field: the previous row is the
+only history the computation reads. Unknown poisons a sum instead of counting as zero.
+Decimal amounts stay strings. `continues` is false when the row's parent is not the previous
+row's commit — an amend, a rebase, a boundary reset or commits nobody recorded — and the
+report shows that gap rather than hiding it.
+
+This is a local append-only ledger, not a consensus chain: `previous` links prove the rows
+were not edited piecemeal, and nothing more. Anyone holding the database can rewrite the
+whole chain. `aipow index --rebuild` recomputes it from the sealed proofs, which is also how
+a repository that predates the chain gets one.
+
 ## 4. Export and verification
 
 One JSONL bundle: first line `{"proof": <proof>}`, followed by canonical event lines including their hashes.

@@ -8,7 +8,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ai_pow import summary
-from ai_pow_scoring import score, history_stats, ladder_step, lifetime
+from ai_pow_scoring import (cumulative_view, iteration_contribution, iteration_step, score,
+                            history_stats)
 from ai_pow_report import render, render_index
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -162,12 +163,15 @@ def main():
         stale.unlink()  # Never leave proofs of commits this demo no longer covers.
     found = commits(len(SHAPES))
     rows = [example(i, commit, SHAPES[i]) for i, commit in enumerate(found)]
-    running, history = None, []
+    cumulative, history, chain = None, [], []
     for index, row in enumerate(rows):
-        running = ladder_step(running, row["score"])
+        contribution = iteration_contribution(row)
+        cumulative = iteration_step({"cumulative": cumulative} if cumulative else None, contribution)
+        chain.append({"contribution": contribution, "cumulative": cumulative})
         metrics, evidence = row["summary"], row["score"]["evidence"]
         history.append({"commit": row["commit"], "title": row["title"], "date": row["date"],
-                        "score": row["score"], "total": running["value"],
+                        "seq": index + 1, "continues": True,
+                        "score": row["score"], "total": cumulative["score_total"],
                         "span_ms": metrics["window"]["span_ms"],
                         "human_tokens": metrics["human"]["tokens_measured"] + metrics["human"]["tokens_estimated"],
                         "prompts": metrics["human"]["messages"],
@@ -199,12 +203,21 @@ def main():
                                  "trust": "local-self-reported"},
                 "derived": row["derived"], "diff": row["diff"], "links": {"index": "../index.html"}}
         index = rows.index(row)
+        page["trend"] = [item["contribution"] for item in chain[max(0, index - 11):index + 1]]
         if index:
             page["current"]["parent"] = rows[index - 1]["commit"]
+            page["baseline"] = {"commit": rows[index - 1]["commit"],
+                                "commits": chain[index - 1]["cumulative"]["commits"],
+                                "totals": cumulative_view(chain[index - 1]["cumulative"])}
         (output / "reports" / (row["commit"] + ".html")).write_text(render(page), encoding="utf-8")
+    totals = cumulative_view(cumulative)
     summary_page = {"project": "ai-pow", "kind": "index", "demo": True,
-                    "lifetime": lifetime(rows), "iteration": running, "history": history,
-                    "commits_in_history": len(rows),
+                    "lifetime": totals, "history": history,
+                    "iteration": {"algorithm": "commit-sum-v1", "value": totals["score_total"],
+                                  "previous": chain[-2]["cumulative"]["score_total"] if len(chain) > 1 else "0.0",
+                                  "delta": rows[-1]["score"]["value"],
+                                  "rated_commits": totals["scored_commits"], "starting_rating": 0},
+                    "commits_in_history": len(rows), "chain_verified": True, "chain_length": len(chain),
                     "statistics": history_stats(history[0]["score"], history[1:]),
                     "span": {"first": {"commit": rows[0]["commit"], "date": rows[0]["date"]},
                              "last": {"commit": rows[-1]["commit"], "date": rows[-1]["date"]}},

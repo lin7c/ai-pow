@@ -20,8 +20,8 @@ def main():
                         "--no-deps", "--no-cache-dir", str(source)], check=True, timeout=90)
         result = subprocess.run([str(environment / "bin/aipow"), "--version"],
                                 capture_output=True, text=True, check=True, timeout=15)
-        assert result.stdout.strip() == "0.7.0", result.stdout
-        subprocess.run([str(python), "-c", "import ai_pow, ai_pow_scoring, ai_pow_report; assert ai_pow.APP_VERSION == '0.7.0'; assert ai_pow_scoring.ALGORITHM == 'retention-v2'; assert callable(ai_pow_report.render)"],
+        assert result.stdout.strip() == "0.8.0", result.stdout
+        subprocess.run([str(python), "-c", "import ai_pow, ai_pow_scoring, ai_pow_report; assert ai_pow.APP_VERSION == '0.8.0'; assert ai_pow_scoring.ALGORITHM == 'retention-v2'; assert callable(ai_pow_report.render)"],
                        cwd=work, check=True, timeout=15)
         print("Installed console entry point: " + result.stdout.strip())
 

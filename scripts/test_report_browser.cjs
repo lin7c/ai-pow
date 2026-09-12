@@ -35,6 +35,16 @@ const {chromium} = require('playwright');
     await page.locator('.stat').first().waitFor();
     assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
     assert.equal(await page.locator('.stat').count(), 8, 'eight comparable rates lead the dashboard');
+    const chainText = await page.locator('#content').textContent();
+    assert.ok(/T-1 \+ this commit/.test(chainText), 'the dashboard states the iteration rule');
+    const chain = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent));
+    assert.equal(chain.chain_verified, true, 'the ledger linkage is checked');
+    assert.equal(chain.chain_length, chain.history.length, 'every recorded commit is a chain row');
+    // T = T-1 + contribution, read straight off the rendered rows.
+    const running = chain.history.map(r => Number(r.total)).reverse();
+    const adds = chain.history.map(r => Number(r.score.value)).reverse();
+    running.forEach((value, i) => assert.ok(Math.abs(value - (i ? running[i - 1] : 0) - adds[i]) < 1e-6,
+                                            `row ${i} is not previous + contribution`));
     assert.equal(await page.locator('.panel svg').count() >= 4, true, 'trend charts are drawn');
     assert.ok(await scoreBelowStats(), 'no score in the first screen of the dashboard');
     const rowCount = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length);
@@ -58,6 +68,10 @@ const {chromium} = require('playwright');
     await page.locator('tbody a').first().click();
     await page.locator('.stat').first().waitFor();
     assert.equal(await page.locator('.stat').count(), 6, 'six comparable rates lead the run view');
+    assert.equal(await page.locator('.stat .spark svg').count(), 6, 'each rate carries its own trend');
+    const runText = await page.locator('#content').textContent();
+    assert.ok(/baseline/.test(runText), 'rates are compared with the project baseline');
+    assert.ok(await page.locator('.delta').count() >= 3, 'the comparison is shown per rate');
     assert.ok(await scoreBelowStats(), 'no score in the first screen of the run view');
     assert.equal(await page.locator('#waterfall svg').count(), 1, 'the session timeline is drawn');
     assert.ok(await page.locator('.tree').count() > 0, 'the agent topology is drawn');

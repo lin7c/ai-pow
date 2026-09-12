@@ -16,7 +16,7 @@ CSS = r"""
 --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
 --sans:'Inter','Helvetica Neue',Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:12px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.6 var(--mono);-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 button,select{font:inherit;color:inherit}button{cursor:pointer}
 button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -25,77 +25,78 @@ h1,h2,h3,h4,p,table{margin:0}
 .shell{max-width:1460px;margin:0 auto;padding:0 20px 56px}
 .skip{position:absolute;top:-80px;left:16px;background:#fff;color:#000;padding:10px;z-index:9}.skip:focus{top:8px}
 .topbar{background:var(--head);border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:5}
-.topbar .shell{padding-block:0;display:flex;align-items:center;gap:16px;height:52px;flex-wrap:wrap}
+.topbar .shell{padding-block:0;display:flex;align-items:center;gap:16px;height:58px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;font:700 13px var(--sans);letter-spacing:.04em}
 .mark{display:flex;gap:3px;transform:skew(-16deg)}.mark i{width:5px;height:15px;background:var(--accent)}
 .mark i:last-child{height:10px;align-self:flex-end;background:var(--text)}
-.crumb{color:var(--muted);font-size:11px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.crumb{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
 .crumb b{color:var(--text);font-weight:400}
 .spacer{flex:1}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:2px;padding:3px 8px;font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:2px;padding:4px 9px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .chip.ok{color:var(--good);border-color:#2a4636}.chip.warn{color:var(--accent);border-color:#4a3a22}
 .chip.dot:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
-.btn{border:1px solid var(--line2);background:var(--panel);color:var(--muted);padding:6px 11px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:30px;display:inline-flex;align-items:center;gap:6px}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--muted);padding:7px 13px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:30px;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{color:var(--text);border-color:var(--dim);text-decoration:none}
 .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:22px 0 14px}
-.pagehead h1{font:600 19px/1.25 var(--sans);letter-spacing:-.01em;overflow-wrap:anywhere;max-width:820px}
-.pagehead .sub{color:var(--muted);font-size:11px;margin-top:7px}
+.pagehead h1{font:600 23px/1.25 var(--sans);letter-spacing:-.01em;overflow-wrap:anywhere;max-width:820px}
+.pagehead .sub{color:var(--muted);font-size:12px;margin-top:7px}
 .pagehead .meta{display:flex;gap:8px;flex-wrap:wrap}
-.hint{color:var(--dim);font-size:10.5px;letter-spacing:.02em}
+.hint{color:var(--dim);font-size:11.5px;letter-spacing:.02em}
 .grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:16px}
 .g6{grid-template-columns:repeat(6,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
 .g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
 .g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
-.stat{background:var(--panel);padding:13px 15px 15px;min-width:0;display:flex;flex-direction:column;gap:2px}
-.stat .label{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:8px}
-.stat .value{font:600 26px/1.25 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
-.stat .value em{font:400 11px var(--mono);color:var(--dim);font-style:normal;margin-left:5px;letter-spacing:.04em}
-.stat .sub{color:var(--muted);font-size:10.5px;overflow-wrap:anywhere}
-.stat .spark{margin-top:6px;height:26px}
-.delta{font-size:10px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+.stat{background:var(--panel);padding:15px 17px 16px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.stat .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.stat .label>span:first-child,.stat .label{white-space:nowrap}
+.stat .value{font:600 31px/1.2 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
+.stat .value em{font:400 12.5px var(--mono);color:var(--dim);font-style:normal;margin-left:5px;letter-spacing:.04em}
+.stat .sub{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.stat .spark{margin-top:9px;height:30px}
+.delta{font-size:11px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
 .delta.up:before{content:'▲ ';color:var(--muted)}.delta.down:before{content:'▼ ';color:var(--muted)}
 .panel{background:var(--panel);min-width:0;display:flex;flex-direction:column}
-.panel>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 15px;border-bottom:1px solid var(--line);background:var(--panel2)}
-.panel>header h3{font:600 11px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--text)}
-.panel>header .unit{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
-.panel .body{padding:14px 15px 16px;min-width:0;flex:1}
+.panel>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 17px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.panel>header h3{font:600 12.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--text)}
+.panel>header .unit{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
+.panel .body{padding:15px 17px 17px;min-width:0;flex:1}
 .panel .body.flush{padding:0}
-.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dotted var(--line2);color:var(--muted);font-size:11px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dotted var(--line2);color:var(--muted);font-size:12.5px}
 .kv:last-child{border-bottom:0}.kv span,.kv b{min-width:0;overflow-wrap:anywhere}
 .kv b{color:var(--text);font-weight:400;text-align:right}
 .kv.none b{color:var(--dim)}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{text-align:left;color:var(--dim);font-weight:400;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--dim);font-weight:400;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--panel2)}
 .scroll thead th{position:sticky;top:0;z-index:1}
-td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}
+td{padding:10px 13px;border-bottom:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}
 tr:hover td{background:var(--panel2)}
 td.key{color:var(--text)}td.r,th.r{text-align:right}
 .bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .bar i{display:block;height:6px;background:var(--accent);min-width:1px}
 .track{flex:1;max-width:120px;height:6px;background:var(--grid)}
 .scroll{max-height:360px;overflow:auto}
-.tree{font:11px/1.75 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:210px;margin:0}
+.tree{font:12.5px/1.8 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:210px;margin:0}
 .tree b{color:var(--accent);font-weight:400}
-.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:10px;margin-top:10px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:11px;margin-top:10px}
 .legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px}
 svg{display:block}
-.axis{fill:var(--dim);font:9.5px var(--mono)}
-.note{color:var(--dim);font-size:10.5px;margin-top:10px;line-height:1.7}
+.axis{fill:var(--dim);font:11px var(--mono)}
+.note{color:var(--dim);font-size:11.5px;margin-top:10px;line-height:1.7}
 .prov{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
 .prov div{background:var(--panel);padding:13px 15px 15px}
-.prov h4{font:600 10px var(--sans);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
-.prov ul{margin:0;padding-left:15px;color:var(--muted);font-size:10.5px;line-height:1.85}
+.prov h4{font:600 11.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.prov ul{margin:0;padding-left:16px;color:var(--muted);font-size:12px;line-height:1.85}
 .prov .obs{color:var(--teal)}.prov .der{color:var(--accent)}.prov .inf{color:var(--violet)}
 .checks{display:flex;flex-wrap:wrap;gap:7px}
 .big-total{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
-.big-total b{font:600 40px/1 var(--sans);letter-spacing:-.03em}
-.pattern b{font:600 21px var(--sans);letter-spacing:-.01em;display:block;margin-bottom:4px}
-.lvl{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:6px 12px;padding:7px 0;border-bottom:1px dotted var(--line2);font-size:11px;color:var(--muted)}
+.big-total b{font:600 46px/1 var(--sans);letter-spacing:-.03em}
+.pattern b{font:600 24px var(--sans);letter-spacing:-.01em;display:block;margin-bottom:4px}
+.lvl{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:6px 12px;padding:8px 0;border-bottom:1px dotted var(--line2);font-size:12.5px;color:var(--muted)}
 .lvl:last-child{border-bottom:0}
-.lvl .tag{text-align:right;font-size:10px;letter-spacing:.1em}
+.lvl .tag{text-align:right;font-size:11px;letter-spacing:.1em}
 .lvl .tag.high{color:var(--accent)}.lvl .tag.low{color:var(--teal)}.lvl .tag.medium{color:var(--muted)}
-.lvl .why{grid-column:1/3;color:var(--dim);font-size:10px}
-.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:10px;border-top:1px solid var(--line);padding-top:14px;margin-top:26px}
+.lvl .why{grid-column:1/3;color:var(--dim);font-size:11.5px}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:11px;border-top:1px solid var(--line);padding-top:14px;margin-top:26px}
 @media(max-width:1180px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}
 .g21,.g12,.g3{grid-template-columns:1fr}}
 @media(max-width:720px){.shell{padding:0 12px 40px}.g6,.g4,.g3,.g2{grid-template-columns:1fr}
@@ -126,8 +127,15 @@ const hhmm=x=>new Date(x).toISOString().slice(11,19)+'Z';
 const chip=(text,kind)=>`<span class="chip${kind?' '+kind:''}">${esc(text)}</span>`;
 const kv=(k,v,cls)=>`<div class="kv${isNum(v)||typeof v==='string'?'':' none'}${cls?' '+cls:''}"><span>${esc(k)}</span><b>${v===null||v===undefined?NA:esc(v)}</b></div>`;
 const panel=(title,unit,body,cls)=>`<section class="panel${cls?' '+cls:''}"><header><h3>${esc(title)}</h3><span class="unit">${esc(unit||'')}</span></header><div class="body${cls&&cls.includes('flush')?' flush':''}">${body}</div></section>`;
-const stat=(label,value,unit,sub,extra)=>`<div class="stat"><span class="label">${esc(label)}${extra||''}</span>
-  <span class="value num">${esc(value)}${unit?`<em>${esc(unit)}</em>`:''}</span><span class="sub">${esc(sub||'')}</span></div>`;
+const stat=(label,value,unit,sub,extra,sparkId)=>`<div class="stat"><span class="label"><span>${esc(label)}</span>${extra||''}</span>
+  <span class="value num">${esc(value)}${unit?`<em>${esc(unit)}</em>`:''}</span><span class="sub">${esc(sub||'')}</span>${sparkId?`<div class="spark" id="${esc(sparkId)}"></div>`:''}</div>`;
+function vsBase(value,reference){
+  if(!isNum(value)||!isNum(reference)||!Number(reference))return '';
+  const r=Number(value)/Number(reference);
+  if(r>=.9&&r<=1.1)return '<span class="delta">≈ baseline</span>';
+  const text=r>1?r.toFixed(1)+'× base':Math.round((1-r)*100)+'% below';
+  return `<span class="delta ${r>1?'up':'down'}">${text}</span>`;
+}
 const track=(value,scale)=>`<span class="bar"><span class="track"><i style="width:${Math.max(0,Math.min(100,Math.round((value||0)*100/(scale||1))))}%"></i></span></span>`;
 function spark(values,host,color){
   const w=host.clientWidth||180,h=26,pad=2;
@@ -152,6 +160,26 @@ const kept=e.artifact.retained,ops=e.artifact.operations;
 const hours=isNum(win.span_ms)?win.span_ms/3600000:null;
 const awc=m.priced_calls?Number(m.reference_usd_known_subtotal):null;
 const toolCalls=counts['tool.call']||0;
+const trend=data.trend||[],prior=data.baseline;
+const RATES={human:(h,k)=>rate(h.human_tokens,k),read:h=>rate(h.visible_tokens,h.visible_events),
+  cost:(h,k)=>rate(isNum(h.reference_usd)?Number(h.reference_usd):null,k),
+  keepRate:h=>rate(h.retained,h.operations),
+  speed:h=>isNum(h.span_ms)&&h.span_ms>=60000?rate(h.retained,h.span_ms/3600000):null,
+  tools:(h,k)=>rate(h.tool_calls,k)};
+// This commit, the same shapes as a history row, so one formula serves both.
+const own={human_tokens:tok(m.human),visible_tokens:tok(m.visible_ai),visible_events:m.visible_ai.events||0,
+  reference_usd:m.priced_calls?m.reference_usd_known_subtotal:null,retained:kept,operations:ops,
+  span_ms:win.span_ms,tool_calls:counts['tool.call']||0};
+const readRow=row=>({human:RATES.human(row,row.retained),read:RATES.read(row),cost:RATES.cost(row,row.retained),
+  keepRate:RATES.keepRate(row),speed:RATES.speed(row),tools:RATES.tools(row,row.retained)});
+const rates=readRow(own);
+const baseTotals=prior?prior.totals:null;
+const base=baseTotals?readRow({human_tokens:baseTotals.human_tokens,visible_tokens:baseTotals.visible_tokens,
+  visible_events:baseTotals.visible_events,reference_usd:baseTotals.reference_usd_known_subtotal,
+  retained:baseTotals.retained,operations:baseTotals.operations,span_ms:baseTotals.span_ms,
+  tool_calls:baseTotals.tool_calls}):{};
+const baseNote=(value,fmt)=>isNum(value)?' · baseline '+fmt(Number(value)):'';
+const trendOf=key=>trend.map(row=>readRow(row)[key]);
 document.title=c.commit.slice(0,7)+' · '+data.project+' · AI-PoW run';
 if(data.demo)document.querySelector('#chips').insertAdjacentHTML('afterbegin',chip('demo data','warn'));
 
@@ -241,22 +269,23 @@ function eventRows(){
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / commit / <b>${esc(c.commit.slice(0,10))}</b>`;
 $('#chips').innerHTML=[chip(v.integrity_verified?'verified':'unverified',v.integrity_verified?'ok dot':'warn dot'),
-  chip(s.algorithm),chip(m.algorithm||'observed-v1'),chip(dur(win.span_ms)+' window')].join('');
+  chip(s.algorithm),chip(m.algorithm||'observed-v1'),chip(dur(win.span_ms)+' window'),
+  prior?chip('baseline: '+n(prior.commits,0)+' earlier commits'):chip('first recorded commit')].join('');
 
 $('#content').innerHTML=`
 <div class="pagehead"><div><h1>${esc(c.title)}</h1>
   <p class="sub">${esc(stamp(c.date))} · parent ${esc(c.parent?c.parent.slice(0,10):'root')} · trace ${esc((c.trace_root||c.proof_hash).slice(0,12))}…</p></div>
   <div class="meta">${chip(n(data.diff?data.diff.files:e.scope.files,0)+' files')}${chip('+'+n(data.diff?data.diff.insertions:null,0)+' / −'+n(data.diff?data.diff.deletions:null,0))}${chip(n(act.sessions,0)+' sessions')}</div>
 </div>
-<p class="hint" style="margin-bottom:14px">Rates first: totals scale with the size of a change, so the ratios below are what actually differ between people, tools and runs. Raw quantities sit under each one.</p>
+<p class="hint" style="margin-bottom:14px">Rates first: totals scale with the size of a change, so the ratios below are what actually differ between people, tools and runs. Each is compared with this project's own baseline — every commit recorded before this one — and the sparkline shows the last ${esc(String(trend.length))} recorded commits.</p>
 <div class="grid g6">
-  ${stat('Human steering',n(rate(tok(m.human),kept),1),'tok/edit',short(tok(m.human))+' prompt tokens · '+n(m.human.messages||0,0)+' turns')}
-  ${stat('Reading burden',n(rate(tok(m.visible_ai),m.visible_ai.events||0),0),'tok/msg',short(tok(m.visible_ai))+' shown of '+short(sum('output_tokens'))+' generated')}
-  ${stat('Unit cost',isNum(awc)&&kept?(awc/kept).toFixed(4):NA,'AWC/edit',(isNum(awc)?awc.toFixed(2)+' AWC':NA)+' · '+n(modelCalls,0)+' calls')}
-  ${stat('Retention',pct(rate(kept,ops),1),'survived',n(kept,0)+' of '+n(ops,0)+' edits · '+pct(1-rate(kept,ops),1)+' rework')}
-  ${stat('Throughput',isNum(hours)&&hours>=1/60?n(kept/hours,1):NA,'edits/h',
-    isNum(hours)&&hours<1/60?'window under a minute · rate not meaningful':dur(win.span_ms)+' observed window')}
-  ${stat('Autonomy',n(rate(toolCalls,kept),2),'calls/edit',n(toolCalls,0)+' tool calls · '+n(counts['agent.spawn']||0,0)+' sub-agents')}
+  ${stat('Human steering',n(rates.human,1),'tok/edit',short(tok(m.human))+' prompt tokens · '+n(m.human.messages||0,0)+' turns'+baseNote(base.human,v=>n(v,1)),vsBase(rates.human,base.human),'sp-human')}
+  ${stat('Reading burden',n(rates.read,0),'tok/msg',short(tok(m.visible_ai))+' shown of '+short(sum('output_tokens'))+' generated'+baseNote(base.read,v=>n(v,0)),vsBase(rates.read,base.read),'sp-read')}
+  ${stat('Unit cost',isNum(rates.cost)?rates.cost.toFixed(4):NA,'AWC/edit',(isNum(awc)?awc.toFixed(2)+' AWC':NA)+' · '+n(modelCalls,0)+' calls'+baseNote(base.cost,v=>v.toFixed(4)),vsBase(rates.cost,base.cost),'sp-cost')}
+  ${stat('Retention',pct(rates.keepRate,1),'survived',n(kept,0)+' of '+n(ops,0)+' edits · '+pct(1-rates.keepRate,1)+' rework'+baseNote(base.keepRate,v=>pct(v,0)),vsBase(rates.keepRate,base.keepRate),'sp-keep')}
+  ${stat('Throughput',isNum(rates.speed)?n(rates.speed,1):NA,'edits/h',
+    isNum(hours)&&hours<1/60?'window under a minute · rate not meaningful':dur(win.span_ms)+' observed window'+baseNote(base.speed,v=>n(v,1)),vsBase(rates.speed,base.speed),'sp-speed')}
+  ${stat('Autonomy',n(rates.tools,2),'calls/edit',n(toolCalls,0)+' tool calls · '+n(counts['agent.spawn']||0,0)+' sub-agents'+baseNote(base.tools,v=>n(v,2)),vsBase(rates.tools,base.tools),'sp-tools')}
 </div>
 <div class="grid g21">
   ${panel('Session timeline','sessions, tasks, rework','<div id="waterfall"></div><div class="legend"><span><i style="background:#39c2b4;opacity:.55"></i>session</span><span><i style="background:#9b8cff"></i>task change</span><span><i style="background:#ff9c31"></i>rework</span></div>')}
@@ -320,8 +349,16 @@ $('#content').innerHTML=`
     </div>
     <p class="note">Hashes prove the record is internally consistent and bound to this commit. They cannot prove the recorder saw everything, and nothing here attests that the code builds, passes tests or is correct.</p>`)}
 </div>`;
-waterfall();
-let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(waterfall,150)});
+function sparks(){
+  for(const [id,key] of [['sp-human','human'],['sp-read','read'],['sp-cost','cost'],
+                         ['sp-keep','keepRate'],['sp-speed','speed'],['sp-tools','tools']]){
+    const host=document.getElementById(id);
+    if(host)spark(trendOf(key),host,'#ff9c31');
+  }
+}
+function paint(){waterfall();sparks()}
+paint();
+let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(paint,150)});
 """
 
 JS_INDEX = HELPERS + r"""
@@ -355,7 +392,8 @@ const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==
   :hu[1]==='—'||ma[1]==='—'?'Not enough recorded history':'Balanced';
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
-$('#chips').innerHTML=[chip(n(lt.scored_commits,0)+' / '+n(data.commits_in_history,0)+' commits'),
+$('#chips').innerHTML=[chip(data.chain_verified?'chain verified':'chain unverified',data.chain_verified?'ok dot':'warn dot'),
+  chip(n(lt.scored_commits,0)+' / '+n(data.commits_in_history,0)+' commits'),
   chip(days===null?'span unknown':n(days,0)+(days===1?' day':' days')),chip(dur(lt.span_ms)+' recorded'),
   chip((lt.algorithms||[]).join(', ')||'no algorithm')].join('');
 
@@ -423,7 +461,7 @@ ${total?`<div class="grid">
   ${panel('Cumulative score','derived · '+total.algorithm,
     `<div class="big-total"><b class="num">${n(total.value,1)}</b>
       <span class="hint">${n(total.previous,1)} + ${n(total.delta,1)} = ${n(total.value,1)} · ${n(total.rated_commits,0)} scored commits · started at 0</span></div>
-     <p class="note">Every recorded commit score added once and unchanged. It grows with the number of recorded commits, so it measures accumulated recorded work, not quality. Average commit score ${n(stats.average,1)}.</p>`)}
+     <p class="note">Each commit appends one row to the iteration chain: <b>T = T-1 + this commit</b>, hash-linked to the row before it. Every score is added once and unchanged, so the total grows with recorded work, not with quality. Average commit score ${n(stats.average,1)}. Chain length ${n(data.chain_length,0)} rows${data.chain_verified?', linkage checked':', linkage NOT checked'}.</p>`)}
 </div>`:''}`;
 
 function line(host,sets,opts){

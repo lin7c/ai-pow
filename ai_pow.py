@@ -26,7 +26,8 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.7.0"
+EMPTY_HASH = "0" * 64
+APP_VERSION = "0.8.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -450,6 +451,8 @@ class Recorder:
                   event_id TEXT UNIQUE NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL);
                 CREATE INDEX event_epoch ON events(epoch, seq);
                 CREATE TABLE proofs(commit_id TEXT PRIMARY KEY, body TEXT NOT NULL);
+                CREATE TABLE iterations(seq INTEGER PRIMARY KEY, commit_id TEXT UNIQUE NOT NULL,
+                  hash TEXT NOT NULL, body TEXT NOT NULL);
                 CREATE TABLE files(path TEXT PRIMARY KEY, hash TEXT NOT NULL, signature TEXT NOT NULL);
             """)
             for k, v in {"version": VERSION, "max_bytes": str(max_mib * 1024**2),
@@ -645,6 +648,8 @@ class Recorder:
         p["score"] = self.evaluate(db, p)
         p["proof_hash"] = digest(p)
         db.execute("INSERT INTO proofs VALUES (?,?)", (current, canonical(p).decode()))
+        # One transaction: a proof never exists without its iteration row.
+        self._append_iteration(db, p)
         self.put(db, "base", current)
         self.put(db, "epoch", uuid.uuid4().hex)
         # Snapshot remains the last observed working state; commit does not erase unstaged work.
@@ -685,6 +690,63 @@ class Recorder:
             numbers[field] = int(match.group(1)) if match else 0
         return numbers
 
+    def _ledger(self, db):
+        db.execute("CREATE TABLE IF NOT EXISTS iterations(seq INTEGER PRIMARY KEY, commit_id TEXT UNIQUE"
+                   " NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL)")
+
+    def _last_iteration(self, db):
+        self._ledger(db)
+        row = db.execute("SELECT body,hash FROM iterations ORDER BY seq DESC LIMIT 1").fetchone()
+        return (json.loads(row[0]), row[1]) if row else (None, EMPTY_HASH)
+
+    def _append_iteration(self, db, proof):
+        """Write T = T-1 + this commit. The previous row is the only history this needs."""
+        from ai_pow_scoring import ITERATION_ALGORITHM, iteration_contribution, iteration_step
+        previous, previous_hash = self._last_iteration(db)
+        base = proof.get("base")
+        continues = previous is None or previous["commit"] == base
+        body = {"v": VERSION, "algorithm": ITERATION_ALGORITHM,
+                "seq": (previous["seq"] + 1) if previous else 1,
+                "commit": proof["commit"], "parent": base, "at": proof["summary"].get("window", {}).get("last_ms"),
+                "previous": previous_hash, "continues": bool(continues),
+                "contribution": iteration_contribution(proof)}
+        body["cumulative"] = iteration_step(previous if continues else previous, body["contribution"])
+        body["hash"] = digest({k: v for k, v in body.items() if k != "hash"})
+        db.execute("INSERT OR REPLACE INTO iterations(commit_id,hash,body) VALUES (?,?,?)",
+                   (proof["commit"], body["hash"], canonical(body).decode()))
+        return body
+
+    def rebuild_iterations(self, ref="HEAD"):
+        """Recompute the chain from the sealed proofs, oldest first."""
+        head_commit = git(self.root, "rev-parse", ref).decode().strip()
+        lineage = git(self.root, "rev-list", "--first-parent", head_commit).decode().splitlines()
+        written = 0
+        with self.connection() as db:
+            self._ledger(db)
+            db.execute("DELETE FROM iterations")
+            for commit in reversed(lineage):
+                row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
+                if not row:
+                    continue  # A commit without a sealed proof contributed nothing observable.
+                self._append_iteration(db, json.loads(row[0]))
+                written += 1
+        return {"rebuilt": written, "commits_in_lineage": len(lineage)}
+
+    def iterations(self, db, ref="HEAD", limit=60):
+        """The newest rows of the chain, with the linkage checked over that window."""
+        self._ledger(db)
+        rows = [json.loads(body) for body, in
+                db.execute("SELECT body FROM iterations ORDER BY seq DESC LIMIT ?", (limit,))]
+        verified = True
+        for index, body in enumerate(rows):
+            stored = dict(body)
+            recorded = stored.pop("hash")
+            if digest(stored) != recorded:
+                verified = False
+            if index + 1 < len(rows) and body["previous"] != rows[index + 1]["hash"]:
+                verified = False
+        return rows, verified
+
     def commit_meta_row(self, commit):
         subject = git(self.root, "show", "-s", "--format=%s%n%cI", commit).decode("utf-8", "replace").splitlines()
         return {"commit": commit, "title": subject[0][:240], "date": subject[-1]}
@@ -700,7 +762,22 @@ class Recorder:
                 current = {**current, "score": score(inputs["evidence"], current["summary"], ALGORITHM)}
             facts = derived_facts(self.root, current, inputs, self._events(db, current["epoch"]))
         parents = current.get("parents") or []
+        baseline = None
+        with self.connection() as db:
+            self._ledger(db)
+            row = db.execute("SELECT body FROM iterations WHERE commit_id=?", (current["commit"],)).fetchone()
+            chain = json.loads(row[0]) if row else None
+            if chain and chain["seq"] > 1:
+                before = db.execute("SELECT body FROM iterations WHERE seq=?", (chain["seq"] - 1,)).fetchone()
+                if before:
+                    from ai_pow_scoring import cumulative_view
+                    body = json.loads(before[0])
+                    baseline = {"commit": body["commit"], "commits": body["cumulative"].get("commits"),
+                                "totals": cumulative_view(body["cumulative"])}
+            trend = [json.loads(body)["contribution"] for body, in db.execute(
+                "SELECT body FROM iterations ORDER BY seq DESC LIMIT 12")][::-1]
         return {"project": self.root.name, "kind": "commit", "demo": False,
+                "baseline": baseline, "trend": trend,
                 "current": {**self.commit_meta_row(current["commit"]), "score": current.get("score"),
                             "summary": current["summary"], "proof_hash": current["proof_hash"],
                             "parent": parents[0] if parents else None, "tree": current.get("tree"),
@@ -708,56 +785,62 @@ class Recorder:
                 "verification": verification, "derived": facts, "diff": self.diff_stats(current)}
 
     def index_data(self, ref="HEAD", rows=60):
-        """The repository: pooled totals, per-commit trends and the cumulative score."""
-        from ai_pow_scoring import history_stats, ladder_step, lifetime_add, lifetime_finish, lifetime_start
+        """The repository, read from the iteration chain rather than replayed."""
+        from ai_pow_scoring import cumulative_view, history_stats
         head_commit = git(self.root, "rev-parse", ref).decode().strip()
         lineage = git(self.root, "rev-list", "--first-parent", head_commit).decode().splitlines()
-        visible = set(lineage[:rows])
-        totals, iteration, series = lifetime_start(), None, {}
         with self.connection() as db:
-            for commit in reversed(lineage):
-                proof = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
-                body = json.loads(proof[0]) if proof else None
-                if body:
-                    lifetime_add(totals, body)
-                iteration = ladder_step(iteration, body.get("score") if body else None)
-                if commit in visible:
-                    series[commit] = (body, iteration)
+            self._ledger(db)
+            known = db.execute("SELECT 1 FROM iterations WHERE commit_id=?", (head_commit,)).fetchone()
+        if not known:
+            # Proofs sealed before the chain existed, or a restored database.
+            with self.connection() as db:
+                sealed = db.execute("SELECT 1 FROM proofs WHERE commit_id=?", (head_commit,)).fetchone()
+            if sealed:
+                self.rebuild_iterations(ref)
+        with self.connection() as db:
+            chain, verified = self.iterations(db, ref, rows)
         history = []
-        for commit in lineage[:rows]:
-            body, running = series[commit]
-            metrics = (body or {}).get("summary") or {}
-            evidence = ((body or {}).get("score") or {}).get("evidence") or {}
-            artifact = evidence.get("artifact") or {}
-            window, activity = metrics.get("window") or {}, metrics.get("activity") or {}
-            history.append({**self.commit_meta_row(commit), "score": (body or {}).get("score"),
-                            "total": running["value"], "span_ms": window.get("span_ms"),
-                            "human_tokens": (metrics.get("human") or {}).get("tokens_measured", 0)
-                                            + (metrics.get("human") or {}).get("tokens_estimated", 0) if metrics else None,
-                            "prompts": (metrics.get("human") or {}).get("messages"),
-                            "visible_tokens": (metrics.get("visible_ai") or {}).get("tokens_measured", 0)
-                                              + (metrics.get("visible_ai") or {}).get("tokens_estimated", 0) if metrics else None,
-                            "awc": metrics.get("reference_usd_known_subtotal"),
-                            "model_calls": sum((b.get("calls") or 0) for b in (metrics.get("models") or {}).values()),
-                            "tool_calls": (metrics.get("event_counts") or {}).get("tool.call", 0),
-                            "sub_agents": (metrics.get("event_counts") or {}).get("agent.spawn", 0),
-                            "sessions": activity.get("sessions"),
-                            "failed_tool_calls": activity.get("failed_tool_calls"),
-                            "coverage_gaps": activity.get("coverage_gaps"),
-                            "input_tokens": sum((b.get("input_tokens") or 0) for b in (metrics.get("models") or {}).values()),
-                            "cached_input_tokens": sum((b.get("cached_input_tokens") or 0) for b in (metrics.get("models") or {}).values()),
-                            "output_tokens": sum((b.get("output_tokens") or 0) for b in (metrics.get("models") or {}).values()),
-                            "reasoning_tokens": sum((b.get("reasoning_tokens") or 0) for b in (metrics.get("models") or {}).values()),
-                            "actual_usd": metrics.get("actual_usd_known_subtotal"),
-                            "tasks": (evidence.get("task") or {}).get("attempts"),
-                            "operations": artifact.get("operations"), "retained": artifact.get("retained")})
-        latest = history[0] if history else None
-        first, last = (self.commit_meta_row(lineage[-1]), self.commit_meta_row(lineage[0])) if lineage else (None, None)
+        for body in chain:
+            contribution, cumulative = body["contribution"], body["cumulative"]
+            history.append({**self.commit_meta_row(body["commit"]),
+                            "seq": body["seq"], "continues": body["continues"],
+                            "score": contribution.get("score"), "total": cumulative["score_total"],
+                            "span_ms": contribution.get("span_ms"),
+                            "human_tokens": contribution.get("human_tokens"),
+                            "prompts": contribution.get("prompts"),
+                            "visible_tokens": contribution.get("visible_tokens"),
+                            "awc": contribution.get("reference_usd"),
+                            "actual_usd": contribution.get("actual_usd"),
+                            "model_calls": contribution.get("model_calls"),
+                            "tool_calls": contribution.get("tool_calls"),
+                            "failed_tool_calls": contribution.get("failed_tool_calls"),
+                            "sub_agents": contribution.get("sub_agents"),
+                            "sessions": contribution.get("sessions"),
+                            "input_tokens": contribution.get("input_tokens"),
+                            "cached_input_tokens": contribution.get("cached_input_tokens"),
+                            "output_tokens": contribution.get("output_tokens"),
+                            "reasoning_tokens": contribution.get("reasoning_tokens"),
+                            "operations": contribution.get("operations"),
+                            "retained": contribution.get("retained"),
+                            "tasks": contribution.get("task_attempts")})
+        latest = chain[0] if chain else None
+        totals = cumulative_view(latest["cumulative"]) if latest else cumulative_view({})
+        iteration = None
+        if latest:
+            before = chain[1]["cumulative"]["score_total"] if len(chain) > 1 else "0.0"
+            contribution = (latest["contribution"].get("score") or {}).get("value", "0.0")
+            iteration = {"algorithm": "commit-sum-v1", "value": totals["score_total"],
+                         "previous": before, "delta": contribution,
+                         "rated_commits": totals["scored_commits"], "starting_rating": 0}
+        scored = [row for row in history if row.get("score")]
         return {"project": self.root.name, "kind": "index", "demo": False,
-                "lifetime": lifetime_finish(totals), "iteration": iteration, "history": history,
-                "commits_in_history": len(lineage),
-                "statistics": history_stats(latest["score"], history[1:]) if latest and latest.get("score") else None,
-                "span": {"first": first, "last": last}}
+                "lifetime": totals, "iteration": iteration, "history": history,
+                "commits_in_history": len(lineage), "chain_verified": verified,
+                "chain_length": (latest["seq"] if latest else 0),
+                "statistics": history_stats(scored[0]["score"], scored[1:]) if scored else None,
+                "span": {"first": self.commit_meta_row(history[-1]["commit"]) if history else None,
+                         "last": self.commit_meta_row(history[0]["commit"]) if history else None}}
 
     def html_report(self, ref="HEAD", destination=None):
         from ai_pow_report import render
@@ -1345,6 +1428,7 @@ def main(argv=None):
             p.add_argument("--output", help="Export HTML to a new file; existing files are preserved")
     index = sub.add_parser("index")
     index.add_argument("--commit", default="HEAD")
+    index.add_argument("--rebuild", action="store_true", help="Recompute the iteration chain from sealed proofs")
     index.add_argument("--html", action="store_true", help="Generate the repository summary page")
     index.add_argument("--output", help="Export HTML to a new file; existing files are preserved")
     task = sub.add_parser("task")
@@ -1397,8 +1481,9 @@ def main(argv=None):
         elif action in {"status", "sample", "seal", "reset-boundary"}:
             result = getattr(recorder, action.replace("-", "_"))()
         elif action == "index":
-            result = ({"index": str(recorder.html_index(args.commit, args.output))}
-                      if args.html or args.output else recorder.index_data(args.commit))
+            rebuilt = recorder.rebuild_iterations(args.commit) if args.rebuild else {}
+            result = ({**rebuilt, "index": str(recorder.html_index(args.commit, args.output))}
+                      if args.html or args.output else {**rebuilt, **recorder.index_data(args.commit)})
         elif action == "report":
             result = {"report": str(recorder.html_report(args.commit, args.output))} if args.html or args.output else recorder.proof(args.commit)
         elif action == "verify":

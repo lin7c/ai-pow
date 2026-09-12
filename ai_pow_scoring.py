@@ -243,6 +243,122 @@ def _add(total, value):
     return None if total is None or value is None else total + value
 
 
+ITERATION_ALGORITHM = "iteration-v1"
+# Quantities that accumulate from T-1 to T. Unknown poisons the sum; it never becomes zero.
+SUMMABLE = ("events", "prompts", "human_tokens", "visible_events", "visible_tokens",
+            "model_calls", "input_tokens", "cached_input_tokens", "output_tokens",
+            "reasoning_tokens", "tool_calls", "failed_tool_calls", "skill_uses",
+            "sub_agents", "sessions", "runs", "coverage_gaps", "span_ms",
+            "operations", "retained", "task_attempts", "task_completed",
+            "files_changed", "priced_calls", "unpriced_calls", "actual_priced_calls")
+MONEY = ("reference_usd", "actual_usd")
+
+
+def iteration_contribution(proof):
+    """What one sealed commit adds to the running history."""
+    metrics = proof.get("summary") or {}
+    evidence = ((proof.get("score") or {}).get("evidence")) or {}
+    artifact, task, scope = (evidence.get(k) or {} for k in ("artifact", "task", "scope"))
+    counts = metrics.get("event_counts") or {}
+    window, activity = metrics.get("window") or {}, metrics.get("activity") or {}
+    def text(bucket, field):
+        data = metrics.get(bucket) or {}
+        if data.get("tokens_complete") is False:
+            return None
+        return (data.get("tokens_measured") or 0) + (data.get("tokens_estimated") or 0)
+    models = (metrics.get("models") or {}).values()
+    def model_sum(field):
+        total = 0
+        for bucket in models:
+            if bucket.get(field) is None:
+                return None
+            total += bucket[field]
+        return total
+    row = {"events": sum(counts.values()) if counts else 0,
+           "prompts": (metrics.get("human") or {}).get("messages") or 0,
+           "human_tokens": text("human", "tokens"),
+           "visible_events": (metrics.get("visible_ai") or {}).get("events") or 0,
+           "visible_tokens": text("visible_ai", "tokens"),
+           "model_calls": sum((b.get("calls") or 0) for b in models),
+           "input_tokens": model_sum("input_tokens"),
+           "cached_input_tokens": model_sum("cached_input_tokens"),
+           "output_tokens": model_sum("output_tokens"),
+           "reasoning_tokens": model_sum("reasoning_tokens"),
+           "tool_calls": counts.get("tool.call", 0),
+           "failed_tool_calls": activity.get("failed_tool_calls") or 0,
+           "skill_uses": counts.get("skill.used", 0),
+           "sub_agents": counts.get("agent.spawn", 0),
+           "sessions": activity.get("sessions") or 0,
+           "runs": activity.get("runs") or 0,
+           "coverage_gaps": activity.get("coverage_gaps") or 0,
+           "span_ms": window.get("span_ms"),
+           "operations": artifact.get("operations") or 0,
+           "retained": artifact.get("retained") or 0,
+           "task_attempts": task.get("attempts") or 0,
+           "task_completed": task.get("completed") or 0,
+           "files_changed": scope.get("files") or 0,
+           "priced_calls": metrics.get("priced_calls") or 0,
+           "unpriced_calls": metrics.get("unpriced_calls") or 0,
+           "actual_priced_calls": metrics.get("actual_priced_calls") or 0,
+           "reference_usd": metrics.get("reference_usd_known_subtotal"),
+           "actual_usd": metrics.get("actual_usd_known_subtotal"),
+           "skills": sorted(metrics.get("skills_used") or []),
+           "mcp": sorted(metrics.get("mcp_used") or [])}
+    result = proof.get("score") or None
+    row["score"] = None if not result else {"value": result["value"], "grade": result.get("grade"),
+                                            "algorithm": result.get("algorithm"),
+                                            "confidence": result.get("confidence"),
+                                            "cohort": result.get("cohort")}
+    return row
+
+
+def iteration_step(previous, contribution):
+    """T = T-1 + this commit. The previous row is the only history this needs."""
+    from decimal import Decimal, localcontext
+    before = (previous or {}).get("cumulative") or {}
+    cumulative = {}
+    for field in SUMMABLE:
+        cumulative[field] = _add(before.get(field, 0), contribution.get(field))
+    with localcontext() as context:
+        context.prec = 50
+        for field in MONEY:
+            carried = Decimal(before.get(field) or 0)
+            added = contribution.get(field)
+            cumulative[field] = format(carried + Decimal(added), "f") if added is not None else (
+                before.get(field) if before.get(field) is not None else None)
+        score_total = Decimal((before.get("score_total") or "0"))
+        if contribution.get("score"):
+            score_total += Decimal(contribution["score"]["value"])
+    cumulative["score_total"] = format(score_total, ".1f")
+    cumulative["commits"] = (before.get("commits") or 0) + 1
+    cumulative["scored_commits"] = (before.get("scored_commits") or 0) + (1 if contribution.get("score") else 0)
+    cumulative["skills"] = sorted(set(before.get("skills") or []) | set(contribution.get("skills") or []))
+    cumulative["mcp"] = sorted(set(before.get("mcp") or []) | set(contribution.get("mcp") or []))
+    cumulative["algorithms"] = sorted(set(before.get("algorithms") or [])
+                                      | ({contribution["score"]["algorithm"]} if contribution.get("score") else set()))
+    cumulative["timed_commits"] = (before.get("timed_commits") or 0) + (1 if contribution.get("span_ms") is not None else 0)
+    return cumulative
+
+
+def cumulative_view(cumulative):
+    """Present a cumulative row with its ratios recomputed from the pooled totals."""
+    def ratio(kept, observed):
+        return None if not observed else format(kept / observed, ".4f")
+    view = {key: cumulative.get(key) for key in SUMMABLE}
+    view.update(commits=cumulative.get("commits", 0), scored_commits=cumulative.get("scored_commits", 0),
+                timed_commits=cumulative.get("timed_commits", 0),
+                skills_used=len(cumulative.get("skills") or []), mcp_used=len(cumulative.get("mcp") or []),
+                algorithms=cumulative.get("algorithms") or [],
+                reference_usd_known_subtotal=cumulative.get("reference_usd"),
+                actual_usd_known_subtotal=cumulative.get("actual_usd"),
+                reference_cost_complete=bool(cumulative.get("priced_calls")) and not cumulative.get("unpriced_calls"),
+                artifact_operations=cumulative.get("operations"), artifact_retained=cumulative.get("retained"),
+                artifact_survival=ratio(cumulative.get("retained") or 0, cumulative.get("operations") or 0),
+                task_fulfillment=ratio(cumulative.get("task_completed") or 0, cumulative.get("task_attempts") or 0),
+                score_total=cumulative.get("score_total"))
+    return view
+
+
 def lifetime_start():
     """Accumulator for pooled repository totals; fold one proof at a time."""
     from decimal import Decimal

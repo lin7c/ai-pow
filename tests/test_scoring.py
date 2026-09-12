@@ -296,7 +296,8 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(totals["algorithms"], ["retention-v2"])
         self.assertNotIn("lifetime", self.rec.report_data())
 
-    def test_ladder_does_not_reset_outside_visible_history(self):
+    def test_cumulative_survives_unrecorded_commits(self):
+        """Commits nobody recorded add nothing, and they never reset the chain."""
         self.commit("first")
         self.rec.seal()
         for _ in range(31):
@@ -305,7 +306,10 @@ class ReportTests(unittest.TestCase):
         self.rec.sample()  # Establish the new interval's uncounted baseline.
         self.commit("latest")
         self.rec.seal()
-        data = self.rec.index_data(rows=31)
-        self.assertEqual(len(data["history"]), 31)
-        self.assertTrue(all(item["score"] is None for item in data["history"][1:]))
+        data = self.rec.index_data()
+        self.assertEqual(len(data["history"]), 2, "only recorded commits enter the chain")
+        self.assertEqual(data["commits_in_history"], 33)  # 2 recorded + 31 unobserved
+        self.assertEqual(data["lifetime"]["commits"], 2)
         self.assertEqual(data["iteration"]["rated_commits"], 2)
+        self.assertFalse(data["history"][0]["continues"], "the gap is reported, not hidden")
+        self.assertTrue(data["chain_verified"])

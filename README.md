@@ -18,14 +18,15 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent architecture, and sampled artifact revisions. It binds those observations to the resulting commit as a **proof vector**, derives a transparent process score from the part that can be checked against the commit, and writes an offline HTML report.
 
-**v0.7 includes:**
+**v0.8 includes:**
 
-- **Two observability pages.** `reports/<commit>.html` is a run view for one commit; `index.html` is a dashboard over the recorded history. Dense, monospace, dark, built like a telemetry console.
-- **Rates first, not totals.** Totals scale with the size of a change; the ratios are what actually differ between people, tools and setups. Both pages lead with them: human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share.
-- A session timeline drawn from real timestamps, with task changes and rework marked on it.
-- Per-file work with real paths, per-model and per-tool tables with share bars, the agent spawn tree, and event volume by type.
-- Repository trends per commit with deltas against the previous commit, a bar chart of surviving edits, and a descriptive development style with its thresholds printed.
-- **No composite score in either first screen.** The retention score sits in the proof panel; the cumulative total sits at the bottom of the dashboard. A browser check fails the build if either moves up.
+- **A real iteration chain.** Every commit appends one hash-linked row: `cumulative(T-1) + contribution(T)`. The history is accumulated, not replayed from whatever proofs happen to still exist, so pruning an old proof cannot shrink it. `aipow index --rebuild` recomputes the chain from sealed proofs.
+- **Each rate compared with the project's own baseline** — every commit recorded before this one — plus a sparkline of the last twelve recorded commits, so a number on the run view can be read without opening a second page.
+- **Two observability pages.** `reports/<commit>.html` is a run view for one commit; `index.html` is a dashboard over the chain.
+- **Rates first, not totals**: human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share.
+- A session timeline drawn from real timestamps, per-file work with real paths, per-model and per-tool share tables, the agent spawn tree, and event volume by type.
+- Gaps in the chain (amend, rebase, boundary reset, unrecorded commits) are marked, not hidden.
+- **No composite score in either first screen.** A browser check fails the build if one moves up.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
 
@@ -60,8 +61,11 @@ Existing or shared hooks are never replaced. If automatic hook installation is u
 # This commit: identity, human, machine, agent, artifact, timeline, result, provenance.
 aipow report --html
 
-# The repository: pooled totals, trends, development style, every recorded commit.
+# The repository: the iteration chain, trends, development style, every recorded commit.
 aipow index --html
+
+# Recompute the chain from sealed proofs (after an upgrade or a restored database).
+aipow index --rebuild --html
 
 # Export a shareable standalone page; existing files are not overwritten.
 aipow report --html --output /path/outside/project/commit-proof.html
