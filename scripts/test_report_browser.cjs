@@ -16,25 +16,25 @@ const {chromium} = require('playwright');
     const folder = path.resolve(process.argv[2] || 'docs/demo');
     const reports = fs.readdirSync(path.join(folder, 'reports')).filter(f => f.endsWith('.html'));
     assert.ok(reports.length >= 2, 'a run view per recorded commit');
-    // Nothing derived from a score may sit in the first screen of either page.
-    const scoreBelowStats = async () => {
-      const box = await page.locator('.grid').first().boundingBox();
-      const found = await page.evaluate(() => {
-        const hits = [];
-        document.querySelectorAll('.kv, .big-total, .panel > header h3').forEach(el => {
-          if (/score/i.test(el.textContent)) hits.push(el.getBoundingClientRect().top + scrollY);
-        });
-        return hits;
-      });
-      assert.ok(found.length > 0, 'the derived score is still reported');
-      return found.every(top => top > box.y + box.height);
+    const scoreLeads = async (label, expected) => {
+      const hero = page.locator('.score-hero');
+      assert.equal(await hero.locator('h2').textContent(), label);
+      const value = await hero.locator('.score-value').textContent();
+      assert.ok(value.startsWith(Number(expected).toLocaleString('en-US', {maximumFractionDigits: 1})));
+      const box = await hero.boundingBox();
+      assert.ok(box.y < 260, 'primary score is visible immediately');
+      assert.equal(await page.locator('details[open]').count(), 0, 'secondary metrics start collapsed');
+      for (const summary of await page.locator('details > summary').all()) {
+        await summary.click();
+        assert.equal(await summary.evaluate(el => el.parentElement.open), true);
+      }
     };
 
     // ---- Repository dashboard ----------------------------------------------
     await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
-    await page.locator('.stat').first().waitFor();
+    await page.locator('.score-hero').waitFor();
     assert.equal(await page.evaluate(() => scrollY), 0, 'the page does not jump on load');
-    assert.equal(await page.locator('.stat').count(), 8, 'eight comparable rates lead the dashboard');
+    assert.equal(await page.locator('.stat').count(), 8, 'eight supporting metrics remain available');
     const chainText = await page.locator('#content').textContent();
     assert.ok(/T-1 \+ this commit/.test(chainText), 'the dashboard states the iteration rule');
     const chain = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent));
@@ -46,7 +46,7 @@ const {chromium} = require('playwright');
     running.forEach((value, i) => assert.ok(Math.abs(value - (i ? running[i - 1] : 0) - adds[i]) < 1e-6,
                                             `row ${i} is not previous + contribution`));
     assert.equal(await page.locator('.panel svg').count() >= 4, true, 'trend charts are drawn');
-    assert.ok(await scoreBelowStats(), 'no score in the first screen of the dashboard');
+    await scoreLeads('总分数', chain.iteration.value);
     const rowCount = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length);
     assert.equal(await page.locator('tbody tr').count() >= rowCount, true, 'one table row per commit');
     const totals = await page.evaluate(() => {
@@ -66,13 +66,13 @@ const {chromium} = require('playwright');
     const proofFile = path.basename(href);
     assert.ok(fs.existsSync(path.join(folder, 'reports', proofFile)), 'the linked run view exists');
     await page.locator('tbody a').first().click();
-    await page.locator('.stat').first().waitFor();
-    assert.equal(await page.locator('.stat').count(), 6, 'six comparable rates lead the run view');
+    await page.locator('.score-hero').waitFor();
+    assert.equal(await page.locator('.stat').count(), 6, 'six supporting metrics remain available');
     assert.equal(await page.locator('.stat .spark svg').count(), 6, 'each rate carries its own trend');
     const runText = await page.locator('#content').textContent();
     assert.ok(/baseline/.test(runText), 'rates are compared with the project baseline');
     assert.ok(await page.locator('.delta').count() >= 3, 'the comparison is shown per rate');
-    assert.ok(await scoreBelowStats(), 'no score in the first screen of the run view');
+    await scoreLeads('迭代分数', await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).current.score.value));
     assert.equal(await page.locator('#waterfall svg').count(), 1, 'the session timeline is drawn');
     assert.ok(await page.locator('.tree').count() > 0, 'the agent topology is drawn');
     assert.ok(/├─|└─/.test(await page.locator('.tree').first().textContent()), 'as a tree');
@@ -88,13 +88,17 @@ const {chromium} = require('playwright');
       await page.setViewportSize({width, height: 900});
       for (const file of ['index.html', ...reports.map(name => path.join('reports', name))]) {
         await page.goto(pathToFileURL(path.join(folder, file)).href);
-        await page.locator('.stat').first().waitFor();
+        await page.locator('.score-hero').waitFor();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
                      `${file} overflows at ${width}px`);
       }
     }
+    await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
+    assert.equal(await page.locator('details:not([open])').count(), 0, 'print includes all evidence');
+    await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+    assert.equal(await page.locator('details[open]').count(), 0, 'print restores collapsed state');
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
-    console.log('Browser checks passed: two pages, rates first, no score up top, privacy, offline.');
+    console.log('Browser checks passed: score hierarchy, exact values, expandable evidence, mobile, privacy, offline.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

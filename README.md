@@ -23,10 +23,10 @@ A Git diff shows what changed. AI-PoW records more of the work behind it: human 
 - **A real iteration chain.** Every commit appends one hash-linked row: `cumulative(T-1) + contribution(T)`. The history is accumulated, not replayed from whatever proofs happen to still exist, so pruning an old proof cannot shrink it. `aipow index --rebuild` recomputes the chain from sealed proofs.
 - **Each rate compared with the project's own baseline** — every commit recorded before this one — plus a sparkline of the last twelve recorded commits, so a number on the run view can be read without opening a second page.
 - **Two observability pages.** `reports/<commit>.html` is a run view for one commit; `index.html` is a dashboard over the chain.
-- **Rates first, not totals**: human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share.
+- **Expandable efficiency metrics**: human tokens per surviving edit, reading burden per message, AWC per surviving edit, retention, throughput, tool calls per edit, cache-read share, failed-tool share.
 - A session timeline drawn from real timestamps, per-file work with real paths, per-model and per-tool share tables, the agent spawn tree, and event volume by type.
 - Gaps in the chain (amend, rebase, boundary reset, unrecorded commits) are marked, not hidden.
-- **No composite score in either first screen.** A browser check fails the build if one moves up.
+- **Scores lead both pages.** The current-version dashboard highlights the cumulative total; each iteration highlights its own 0–100 score. Supporting data is grouped into three collapsed sections.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
 
@@ -101,7 +101,7 @@ Both open with comparable **rates**, because raw totals only tell you how big th
 | cache reads / input tokens | how well the setup reuses context |
 | failed / total tool calls | how much of the automation misfired |
 
-**Run view: rates first, score last.** The comparable ratios open the page; the 0–100 retention score sits in the proof panel, labelled derived. A first screen that leads with one composite number invites gaming it.
+**Run view: iteration score first.** The 0–100 score leads alongside its evidence confidence and status. Efficiency, execution details, and verification remain available in expandable sections. The score describes recorded work, not code quality.
 
 **Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 

@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 """Offline observability pages: one run view per commit, one dashboard per repository.
 
-Nothing is fetched at view time. Both pages lead with the rates that differ
-between people and setups, not with totals that only scale with the change.
+Nothing is fetched at view time. Scores lead each page; supporting evidence
+is grouped into expandable sections.
 """
 import base64
 import hashlib
@@ -105,6 +105,22 @@ svg{display:block}
 @media print{body{background:#fff;color:#111}.topbar{position:static}.btn{display:none}
 .panel,.stat,.prov div{background:#fff}.grid,.prov{background:#d8dee6;border-color:#d8dee6}
 td,th{border-color:#e2e7ee}.kv,.note,.hint{color:#4b5563}}
+/* Score-led report: a quiet canvas, one dominant number, progressive detail. */
+:root{--bg:#0e1215;--panel:#151b1f;--panel2:#1a2227;--head:#0e1215;--line:#293238;--line2:#364249;--text:#f2f3ed;--muted:#b0bcbf;--dim:#91a1a6;--accent:#dbed9b;--teal:#83c8be;--sans:'Avenir Next','Trebuchet MS','Noto Sans CJK SC',sans-serif}
+body{font-family:var(--sans);font-size:14px}.shell{max-width:1180px;padding-inline:32px}
+.topbar{position:static}.topbar .shell{min-height:72px;height:auto;padding-block:16px}.chip{letter-spacing:0;text-transform:none;border-radius:30px}.btn{letter-spacing:0;text-transform:none;border-radius:6px;min-height:38px}
+.pagehead{margin:36px 0 24px}.pagehead h1{font-size:26px}.pagehead .sub{font-size:13px}.pagehead .meta{display:none}
+.score-hero{display:grid;grid-template-columns:1.25fr 1fr;border:1px solid var(--line2);border-radius:16px;background:var(--panel);overflow:hidden;margin-bottom:28px}
+.score-main{padding:32px 40px;background:radial-gradient(ellipse at 0 100%,#dbed9b0d,transparent 75%)}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--accent);margin-bottom:14px}.score-label{font-size:19px;font-weight:500}.score-value{display:block;font:500 clamp(72px,8vw,112px)/1.15 var(--sans);letter-spacing:-.065em;color:var(--accent);font-variant-numeric:tabular-nums;margin:10px 0}.score-value small{font-size:22px;letter-spacing:0;color:var(--dim);margin-left:12px}.score-caption{color:var(--muted);font-size:13px;max-width:430px;line-height:1.8}
+.score-aside{padding:36px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:20px}.score-aside h3{font-size:15px;font-weight:500}.score-aside .kv{padding:12px 0;font-size:14px}.score-aside .kv b{font:500 22px var(--sans)}.score-aside .note{margin:0}
+.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:30px 0 16px}.section-heading h2{font-size:19px;font-weight:500}.section-heading p{color:var(--dim);font-size:12px}
+.grid{gap:16px;background:transparent;border:0;margin-bottom:20px}.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.panel,.stat{border:1px solid var(--line);border-radius:10px;overflow:hidden}.panel>header{padding:16px 20px;background:transparent}.panel>header h3{letter-spacing:0;text-transform:none;font-size:14px}.panel .body{padding:20px}.panel .body.flush{padding:0}.stat{padding:20px}.stat .label{letter-spacing:0;text-transform:none}.stat .value{font-size:26px}.note,.hint{font-size:12px}
+.detail-group{border-top:1px solid var(--line);padding:0 0 4px}.detail-group>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:18px;padding:22px 0;font-size:16px;min-height:68px}.detail-group>summary::-webkit-details-marker{display:none}.detail-group>summary:after{content:'+';margin-left:auto;color:var(--accent);font:24px var(--mono)}.detail-group[open]>summary:after{content:'−'}.detail-group>summary span{font-size:12px;color:var(--dim)}summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.iterations{border:1px solid var(--line);border-radius:10px;overflow:hidden}.iterations td{padding:18px 20px}.iterations th{padding:14px 20px;letter-spacing:0;text-transform:none}.iterations .iteration-score{color:var(--accent);font-size:23px;white-space:nowrap}.iterations .iteration-title{display:block;color:var(--text);font-size:14px;margin-bottom:5px}.iterations .scroll{max-height:490px}.iterations .hint{font-family:var(--mono);font-size:11px}.iterations td:first-child{width:64%}.score-track{height:5px;background:var(--line2);margin-top:14px;border-radius:4px;overflow:hidden}.score-track i{display:block;height:100%;background:var(--accent)}
+@media(max-width:720px){.shell{padding-inline:18px}.topbar .shell{gap:10px}.topbar #crumb{display:none}.topbar #chips{order:5;flex-basis:100%;flex-wrap:wrap;overflow:visible}.pagehead{margin-top:26px}.pagehead h1{font-size:22px}.score-hero{grid-template-columns:1fr}.score-main{padding:26px}.score-value{font-size:80px}.score-aside{border-left:0;border-top:1px solid var(--line);padding:24px;gap:12px}.score-aside .kv{padding:7px 0}.g6{grid-template-columns:1fr}.detail-group>summary{flex-wrap:wrap;gap:6px}.detail-group>summary span{flex-basis:75%;font-size:11px}.section-heading p{display:none}.iterations td,.iterations th{padding:13px 12px}.iterations .iteration-score{font-size:21px}.iterations .opt{display:none}.score-caption{font-size:12px}}
+@media print{.score-main{background:none}.score-value,.iterations .iteration-score{color:#314b16}.score-hero{break-inside:avoid}details>summary{display:none}.score-aside{border-color:#ccc}.score-caption{color:#444}}
+
 """
 
 HELPERS = r"""
@@ -129,6 +145,22 @@ const kv=(k,v,cls)=>`<div class="kv${isNum(v)||typeof v==='string'?'':' none'}${
 const panel=(title,unit,body,cls)=>`<section class="panel${cls?' '+cls:''}"><header><h3>${esc(title)}</h3><span class="unit">${esc(unit||'')}</span></header><div class="body${cls&&cls.includes('flush')?' flush':''}">${body}</div></section>`;
 const stat=(label,value,unit,sub,extra,sparkId)=>`<div class="stat"><span class="label"><span>${esc(label)}</span>${extra||''}</span>
   <span class="value num">${esc(value)}${unit?`<em>${esc(unit)}</em>`:''}</span><span class="sub">${esc(sub||'')}</span>${sparkId?`<div class="spark" id="${esc(sparkId)}"></div>`:''}</div>`;
+const disclosure=(title,subtitle,nodes)=>{
+  const el=document.createElement('details');el.className='detail-group';
+  el.innerHTML=`<summary>${esc(title)}<span>${esc(subtitle)}</span></summary>`;
+  nodes.forEach(node=>el.append(node));return el;
+};
+function scoreLayout(hero,groups,featured){
+  const content=$('#content'),head=content.querySelector('.pagehead');
+  content.replaceChildren(head);
+  content.insertAdjacentHTML('beforeend',hero);
+  if(featured)content.insertAdjacentHTML('beforeend',featured);
+  content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>数据与依据</h2><p>按需展开，查看完整记录</p></div>');
+  groups.forEach(([title,subtitle,nodes])=>content.append(disclosure(title,subtitle,nodes)));
+  if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('演示数据','warn'));
+}
+const scoreHero=(label,value,unit,caption,aside)=>`<section class="score-hero" aria-label="${esc(label)}"><div class="score-main"><p class="eyebrow">AI-POW / SCORE REPORT</p><h2 class="score-label">${esc(label)}</h2><strong class="score-value">${n(value,1)}${unit?`<small>${esc(unit)}</small>`:''}</strong><p class="score-caption">${esc(caption)}</p></div><div class="score-aside">${aside}</div></section>`;
+
 function vsBase(value,reference){
   if(!isNum(value)||!isNum(reference)||!Number(reference))return '';
   const r=Number(value)/Number(reference);
@@ -269,15 +301,14 @@ function eventRows(){
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / commit / <b>${esc(c.commit.slice(0,10))}</b>`;
 $('#chips').innerHTML=[chip(v.integrity_verified?'verified':'unverified',v.integrity_verified?'ok dot':'warn dot'),
-  chip(s.algorithm),chip(m.algorithm||'observed-v1'),chip(dur(win.span_ms)+' window'),
-  prior?chip('baseline: '+n(prior.commits,0)+' earlier commits'):chip('first recorded commit')].join('');
+  chip('迭代版本')].join('');
 
 $('#content').innerHTML=`
 <div class="pagehead"><div><h1>${esc(c.title)}</h1>
   <p class="sub">${esc(stamp(c.date))} · parent ${esc(c.parent?c.parent.slice(0,10):'root')} · trace ${esc((c.trace_root||c.proof_hash).slice(0,12))}…</p></div>
   <div class="meta">${chip(n(data.diff?data.diff.files:e.scope.files,0)+' files')}${chip('+'+n(data.diff?data.diff.insertions:null,0)+' / −'+n(data.diff?data.diff.deletions:null,0))}${chip(n(act.sessions,0)+' sessions')}</div>
 </div>
-<p class="hint" style="margin-bottom:14px">Rates first: totals scale with the size of a change, so the ratios below are what actually differ between people, tools and runs. Each is compared with this project's own baseline — every commit recorded before this one — and the sparkline shows the last ${esc(String(trend.length))} recorded commits.</p>
+
 <div class="grid g6">
   ${stat('Human steering',n(rates.human,1),'tok/edit',short(tok(m.human))+' prompt tokens · '+n(m.human.messages||0,0)+' turns'+baseNote(base.human,v=>n(v,1)),vsBase(rates.human,base.human),'sp-human')}
   ${stat('Reading burden',n(rates.read,0),'tok/msg',short(tok(m.visible_ai))+' shown of '+short(sum('output_tokens'))+' generated'+baseNote(base.read,v=>n(v,0)),vsBase(rates.read,base.read),'sp-read')}
@@ -356,7 +387,18 @@ function sparks(){
     if(host)spark(trendOf(key),host,'#ff9c31');
   }
 }
+
+const commitGrids=[...$('#content').querySelectorAll(':scope > .grid')];
+scoreLayout(scoreHero('迭代分数',s.value,'/ 100','本次提交的评分。分数依据记录中的编辑留存情况计算。',
+  '<h3>本次评分依据</h3>'+kv('留存编辑',n(kept,0)+' / '+n(ops,0))+
+  kv('证据置信度',pct(s.confidence,0))+kv('评分状态',s.status)+
+  `<div class="score-track"><i style="width:${Math.max(0,Math.min(100,Number(s.value)||0))}%"></i></div><p class="note">${esc(s.algorithm)} · ${esc(s.grade)}。评分不代表代码质量或测试通过。</p>`),[
+  ['效率与投入','人工、成本、留存与工具调用',[commitGrids[0],commitGrids[2],commitGrids[3]]],
+  ['变更与执行过程','文件改动、会话时间线与任务记录',[commitGrids[4],commitGrids[1],commitGrids[5]]],
+  ['验证与数据来源','校验结果、证据与计算口径',[commitGrids[6]]]
+]);
 function paint(){waterfall();sparks()}
+$('#content').addEventListener('toggle',()=>requestAnimationFrame(paint),true);
 paint();
 let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(paint,150)});
 """
@@ -393,13 +435,11 @@ const pattern=hu[0]==='high'&&ma[0]==='low'?'Human-guided / low-cost AI':hu[0]==
 
 $('#crumb').innerHTML=`<b>${esc(data.project)}</b> / repository history`;
 $('#chips').innerHTML=[chip(data.chain_verified?'chain verified':'chain unverified',data.chain_verified?'ok dot':'warn dot'),
-  chip(n(lt.scored_commits,0)+' / '+n(data.commits_in_history,0)+' commits'),
-  chip(days===null?'span unknown':n(days,0)+(days===1?' day':' days')),chip(dur(lt.span_ms)+' recorded'),
-  chip((lt.algorithms||[]).join(', ')||'no algorithm')].join('');
+  chip('当前版本')].join('');
 
 $('#content').innerHTML=`
-<div class="pagehead"><div><h1>${esc(data.project)} · AI development history</h1>
-  <p class="sub">Per-commit rates over the recorded first-parent history. Pooled ratios are recomputed from pooled totals, never averaged per commit, and unknown values stay unknown.</p></div>
+<div class="pagehead"><div><h1>${esc(data.project)} <span style="color:var(--dim);font-weight:400">/ 当前版本</span></h1>
+  <p class="sub">${rows.length?'最新提交 '+esc(rows[0].commit.slice(0,7))+' · '+esc(dayOf(rows[0].date)):'暂无已记录的迭代'}</p></div>
   <div class="meta">${chip(n(lt.sessions,0)+' sessions')}${chip(n(lt.model_calls,0)+' model calls')}${chip(short(lt.artifact_operations)+' edits')}</div>
 </div>
 <div class="grid g4">
@@ -504,6 +544,18 @@ function draw(){
     {name:'reworked',values:survival.map(v=>isNum(v)?(1-v)*100:null),color:'#ff9c31'}],{max:100,fmt:v=>Math.round(v)+'%',label:'Retention and rework'});
   bars('#chart-volume',series.map(p=>p.retained),series.map(p=>p.commit.slice(0,7)+' · '+n(p.retained,0)+' surviving edits'));
 }
+
+const indexGrids=[...$('#content').querySelectorAll(':scope > .grid')];
+const historyView=`<div class="section-heading"><h2>迭代记录</h2><p>最新在前 · 点击标题查看本次评分</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>版本 / 变更</th><th class="r">迭代分数</th><th class="r opt">累计总分</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">暂无迭代记录</td></tr>'}</tbody></table></div></section>`;
+scoreLayout(scoreHero('总分数',total?total.value:null,'','截至当前版本，所有已评分迭代的累计总分。',
+  '<h3>总分如何变化</h3>'+kv('上一版本总分',n(total?total.previous:null,1))+
+  kv('本次迭代贡献',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('已评分迭代',n(total?total.rated_commits:lt.scored_commits,0))+
+  '<p class="note">总分 = 上一版本总分 + 本次迭代分数。累计值随已记录工作增长，不代表代码质量。</p>'),[
+  ['效率与趋势','人工投入、成本、留存及执行效率',indexGrids.slice(0,4)],
+  ['累计用量与开发方式','模型、工具、产物与开发特征',[indexGrids[4],indexGrids[6]]],
+  ['评分口径与累计规则','评分算法、累计公式与链路校验',indexGrids.slice(7)]
+],historyView);
+$('#content').addEventListener('toggle',()=>requestAnimationFrame(draw),true);
 draw();
 let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(draw,150)});
 """
@@ -521,7 +573,12 @@ def _text(value):
 
 def _page(data, script, title, action):
     payload = json.dumps(data, ensure_ascii=True, separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    script = script + "\ndocument.getElementById('print').addEventListener('click',()=>window.print());"
+    script = script + r"""
+let printCollapsed=[];
+addEventListener('beforeprint',()=>{printCollapsed=[...document.querySelectorAll('details:not([open])')];printCollapsed.forEach(el=>el.open=true);dispatchEvent(new Event('resize'));});
+addEventListener('afterprint',()=>{printCollapsed.forEach(el=>el.open=false);printCollapsed=[];});
+document.getElementById('print').addEventListener('click',()=>window.print());
+"""
     script_hash = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
             + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'sha256-' + script_hash
@@ -544,7 +601,7 @@ def _page(data, script, title, action):
 def render(data):
     """The per-commit run view."""
     link = (data.get("links") or {}).get("index")
-    action = '<a class="btn" href="' + link + '">Repository ▸</a>' if link else ""
+    action = '<a class="btn" href="' + link + '">← 当前版本</a>' if link else ""
     return _page(data, JS_COMMIT, "AI-PoW · Commit run", action)
 
 
