@@ -15,7 +15,7 @@ const {chromium} = require('playwright');
     page.on('request', request => {if (/^https?:/.test(request.url())) requests.push(request.url());});
     const folder = path.resolve(process.argv[2] || 'docs/demo');
     const reports = fs.readdirSync(path.join(folder, 'reports')).filter(f => f.endsWith('.html'));
-    assert.ok(reports.length >= 2, 'one proof page per commit');
+    assert.ok(reports.length >= 2, 'a proof page per recorded commit');
     const below = async (selector, reference) => {
       const a = await page.locator(selector).first().boundingBox();
       const b = await page.locator(reference).first().boundingBox();
@@ -29,7 +29,8 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('.five div').count(), 5, 'five pooled quantities first');
     assert.equal(await page.locator('.chart-cell svg path').count(), 6, 'six trend lines');
     assert.equal(await page.locator('.level').count(), 3, 'development style levels');
-    assert.equal(await page.locator('.row').count(), reports.length, 'one row per recorded commit');
+    const rowCount = await page.evaluate(() => JSON.parse(document.querySelector('#report-data').textContent).history.length);
+    assert.equal(await page.locator('.row').count(), rowCount, 'one row per recorded commit');
     assert.ok(await below('.total-figure', '.five'), 'the cumulative score is never the first screen');
     const totals = await page.evaluate(() => {
       const d = JSON.parse(document.querySelector('#report-data').textContent);
@@ -45,6 +46,8 @@ const {chromium} = require('playwright');
 
     // ---- Commit proof -------------------------------------------------------
     const href = await page.locator('.row').first().getAttribute('href');
+    const proofFile = path.basename(href);
+    assert.ok(fs.existsSync(path.join(folder, 'reports', proofFile)), 'the linked proof page exists');
     await page.locator('.row').first().click();
     await page.locator('.five').waitFor();
     assert.ok(href.includes('reports/'), 'each row opens that commit proof');
@@ -64,14 +67,15 @@ const {chromium} = require('playwright');
       assert.ok(text.includes(label), `the proof shows ${label}`);
     if (process.env.REPORT_SCREENSHOT) await page.screenshot({path: process.env.REPORT_SCREENSHOT, fullPage: true});
 
+    // Every generated page, at every width, with the widest recorded labels.
     for (const width of [375, 720, 1024]) {
       await page.setViewportSize({width, height: 900});
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
-                   `commit page overflow at ${width}px`);
-      await page.goto(pathToFileURL(path.join(folder, 'index.html')).href);
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
-                   `index page overflow at ${width}px`);
-      await page.goto(pathToFileURL(path.join(folder, 'reports', reports[0])).href);
+      for (const file of ['index.html', ...reports.map(name => path.join('reports', name))]) {
+        await page.goto(pathToFileURL(path.join(folder, file)).href);
+        await page.locator('.five').waitFor();
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true,
+                     `${file} overflows at ${width}px`);
+      }
     }
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);

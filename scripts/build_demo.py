@@ -157,6 +157,8 @@ def example(index, commit, shape):
 def main():
     output = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs/demo"
     (output / "reports").mkdir(parents=True, exist_ok=True)
+    for stale in (output / "reports").glob("*.html"):
+        stale.unlink()  # Never leave proofs of commits this demo no longer covers.
     found = commits(len(SHAPES))
     rows = [example(i, commit, SHAPES[i]) for i, commit in enumerate(found)]
     running, history = None, []
