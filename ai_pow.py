@@ -25,7 +25,7 @@ import time
 import uuid
 
 VERSION = "0.1.0"
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.4.0"
 ZERO = "0" * 64
 MAX_EVENT = 16 * 1024
 MAX_FILES = 2000
@@ -239,18 +239,49 @@ def _summary_v1(events):
             "semantic_edits": None, "quality": None}
 
 
-def summary(events, algorithm="observed-v2"):
+MAX_AGENT_NODES = 128
+MAX_TOOL_NAMES = 32
+
+
+def _agent_block(agents, tools):
+    """Reconstruct the observed agent structure; unknown parents stay unknown."""
+    parent, order = agents["parent"], agents["order"]
+    known, depths = set(order), {}
+    for start in order:
+        node, chain, seen = start, [], set()
+        # Walk up to a root, an already-measured ancestor, or a cycle guard.
+        while node in known and node not in depths and node not in seen:
+            seen.add(node)
+            chain.append(node)
+            node = parent.get(node) or ""
+        level = depths.get(node, 0)
+        for item in reversed(chain):
+            level += 1
+            depths[item] = level
+    ranked = sorted(tools.items(), key=lambda item: (-item[1], item[0]))
+    return {"spawns": agents["spawns"], "stops": agents["stops"], "nodes": len(order),
+            "parents_known": sum(1 for node in order if parent.get(node)),
+            "max_depth": max((depths[node] for node in order), default=0),
+            "graph": [[node, parent.get(node) or ""] for node in order],
+            "tool_calls_by_name": [[name, calls] for name, calls in ranked[:MAX_TOOL_NAMES]],
+            "other_tool_calls": sum(calls for _, calls in ranked[MAX_TOOL_NAMES:]),
+            "truncated": agents["truncated"] or len(ranked) > MAX_TOOL_NAMES}
+
+
+def summary(events, algorithm="observed-v3"):
     """Keep unknown totals null and make byte estimates stream-chunk invariant.
 
-    Retain the original reducer for verification of proofs created before the
+    Retain the original reducers for verification of proofs created before the
     accounting review. A new report never silently rewrites an old proof.
     """
     if algorithm == "observed-v1":
         with localcontext() as ctx:
             ctx.prec = 28
             return _summary_v1(events)
-    if algorithm != "observed-v2":
+    if algorithm not in {"observed-v2", "observed-v3"}:
         raise ValueError("Unsupported summary algorithm")
+    agents = {"parent": {}, "order": [], "spawns": 0, "stops": 0, "truncated": False}
+    tool_names = {}
     text = {kind: {"events": 0, "methods": {}, "unknown_token_events": 0}
             for kind in ("human.message", "assistant.visible")}
     missing, prices, calls = {}, {}, {}
@@ -272,6 +303,19 @@ def summary(events, algorithm="observed-v2"):
                         bucket["tokens"] = (bucket["bytes"] + 3) // 4
                     else:
                         bucket["tokens"] += tokens
+            if kind == "tool.call":
+                name = str(data.get("name", "unknown"))[:128]
+                tool_names[name] = tool_names.get(name, 0) + 1
+            if kind in {"agent.spawn", "agent.stop"}:
+                agents["spawns" if kind == "agent.spawn" else "stops"] += 1
+                node = data.get("agent_id")
+                if kind == "agent.spawn" and isinstance(node, str) and node:
+                    if node in agents["parent"] or len(agents["order"]) >= MAX_AGENT_NODES:
+                        agents["truncated"] = agents["truncated"] or node not in agents["parent"]
+                    else:
+                        agents["order"].append(node)
+                        origin = data.get("parent_agent_id")
+                        agents["parent"][node] = origin if isinstance(origin, str) and origin and origin != "unknown" else ""
             if kind == "model.usage":
                 key = data["model"] + "/" + data["measurement"]
                 counts = missing.setdefault(key, {})
@@ -312,6 +356,8 @@ def summary(events, algorithm="observed-v2"):
     result["overall_score"] = None
     result["efficiency"] = None
     result["ranking_eligible"] = False
+    if algorithm == "observed-v3":
+        result["agent"] = _agent_block(agents, tool_names)
     return result
 
 
@@ -580,7 +626,7 @@ class Recorder:
         return evaluate_score(self.root, proof, self._events(db, proof["epoch"]))
 
     def report_data(self, ref="HEAD", view="iteration"):
-        from ai_pow_scoring import history_stats, ladder_step
+        from ai_pow_scoring import history_stats, ladder_step, lifetime_add, lifetime_finish, lifetime_start
         if view not in {"iteration", "latest"}:
             raise ValueError("Report view must be iteration or latest")
         current = self.proof(ref)
@@ -595,6 +641,7 @@ class Recorder:
                         "score": proof.get("score"), "summary": proof["summary"], "proof_hash": proof["proof_hash"]}
             history = []
             iteration = None
+            totals = None
             if view == "iteration":
                 # Replay the entire bounded first-parent lineage, not just the
                 # visible 30 rows. Never reset ratings as rows leave the view.
@@ -602,11 +649,17 @@ class Recorder:
                 ancestors = lineage[1:31]
                 visible = set(lineage[:31])
                 ratings = {}
+                # One pass: the ladder and the pooled lifetime totals share the
+                # same population, and neither keeps the proof bodies in memory.
+                totals = lifetime_start()
                 for commit in reversed(lineage):
                     row = db.execute("SELECT body FROM proofs WHERE commit_id=?", (commit,)).fetchone()
-                    saved = json.loads(row[0]).get("score") if row else None
+                    body = json.loads(row[0]) if row else None
+                    saved = body.get("score") if body else None
                     if commit == current["commit"]:
                         saved = current_sealed_score
+                    if body:
+                        lifetime_add(totals, {**body, "score": saved})
                     iteration = ladder_step(iteration, saved)
                     if commit in visible:
                         ratings[commit] = iteration
@@ -619,7 +672,7 @@ class Recorder:
                         history.append({"commit": commit, "title": subject[0][:240], "date": subject[-1], "score": None})
                     history[-1]["iteration"] = ratings[commit]
             return {"project": self.root.name, "view": view, "current": decorate(current), "history": history,
-                    "iteration": iteration,
+                    "iteration": iteration, "lifetime": lifetime_finish(totals) if totals else None,
                     "statistics": history_stats(current["score"], history) if view == "iteration" else None,
                     "verification": verification, "demo": False}
 
@@ -815,8 +868,8 @@ class Recorder:
 SCORING_TYPES = {"human.message", "file.observed", "task.change", "coverage.gap"}
 
 
-def evaluate_score(root, proof, events):
-    from ai_pow_scoring import collect_evidence, fingerprints, score
+def evaluate_score(root, proof, events, algorithm=None):
+    from ai_pow_scoring import ALGORITHM, collect_evidence, fingerprints, score
     selected = []
     for event in events:
         if event["type"] in SCORING_TYPES:
@@ -862,7 +915,7 @@ def evaluate_score(root, proof, events):
     for path_id in wanted - known_paths:
         units[path_id] = []  # A verified deletion is a surviving outcome too.
     evidence = collect_evidence(selected, units, scope_units, len(changed), limited)
-    return score(evidence, proof["summary"])
+    return score(evidence, proof["summary"], algorithm or ALGORITHM)
 
 
 def verify_proof(root, proof, events):
@@ -899,7 +952,8 @@ def verify_proof(root, proof, events):
     if bool(count) != (p["first_seq"] is not None) or totals != p["summary"]:
         raise ValueError("Summary/range mismatch")
     if p.get("score"):
-        if evaluate_score(root, p, scoring_events) != p["score"]:
+        # Recompute under the algorithm the proof recorded, not the installed one.
+        if evaluate_score(root, p, scoring_events, p["score"].get("algorithm", "unrecorded")) != p["score"]:
             raise ValueError("Score calculation/version mismatch")
     return {"integrity_verified": True, "git_tree_verified": True, "events": count,
             "proof_hash": h, "trust": "local-self-reported", "completeness_verified": False,
@@ -976,7 +1030,8 @@ def claude_hook(recorder, payload):
             event_id = digest([data["session_id"], data["call_id"], typ])
     elif kind in {"SubagentStart", "SubagentStop"}:
         typ = "agent.spawn" if kind == "SubagentStart" else "agent.stop"
-        data["parent_agent_id"] = "unknown"
+        origin = payload.get("parent_agent_id")
+        data["parent_agent_id"] = str(origin)[:128] if origin else "unknown"
     elif kind in {"SessionStart", "Stop", "SessionEnd"}:
         typ = "run.start" if kind == "SessionStart" else "run.stop"
     else:

@@ -6,8 +6,13 @@ import hashlib
 import json
 import math
 
-ALGORITHM = "balanced-v1"
-WEIGHTS = {"human": .28, "artifact": .28, "task": .14, "efficiency": .30}
+ALGORITHM = "retention-v2"
+# Retention only. Resource use is recorded as fact in the proof vector and is
+# deliberately not scored: judging efficiency requires a comparable result,
+# which this recorder cannot observe.
+WEIGHTS = {"human": .40, "artifact": .40, "task": .20}
+# Frozen weights of the superseded algorithm. Kept so old proofs verify.
+BALANCED_WEIGHTS = {"human": .28, "artifact": .28, "task": .14, "efficiency": .30}
 LABELS = {"human": "Input retention", "artifact": "Artifact survival",
           "task": "Task fulfillment", "efficiency": "Resource discipline"}
 
@@ -120,18 +125,18 @@ def grade(score):
     return next(label for threshold, label in ((90, "S"), (80, "A"), (65, "B"), (50, "C"), (35, "D"), (0, "E")) if score >= threshold)
 
 
-def score(evidence, metrics):
-    """Smooth 0–100 score with a neutral 50 prior and explicit confidence.
+def _score_balanced_v1(evidence, metrics):
+    """Superseded algorithm, retained verbatim so sealed proofs keep verifying.
 
-    Missing dimensions keep their weight and neutral prior. Observed retention
-    uses Beta(2,2) smoothing; evidence never silently becomes a perfect score.
+    Never edit this body: verification recomputes it and compares the result
+    with the stored score. Behaviour changes belong in a new algorithm.
     """
     parts = {}
     def retain(key, numerator, denominator, reliability=1):
         ratio = numerator / denominator if denominator else None
         quality = (numerator + 2) / (denominator + 4) if denominator else .5
         confidence = (denominator / (denominator + 4) if denominator else 0) * reliability
-        parts[key] = {"label": LABELS[key], "weight": str(WEIGHTS[key]),
+        parts[key] = {"label": LABELS[key], "weight": str(BALANCED_WEIGHTS[key]),
                       "ratio": None if ratio is None else format(ratio, ".6f"),
                       "quality": format(quality, ".6f"), "confidence": format(confidence, ".6f")}
     art, human, task = (evidence[k] for k in ("artifact", "human", "task"))
@@ -167,15 +172,155 @@ def score(evidence, metrics):
         for part in parts.values():
             part["confidence"] = format(float(part["confidence"]) / (1 + evidence["gaps"]), ".6f")
     # Every component contributes around neutral; retain the missing-data penalty.
-    latent = .5 + sum(WEIGHTS[k] * float(p["confidence"]) * (float(p["quality"]) - .5) for k, p in parts.items())
+    latent = .5 + sum(BALANCED_WEIGHTS[k] * float(p["confidence"]) * (float(p["quality"]) - .5) for k, p in parts.items())
     value = 100 / (1 + math.exp(-5 * (latent - .5)))
-    confidence = sum(WEIGHTS[k] * float(p["confidence"]) for k, p in parts.items())
+    confidence = sum(BALANCED_WEIGHTS[k] * float(p["confidence"]) for k, p in parts.items())
     units = evidence["scope"]["units"]
     cohort = "small" if units < 8 else "medium" if units < 32 else "large" if units < 128 else "extensive"
-    return {"algorithm": ALGORITHM, "value": format(value, ".1f"), "grade": grade(round(value, 1)),
+    return {"algorithm": "balanced-v1", "value": format(value, ".1f"), "grade": grade(round(value, 1)),
             "confidence": format(confidence, ".4f"), "status": "provisional" if confidence < .65 else "established",
             "cohort": cohort, "components": parts, "evidence": evidence,
             "meaning": "process-retention-and-resource-score", "quality_verified": False}
+
+
+def _score_retention_v2(evidence):
+    """Retention-only 0-100 score: how much observed work survived into the commit.
+
+    Resource use is not an input. A dimension with no evidence cedes its weight
+    to the observed ones instead of pulling every score toward the neutral 50,
+    and the score states which dimensions it was actually computed from.
+    """
+    parts = {}
+    def retain(key, numerator, denominator, reliability=1):
+        ratio = numerator / denominator if denominator else None
+        # Beta(2,2) smoothing: a single observation cannot reach 0 or 1.
+        quality = (numerator + 2) / (denominator + 4) if denominator else .5
+        confidence = (denominator / (denominator + 4) if denominator else 0) * reliability
+        parts[key] = {"label": LABELS[key], "weight": format(WEIGHTS[key], ".2f"),
+                      "ratio": None if ratio is None else format(ratio, ".6f"),
+                      "quality": format(quality, ".6f"), "confidence": format(confidence, ".6f")}
+    art, human, task = (evidence[k] for k in ("artifact", "human", "task"))
+    coverage = art["checked_operations"] / art["operations"] if art["operations"] else 0
+    retain("artifact", art["retained"], art["operations"], coverage * (.8 if evidence["limited"] else 1))
+    # Token mass weights prompts, but sample confidence depends on prompt count.
+    hratio = float(human["retained_weight"]) / human["observed_weight"] if human["observed_weight"] else 0
+    retain("human", hratio * human["linked_prompts"], human["linked_prompts"],
+           .7 * (human["linked_prompts"] / human["prompts"] if human["prompts"] else 0))
+    retain("task", task["completed"], task["attempts"])
+    if evidence.get("gaps"):
+        for part in parts.values():
+            part["confidence"] = format(float(part["confidence"]) / (1 + evidence["gaps"]), ".6f")
+    observed = {key: WEIGHTS[key] for key, part in parts.items() if float(part["confidence"]) > 0}
+    total = sum(observed.values())
+    latent = .5
+    for key, part in parts.items():
+        effective = observed.get(key, 0) / total if total else 0
+        part["effective_weight"] = format(effective, ".6f")
+        latent += effective * float(part["confidence"]) * (float(part["quality"]) - .5)
+    value = 100 / (1 + math.exp(-5 * (latent - .5)))
+    # Confidence follows the same basis as the score: the dimensions it used.
+    confidence = sum(float(parts[key]["effective_weight"]) * float(parts[key]["confidence"]) for key in parts)
+    units = evidence["scope"]["units"]
+    cohort = "small" if units < 8 else "medium" if units < 32 else "large" if units < 128 else "extensive"
+    return {"algorithm": "retention-v2", "value": format(value, ".1f"), "grade": grade(round(value, 1)),
+            "confidence": format(confidence, ".4f"), "status": "provisional" if confidence < .65 else "established",
+            "cohort": cohort, "components": parts, "evidence": evidence,
+            "dimensions": {"scored": sorted(observed), "unscored": sorted(set(parts) - set(observed))},
+            "meaning": "process-retention-score", "quality_verified": False}
+
+
+def score(evidence, metrics=None, algorithm=ALGORITHM):
+    """Dispatch on the recorded algorithm; a verifier never reinterprets old proofs."""
+    if algorithm == "retention-v2":
+        return _score_retention_v2(evidence)
+    if algorithm == "balanced-v1":
+        return _score_balanced_v1(evidence, metrics)
+    raise ValueError("Unsupported score algorithm: " + str(algorithm))
+
+
+def _add(total, value):
+    """None means unknown and stays unknown; it is never treated as zero."""
+    return None if total is None or value is None else total + value
+
+
+def lifetime_start():
+    """Accumulator for pooled repository totals; fold one proof at a time."""
+    from decimal import Decimal
+    return {"commits": 0, "scored_commits": 0, "human_tokens": 0, "prompts": 0,
+            "visible_tokens": 0, "visible_events": 0, "model_calls": 0,
+            "input_tokens": 0, "output_tokens": 0, "reasoning_tokens": 0,
+            "tool_calls": 0, "sub_agents": 0, "skills": set(), "mcp": set(),
+            "artifact_operations": 0, "artifact_retained": 0,
+            "task_attempts": 0, "task_completed": 0, "priced_calls": 0,
+            "unpriced_calls": 0, "cost": Decimal(0), "algorithms": set()}
+
+
+def lifetime_add(totals, proof):
+    """Add one recorded commit. Unknown stays unknown; it never becomes zero."""
+    from decimal import Decimal, localcontext
+    metrics = proof.get("summary") or {}
+    totals["commits"] += 1
+    for field, bucket, count in (("human_tokens", "human", "prompts"),
+                                 ("visible_tokens", "visible_ai", "visible_events")):
+        text = metrics.get(bucket) or {}
+        tokens = None if text.get("tokens_complete") is False else (
+            (text.get("tokens_measured") or 0) + (text.get("tokens_estimated") or 0))
+        totals[field] = _add(totals[field], tokens)
+        totals[count] += text.get("messages", text.get("events", 0)) or 0
+    for model in (metrics.get("models") or {}).values():
+        totals["model_calls"] += model.get("calls") or 0
+        for field in ("input_tokens", "output_tokens", "reasoning_tokens"):
+            totals[field] = _add(totals[field], model.get(field))
+    counts = metrics.get("event_counts") or {}
+    totals["tool_calls"] += counts.get("tool.call", 0)
+    totals["sub_agents"] += counts.get("agent.spawn", 0)
+    totals["skills"].update(metrics.get("skills_used") or [])
+    totals["mcp"].update(metrics.get("mcp_used") or [])
+    totals["priced_calls"] += metrics.get("priced_calls") or 0
+    totals["unpriced_calls"] += metrics.get("unpriced_calls") or 0
+    if metrics.get("reference_usd_known_subtotal") is not None:
+        with localcontext() as context:
+            context.prec = 50
+            totals["cost"] += Decimal(metrics["reference_usd_known_subtotal"])
+    result = proof.get("score")
+    if not result:
+        return totals
+    totals["scored_commits"] += 1
+    totals["algorithms"].add(result.get("algorithm"))
+    evidence = result.get("evidence") or {}
+    artifact, task = evidence.get("artifact") or {}, evidence.get("task") or {}
+    totals["artifact_operations"] += artifact.get("operations") or 0
+    totals["artifact_retained"] += artifact.get("retained") or 0
+    totals["task_attempts"] += task.get("attempts") or 0
+    totals["task_completed"] += task.get("completed") or 0
+    return totals
+
+
+def lifetime_finish(totals):
+    """Recompute ratios from pooled numerators and denominators.
+
+    Averaging per-commit percentages would give a one-line commit the same
+    weight as a large one, so the ratios are always pooled, never averaged.
+    """
+    def ratio(kept, observed):
+        return None if not observed else format(kept / observed, ".4f")
+    result = {key: value for key, value in totals.items()
+              if key not in {"skills", "mcp", "cost", "algorithms"}}
+    result.update(skills_used=len(totals["skills"]), mcp_used=len(totals["mcp"]),
+                  reference_usd_known_subtotal=format(totals["cost"], "f") if totals["priced_calls"] else None,
+                  reference_cost_complete=bool(totals["priced_calls"]) and not totals["unpriced_calls"],
+                  artifact_survival=ratio(totals["artifact_retained"], totals["artifact_operations"]),
+                  task_fulfillment=ratio(totals["task_completed"], totals["task_attempts"]),
+                  algorithms=sorted(a for a in totals["algorithms"] if a))
+    return result
+
+
+def lifetime(proofs):
+    """Pooled physical totals across recorded commits."""
+    totals = lifetime_start()
+    for proof in proofs:
+        lifetime_add(totals, proof)
+    return lifetime_finish(totals)
 
 
 def history_stats(current, history):

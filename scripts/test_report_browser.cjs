@@ -18,6 +18,20 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('.history-row').count(), 6);
     assert.equal(await page.locator('.history-section').last().isVisible(), true);
     assert.equal(await page.locator('.ladder-card').isVisible(), true);
+    assert.equal(await page.locator('.vblock').count(), 6);
+    assert.equal(await page.locator('.component').count(), 3, 'retention-v2 scores three dimensions');
+    assert.equal(await page.locator('.tree div').count() > 0, true, 'agent structure is drawn');
+    assert.equal(await page.locator('.lifetime').isVisible(), true);
+    const pooled = await page.evaluate(() => {
+      const d = JSON.parse(document.querySelector('#report-data').textContent);
+      const rows = [d.current, ...d.history];
+      const ops = rows.reduce((t, p) => t + p.score.evidence.artifact.operations, 0);
+      const kept = rows.reduce((t, p) => t + p.score.evidence.artifact.retained, 0);
+      return {expected: kept / ops, reported: Number(d.lifetime.artifact_survival),
+              mean: rows.reduce((t, p) => t + p.score.evidence.artifact.retained / p.score.evidence.artifact.operations, 0) / rows.length};
+    });
+    assert.ok(Math.abs(pooled.expected - pooled.reported) < 0.0001, 'lifetime ratio is pooled');
+    assert.ok(Math.abs(pooled.mean - pooled.reported) > 0.0001, 'pooled ratio is not the mean of ratios');
     await page.locator('#chart-scores').click();
     assert.equal(await page.locator('#chart-label').textContent(), 'COMMIT SCORE / 100');
     await page.locator('#chart-ladder').click();
@@ -27,6 +41,7 @@ const {chromium} = require('playwright');
     await page.locator('#latest').click();
     assert.equal(await page.locator('.history-section').last().isVisible(), false);
     assert.equal(await page.locator('.ladder-card').isVisible(), false);
+    assert.equal(await page.locator('.lifetime').isVisible(), false);
     await page.locator('#iteration').click();
     await page.locator('.history-row').first().click();
     assert.equal(await page.locator('#commit-dialog').isVisible(), true);

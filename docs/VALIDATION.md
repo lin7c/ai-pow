@@ -20,8 +20,12 @@ The standalone suite covers:
 - Latest-only data isolation, first-parent history averages, cohort/algorithm separation, and refusing to overwrite exports.
 - Scores use committed blobs rather than unstaged working-tree content.
 - Zero-based exact addition of existing commit scores, no extra weighting or cap, omitted unscored commits, and preservation of contributions older than the 30 visible history rows.
+- Resource quantities leaving the score unchanged, weight ceding when a dimension has no evidence, and sparse evidence staying near the neutral prior.
+- Proofs sealed with balanced-v1/observed-v2 verifying under their own algorithms, and rejection of a proof relabelled with another or an unknown algorithm.
+- Pooled repository totals: ratios recomputed from pooled quantities rather than averaged, unknown values never counted as zero.
+- Agent-structure reduction: parent links, depth, per-tool counts, node/name bounds, repeated spawns, and reported parent cycles.
 
-The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, and overflow checks at 375, 720, 1024, and 1440 pixels. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
+The optional Playwright check exercises report mode switching, grade filters, commit dialogs, Escape behavior, no external requests, overflow checks at 375, 720, 1024, and 1440 pixels, the six proof-vector blocks, the three scored dimensions, the rendered agent structure, and a pooled lifetime ratio that differs from the mean of its per-commit ratios. The included preview was inspected visually. Synthetic demo data is labeled and generated with the production score policy; it is not a real project benchmark.
 
 Run the current suite with:
 
@@ -37,21 +41,23 @@ Related laintas-cli integration tests were also run in the development workspace
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/benchmark.py
 ```
 
-The application-0.2 benchmark created 1,000 files of 1 KiB, established a baseline, sampled unchanged files, recorded 1,000 simple tool-call events, and sealed a commit with an HTML report:
+The 0.4.0 benchmark created 1,000 files of 1 KiB, established a baseline, sampled unchanged files, recorded 1,000 simple tool-call events, and sealed a commit with an HTML report:
 
 | Measurement | Observed value |
 | --- | ---: |
-| Unchanged-file sample | 123.60 ms |
+| Unchanged-file sample | 191.68 ms |
 | Source content reread | 0 bytes |
-| Event write latency, median | 14.16 ms |
-| Event write latency, P95 | 25.74 ms |
+| Event write latency, median | 13.72 ms |
+| Event write latency, P95 | 20.38 ms |
 | Database including file state | 1,175,552 bytes |
-| Current traced Python allocations after recording | 237.19 KiB |
-| Peak traced Python allocations while recording | 2,295.74 KiB |
-| Commit sealing, verification, and HTML generation | 2,766.84 ms |
-| Peak traced Python allocations while sealing | 2,309.51 KiB |
-| Generated HTML | 33,185 bytes |
+| Current traced Python allocations after recording | 208.74 KiB |
+| Peak traced Python allocations while recording | 2,275.77 KiB |
+| Commit sealing, verification, and HTML generation | 2,935.02 ms |
+| Peak traced Python allocations while sealing | 2,331.86 KiB |
+| Generated HTML | 42,480 bytes |
 | Python threads after completion | 1 |
+
+The report grew from roughly 33 KB to 42 KB with the proof vector and repository totals. Sampling and sealing timings vary between runs on this machine; the previous release measured 123.60 ms and 2,766.84 ms for the same two steps.
 
 This is a local short-duration measurement, not a latency or leak guarantee. System load, filesystem layout, hardware, event payloads, and validation depth affect results. `tracemalloc` excludes SQLite native allocations, interpreter RSS, and Git subprocess memory. Journal files and exports are not included in the database size.
 

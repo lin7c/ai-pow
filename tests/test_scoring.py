@@ -2,7 +2,7 @@ import copy
 import unittest
 
 import ai_pow as pow
-from ai_pow_scoring import collect_evidence, fingerprints, history_stats, score, ladder_step
+from ai_pow_scoring import collect_evidence, fingerprints, history_stats, lifetime, score, ladder_step
 from ai_pow_report import render
 import test_protocol
 
@@ -34,11 +34,58 @@ class ScoringTests(unittest.TestCase):
         self.assertEqual(values, sorted(values))
         self.assertGreater(values[-1], values[0] + 25)
 
-    def test_cost_monotonic_and_smooth(self):
-        values = [float(score(*fixture(cost=c))["value"]) for c in (.01, 1, 10, 100)]
-        self.assertEqual(values, sorted(values, reverse=True))
-        a, b = (float(score(*fixture(cost=c))["value"]) for c in (2, 2.01))
-        self.assertLess(abs(a-b), .2)
+    def test_resource_use_never_changes_the_score(self):
+        """Spending less must not look like better work; results are unobservable."""
+        values = {score(*fixture(cost=c))["value"] for c in (.01, 1, 10, 1000)}
+        self.assertEqual(len(values), 1)
+        evidence, metrics = fixture()
+        metrics.update(event_counts={"tool.call": 9000, "agent.spawn": 500},
+                       reference_usd_known_subtotal="900")
+        self.assertEqual(score(evidence, metrics)["value"], score(*fixture())["value"])
+        self.assertNotIn("efficiency", score(*fixture())["components"])
+
+    def test_unobserved_dimension_cedes_its_weight(self):
+        evidence, metrics = fixture()
+        evidence["task"] = {"completed": 0, "attempts": 0, "declared": 0, "basis": "none"}
+        ceded = score(evidence, metrics)
+        self.assertEqual(ceded["dimensions"], {"scored": ["artifact", "human"], "unscored": ["task"]})
+        self.assertEqual(sum(float(c["effective_weight"]) for c in ceded["components"].values()), 1)
+        self.assertEqual(ceded["components"]["task"]["effective_weight"], "0.000000")
+        # Retained work still reads as retained work when a dimension is absent.
+        self.assertGreater(float(ceded["value"]), 70)
+        weak = copy.deepcopy(evidence)
+        weak["artifact"] = {"retained": 10, "operations": 100, "checked_operations": 100}
+        self.assertLess(float(score(weak, metrics)["value"]), 40)
+
+    def test_sparse_evidence_stays_near_the_neutral_prior(self):
+        evidence, metrics = fixture(ratio=1, units=1, prompts=1, tasks=1)
+        evidence["artifact"] = {"retained": 1, "operations": 1, "checked_operations": 1}
+        self.assertLess(float(score(evidence, metrics)["value"]), 70)
+        self.assertEqual(score(evidence, metrics)["status"], "provisional")
+
+    def test_lifetime_pools_instead_of_averaging(self):
+        def row(retained, operations):
+            return {"summary": {"human": {"tokens_measured": 10, "messages": 1, "tokens_complete": True}},
+                    "score": {"algorithm": "retention-v2",
+                              "evidence": {"artifact": {"retained": retained, "operations": operations},
+                                           "task": {"completed": 1, "attempts": 2}}}}
+        totals = lifetime([row(9, 10), row(9, 90)])
+        self.assertEqual(totals["artifact_survival"], "0.1800")
+        self.assertEqual(totals["human_tokens"], 20)
+        self.assertEqual(totals["task_fulfillment"], "0.5000")
+        self.assertEqual(totals["commits"], 2)
+
+    def test_lifetime_keeps_unknown_unknown(self):
+        known = {"summary": {"human": {"tokens_measured": 5, "messages": 1, "tokens_complete": True},
+                             "priced_calls": 1, "unpriced_calls": 0,
+                             "reference_usd_known_subtotal": "1.25"}}
+        partial = {"summary": {"human": {"tokens_complete": False}, "priced_calls": 0, "unpriced_calls": 2}}
+        totals = lifetime([known, partial])
+        self.assertIsNone(totals["human_tokens"])
+        self.assertEqual(totals["reference_usd_known_subtotal"], "1.25")
+        self.assertFalse(totals["reference_cost_complete"])
+        self.assertEqual(totals["scored_commits"], 0)
+        self.assertIsNone(totals["artifact_survival"])
 
     def test_gap_reduces_confidence(self):
         e, m = fixture()
@@ -166,6 +213,45 @@ class ReportTests(unittest.TestCase):
         e = self.rec.seal()["score"]["evidence"]
         self.assertEqual(e["artifact"]["operations"], 4)
         self.assertEqual(e["artifact"]["retained"], 2)
+
+    def test_legacy_algorithms_verify_under_their_own_version(self):
+        """An installed newer algorithm must never re-interpret a sealed proof."""
+        self.commit()
+        sealed = self.rec.seal()
+        self.assertEqual(sealed["score"]["algorithm"], "retention-v2")
+        self.assertEqual(sealed["summary"]["algorithm"], "observed-v3")
+        with self.rec.connection() as db:
+            events = list(self.rec._events(db, sealed["epoch"]))
+        legacy = {key: value for key, value in sealed.items() if key != "proof_hash"}
+        legacy["summary"] = pow.summary(iter(events), algorithm="observed-v2")
+        legacy["score"] = pow.evaluate_score(self.root, legacy, events, "balanced-v1")
+        legacy["proof_hash"] = pow.digest(legacy)
+        self.assertIn("efficiency", legacy["score"]["components"])
+        with self.rec.connection() as db:
+            checked = pow.verify_proof(self.root, legacy, self.rec._events(db, legacy["epoch"]))
+        self.assertTrue(checked["integrity_verified"])
+        for algorithm in ("retention-v2", "future-v9"):
+            forged = {key: value for key, value in legacy.items() if key != "proof_hash"}
+            forged["score"] = {**legacy["score"], "algorithm": algorithm}
+            forged["proof_hash"] = pow.digest(forged)
+            with self.rec.connection() as db, self.assertRaises(ValueError):
+                pow.verify_proof(self.root, forged, self.rec._events(db, forged["epoch"]))
+
+    def test_report_lifetime_pools_the_recorded_history(self):
+        self.commit("first")
+        first = self.rec.seal()
+        self.commit("second")
+        second = self.rec.seal()
+        data = self.rec.report_data()
+        totals = data["lifetime"]
+        operations = sum(p["score"]["evidence"]["artifact"]["operations"] for p in (first, second))
+        retained = sum(p["score"]["evidence"]["artifact"]["retained"] for p in (first, second))
+        self.assertEqual(totals["commits"], 2)
+        self.assertEqual(totals["scored_commits"], 2)
+        self.assertEqual(totals["artifact_operations"], operations)
+        self.assertEqual(totals["artifact_survival"], format(retained / operations, ".4f"))
+        self.assertEqual(totals["algorithms"], ["retention-v2"])
+        self.assertIsNone(self.rec.report_data(view="latest")["lifetime"])
 
     def test_ladder_does_not_reset_outside_visible_history(self):
         self.commit("first")

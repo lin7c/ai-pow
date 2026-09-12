@@ -16,14 +16,16 @@ A versioned process score and a verifiable work journal for every Git commit.
 
 ## The idea
 
-A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent activity, and sampled artifact revisions. It binds those observations to the resulting commit, computes a transparent process score, and creates an offline HTML report.
+A Git diff shows what changed. AI-PoW records more of the work behind it: human input, visible AI responses, model usage, agent architecture, and sampled artifact revisions. It binds those observations to the resulting commit as a **proof vector**, derives a transparent process score from the part that can be checked against the commit, and writes an offline HTML report.
 
-**v0.3 includes:**
+**v0.4 includes:**
 
-- A smooth 0–100 score with four visible components, evidence confidence, and explicit uncertainty.
-- A designed commit report with grade, resource breakdown, scoring explanations, and proof identity.
+- A six-part proof vector per commit: human input, AI visible output, machine work, agent architecture, artifact work, task work.
+- A smooth 0–100 retention score with three visible dimensions, evidence confidence, and explicit uncertainty.
 - Two views: **Iteration history** and **Latest commit**.
 - A zero-based cumulative project score: the exact sum of recorded commit scores, with a switchable total/commit-score chart.
+- Pooled repository totals whose ratios are recomputed from the pooled quantities, not averaged per commit.
+- An observed agent structure: spawns, parent links where reported, depth, and per-tool call counts.
 - Historical averages, same-scope comparisons, local percentiles, grade filters, and commit inspection.
 - A bounded local recorder, hash-chained export, and verification against actual Git objects.
 - A Claude Code adapter, generic agent wrapper, and shared core for the laintas-cli development integration.
@@ -84,7 +86,7 @@ Reports are generated after committing and remain outside the tracked source tre
 
 **Latest commit: 0–100.** How did this observed development interval perform?
 
-**Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once.
+**Iteration history: cumulative score, starting at 0.** Add each commit's existing score exactly once. Alongside it, **repository totals** pool the raw quantities (human tokens, machine work, agent activity, artifact operations) and recompute their ratios from those pooled totals.
 
 ```text
 Commit scores: 81.4 + 43.6 + 50.0
@@ -99,14 +101,17 @@ Upgrading does not change sealed commit scores. Run `aipow report --html --view 
 
 ## What makes the score higher?
 
-| Component | Weight | Higher score |
+| Dimension | Weight | Higher score |
 | --- | ---: | --- |
-| Input retention | 28% | More observed edits linked to human messages remain |
-| Artifact survival | 28% | Less observed rewriting is discarded before the commit |
-| Task fulfillment | 14% | More declared attempts finish with committed artifact evidence |
-| Resource discipline | 30% | Lower scope-adjusted input, visible output, compute, and tool pressure |
+| Input retention | 40% | More observed edits linked to human messages remain |
+| Artifact survival | 40% | Less observed rewriting is discarded before the commit |
+| Task fulfillment | 20% | More declared attempts finish with committed artifact evidence |
 
-The retention weights preserve the original 40:40:20 proportions within their 70% share. Installing more Skills or spawning more agents does not earn points.
+Installing more Skills or spawning more agents does not earn points.
+
+**Resource use is recorded, never scored.** Cost, tokens, tool calls and output length appear in the proof vector and carry no weight. Calling any of them "efficient" requires a comparable result, which this recorder cannot observe — and a resource term would reward doing less AI work, which is the opposite of a proof of work. Result and PoW stay on separate axes.
+
+**A dimension with no evidence cedes its weight** to the dimensions that do have evidence, instead of pulling every sparse commit toward 50. The report names which dimensions the score used.
 
 Small samples are smoothed toward **50**, and missing evidence stays neutral rather than receiving 100%. A smooth logistic curve avoids easy extremes. Evidence confidence below 65% is marked **provisional**.
 
@@ -119,7 +124,7 @@ Small samples are smoothed toward **50**, and missing evidence stays neutral rat
 | D | 35–49.9 |
 | E | Below 35 |
 
-The included calibration examples range from **43.6** for low retention and high resource pressure to **81.4** for strong retention and modest resource pressure at the same scope. These are examples, not a claim about the distribution of real developers.
+The included calibration examples range from **40.6** at 40% retention to **85.6** at 98% retention. A small commit with high retention lands below a large one with slightly lower retention, because less evidence keeps the result nearer 50. These are examples, not a claim about the distribution of real developers.
 
 **This is a process score, not a code-quality score.** A necessary experiment can reduce survival. Removing bad code can improve the software. Temporal prompt attribution is not semantic understanding, file units are only structural/content proxies, and declared task completion is not a passed acceptance test. Never retain bad code to improve a number.
 
@@ -172,7 +177,7 @@ Verification checks the proof hash, event chain and sequence, recomputed measure
 
 It proves **local consistency**, not truthful execution, complete capture, accurate timestamps, or correct software. An operator can fabricate an entire local chain. Unqualified payment systems and developer leaderboards should not rely on it.
 
-The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is separately versioned as `balanced-v1`; changing policy must not silently rewrite old sealed scores.
+The protocol retains version 0.1 and supports legacy unscored proofs. Scoring is separately versioned as `retention-v2`, and the accounting reducer as `observed-v3`. Verification recomputes a proof under the algorithms **it** recorded, so proofs sealed with `balanced-v1` / `observed-v2` keep verifying unchanged and an unknown algorithm fails instead of being reinterpreted.
 
 ## Storage, privacy, and overhead
 

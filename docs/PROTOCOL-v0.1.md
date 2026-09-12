@@ -58,7 +58,7 @@ Provider-reported means obtained from a local response/transcript, not provider-
 - `reasoning_tokens`: subset of output; null when undisclosed.
 - Missing buckets remain null/unknown; no inference that absent means zero.
 
-Current summaries use `algorithm: observed-v2`. A model bucket with missing usage
+Current summaries use `algorithm: observed-v3`, which is `observed-v2` plus an `agent` block. A model bucket with missing usage
 reports a null total for that field, its `known_token_subtotals`, and a
 `missing_field_calls` count. Text buckets retain per-method observations and
 unknown-event counts. UTF-8 byte estimates aggregate bytes before rounding, so
@@ -68,6 +68,21 @@ broken down by measurement basis. Completeness refers only to observed calls.
 Proofs without an explicit summary algorithm retain the `observed-v1` reducer.
 Verifiers MUST select the recorded interpretation, not rewrite old summaries.
 An unknown algorithm is rejected. See [Metrics and scoring](METRICS.md).
+
+The `observed-v3` `agent` block reduces the observed agent structure:
+
+```json
+{"spawns": 4, "stops": 1, "nodes": 3, "parents_known": 2, "max_depth": 3,
+ "graph": [["planner", ""], ["builder", "planner"]],
+ "tool_calls_by_name": [["shell", 18]], "other_tool_calls": 0, "truncated": false}
+```
+
+`graph` lists spawned agents in first-seen order with their reported parent; an empty
+string means the adapter reported no parent, and such a node is treated as a root.
+`max_depth` counts only observed agents, so an adapter without parent links yields 1.
+At most 128 agents and 32 tool names are retained, after which `truncated` is true and
+the remaining calls are summed into `other_tool_calls`. Repeated spawns of one agent id
+count once as a node. A cycle in reported parents is bounded, not resolved.
 
 Example price file (illustrative rates, NOT real provider prices):
 
@@ -127,21 +142,32 @@ Verifier MUST:
 4. Stream the event range, recomputing each hash and checking sequence, epoch and previous-hash linkage.
 5. Check terminal hash and exact range; reject a missing suffix/prefix.
 6. Recompute summaries and reference prices; compare them with the proof.
-   For proofs carrying the optional application-0.2 `score` extension, rebuild
-   scoring evidence from trace events and committed blobs, and compare the
-   versioned score as well. Unknown score algorithms fail verification.
+   For proofs carrying the optional `score` extension, rebuild scoring evidence
+   from trace events and committed blobs, and compare the score recomputed under
+   the algorithm that proof recorded. Unknown score algorithms fail verification.
 7. Report integrity separately from authenticity, completeness, task quality and efficiency.
 
 The anchor of a partial exported range is self-reported. Without a trusted previous proof/signature or external
 publication, rewriting the entire proof and trace is undetectable. Full local consistency MUST NOT be rendered as
 remote attestation, timestamp proof, proof of non-omission, or measured useful computation.
 
-## 5. Application 0.2 scoring extension
+## 5. Application scoring extension
 
 Protocol version remains 0.1.0. New proofs optionally include `score`, covered by
-the existing proof hash. Its `algorithm` is `balanced-v1`; decimal quantities use
+the existing proof hash. Its `algorithm` is `retention-v2`; decimal quantities use
 strings, preserving canonical JSON rules. Legacy proofs without this extension
 remain verifiable without being rewritten.
+
+`retention-v2` scores retention only — input retention, artifact survival and task
+fulfillment at 40:40:20 — and records `dimensions.scored` / `dimensions.unscored`
+plus an `effective_weight` per component, because a dimension without evidence cedes
+its weight to the observed ones. Resource quantities are recorded in the summary and
+carry no weight in the score.
+
+Verification recomputes a proof under the algorithms recorded **in that proof**.
+`balanced-v1` (retention plus a 30% resource-discipline term) stays implemented for
+that purpose and MUST NOT be edited; an unknown score algorithm fails verification
+instead of being reinterpreted by whatever version is installed.
 
 `file.observed` may include `units_before`, `units_after` (up to 64 SHA-256 hashes
 each), `unit_kind`, `units_truncated`, and an explicit `prompt_id`. Python units

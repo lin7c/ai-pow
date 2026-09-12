@@ -265,6 +265,37 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(code, 7)
         self.assertEqual(threading.active_count(), before)
 
+    def test_agent_structure_is_bounded_and_versioned(self):
+        def item(kind, **data):
+            return {"type": kind, "data": data}
+        events = [item("agent.spawn", agent_id="a"), item("agent.spawn", agent_id="b", parent_agent_id="a"),
+                  item("agent.spawn", agent_id="c", parent_agent_id="b"), item("agent.stop", agent_id="c"),
+                  item("tool.call", name="shell"), item("tool.call", name="shell"), item("tool.call", name="read")]
+        block = pow.summary(iter(events))["agent"]
+        self.assertEqual(block["graph"], [["a", ""], ["b", "a"], ["c", "b"]])
+        self.assertEqual((block["max_depth"], block["nodes"], block["parents_known"]), (3, 3, 2))
+        self.assertEqual(block["tool_calls_by_name"], [["shell", 2], ["read", 1]])
+        self.assertEqual(block["stops"], 1)
+        # The older reducer must keep producing exactly what it produced before.
+        self.assertNotIn("agent", pow.summary(iter(events), algorithm="observed-v2"))
+        many = [item("agent.spawn", agent_id="n%d" % i) for i in range(pow.MAX_AGENT_NODES + 5)]
+        bounded = pow.summary(iter(many))["agent"]
+        self.assertEqual((bounded["nodes"], bounded["spawns"]), (pow.MAX_AGENT_NODES, pow.MAX_AGENT_NODES + 5))
+        self.assertTrue(bounded["truncated"])
+        cycle = [item("agent.spawn", agent_id="x", parent_agent_id="y"),
+                 item("agent.spawn", agent_id="y", parent_agent_id="x")]
+        self.assertEqual(pow.summary(iter(cycle))["agent"]["max_depth"], 2)
+        repeated = [item("agent.spawn", agent_id="a"), item("agent.spawn", agent_id="a")]
+        self.assertEqual(pow.summary(iter(repeated))["agent"]["nodes"], 1)
+        self.assertFalse(pow.summary(iter(repeated))["agent"]["truncated"])
+
+    def test_sealed_agent_structure_verifies(self):
+        self.rec.record("agent.spawn", {"agent_id": "worker", "parent_agent_id": "main"}, "test")
+        self.rec.record("tool.call", {"name": "shell", "call_id": "1"}, "test")
+        self.commit()
+        proof = self.rec.seal()
+        self.assertEqual(proof["summary"]["agent"]["graph"], [["worker", "main"]])
+        self.assertTrue(self.rec.verify()["integrity_verified"])
 
 if __name__ == "__main__":
     unittest.main()

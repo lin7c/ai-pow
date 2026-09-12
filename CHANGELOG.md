@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- Make the proof vector the body of the report: human input, AI visible output, machine work, agent architecture, artifact work and task work, each with its own recorded quantities.
+- Replace balanced-v1 with retention-v2: retention only, at the original 40:40:20 weights. Resource use is recorded as fact and no longer scored, because efficiency needs a comparable result that the recorder cannot observe.
+- Cede the weight of a dimension without evidence to the observed dimensions, and report which dimensions a score was computed from.
+- Verify every proof under the algorithms it recorded; balanced-v1 and observed-v2 proofs keep verifying unchanged, and an unknown algorithm fails instead of being reinterpreted.
+- Add summary reducer observed-v3 with an observed agent structure: spawns, reported parent links, depth, and per-tool call counts, bounded to 128 agents and 32 tool names.
+- Add pooled repository totals whose ratios are recomputed from pooled quantities instead of averaging per-commit percentages; unknown values stay unknown.
+- Stop reporting a parent agent link the Claude adapter never received.
+- Use the masthead mark as the report favicon.
+
 ## 0.3.0
 
 - Replace project-rating updates with commit-sum-v1: start at zero and add each recorded commit score exactly once.
