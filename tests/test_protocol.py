@@ -217,6 +217,25 @@ class ProtocolTests(unittest.TestCase):
         self.commit()
         self.assertTrue(self.rec.verify()["integrity_verified"])
 
+    def test_host_launcher_replaces_only_our_stale_hook(self):
+        self.assertEqual(pow.hook_status(self.rec)["state"], "missing")
+        self.assertTrue(pow.install_hook(self.rec)["installed"])
+        self.assertEqual(pow.hook_status(self.rec)["state"], "installed")
+        hook = Path(pow.hook_status(self.rec)["path"])
+        with patch.object(pow, "HOST_INVOCATION", ["laintas-host", "pow"]):
+            self.assertEqual(pow.invocation(), ["laintas-host", "pow"])
+            self.assertEqual(pow.hook_status(self.rec)["state"], "stale")
+            result = pow.install_hook(self.rec)
+            self.assertTrue(result["installed"] and result["replaced"])
+            self.assertIn("laintas-host pow --cwd . seal", hook.read_text())
+            self.assertEqual(pow.hook_status(self.rec)["state"], "installed")
+            self.assertEqual(hook.stat().st_mode & 0o777, 0o700)
+            # Anything a person added makes the hook theirs again.
+            hook.write_text(hook.read_text() + "echo mine\n")
+            self.assertEqual(pow.hook_status(self.rec)["state"], "foreign")
+            self.assertFalse(pow.install_hook(self.rec)["installed"])
+            self.assertIn("echo mine", hook.read_text())
+
     def test_amend_rejected_and_reset_retains_trace(self):
         self.commit()
         self.rec.seal()

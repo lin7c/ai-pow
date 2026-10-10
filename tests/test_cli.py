@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -39,7 +40,11 @@ class CliTests(unittest.TestCase):
             # A different installed frontend must read the exact same proof/store.
             laintas = Path(__file__).resolve().parents[2] / "laintas_cli"
             python = laintas / "venv/bin/python"
-            if python.is_file():
+            extension = laintas / "extensions" / "ai-pow"
+            if python.is_file() and (extension / "main.py").is_file():
+                # laintas-cli serves `pow` from its ai-pow extension.
+                shutil.copytree(extension, root / "private-home" / "extensions" / "ai-pow",
+                                ignore=shutil.ignore_patterns("__pycache__"))
                 native = [str(python), str(laintas / "laintas_cli.py"), "pow"]
                 result = command(native, "report")
                 self.assertEqual(result["proof_hash"], proof["proof_hash"])
