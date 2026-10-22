@@ -8,11 +8,11 @@ A versioned process score and a verifiable work journal for every Git commit.
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[Repository summary](https://lin7c.github.io/ai-pow/demo/)** · **[Commit proof](https://lin7c.github.io/ai-pow/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
+**[Repository summary](https://lin7c.github.io/ai-pow/demo/)** · **[Commit proof](https://lin7c.github.io/ai-pow/demo/reports/56d5a358991bbf307d5de0cc865ffcd8cfe23a05.html)** · [Scoring specification](docs/METRICS.md) · [Protocol](docs/PROTOCOL-v0.1.md)
 
 [![Current version: total score and iteration history](docs/demo/preview.png)](https://lin7c.github.io/ai-pow/demo/)
 
-[![Iteration detail: score and expandable evidence](docs/demo/iteration-preview.png)](https://lin7c.github.io/ai-pow/demo/reports/135c812f3ad6cfa5e5e164296f053771331f176f.html)
+[![Iteration detail: score and expandable evidence](docs/demo/iteration-preview.png)](https://lin7c.github.io/ai-pow/demo/reports/56d5a358991bbf307d5de0cc865ffcd8cfe23a05.html)
 
 *The preview uses clearly labeled synthetic history evaluated by the production scoring algorithm.*
 

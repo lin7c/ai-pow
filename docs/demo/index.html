@@ -1,117 +1,161 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V0se4XqT769aM4VSfqRZcMCn2dxYqfN/j/jot9OoS9Q='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%230b0e13&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%23ff9c31&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%23ffffff&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-rpI+4msHpd8VrB0MN8TijQXBIevvnABP1hFEAd5kfhQ='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;%3E%3Crect width=&#39;32&#39; height=&#39;32&#39; fill=&#39;%23f4f1ea&#39;/%3E%3Cg transform=&#39;skewX(-16)&#39;%3E%3Crect x=&#39;12&#39; y=&#39;5&#39; width=&#39;7.2&#39; height=&#39;21.6&#39; fill=&#39;%234d6b1c&#39;/%3E%3Crect x=&#39;22.4&#39; y=&#39;11.4&#39; width=&#39;7.2&#39; height=&#39;15.2&#39; fill=&#39;%231d201b&#39;/%3E%3C/g%3E%3C/svg%3E"><title>AI-PoW · Repository history</title><style>
 :root{
---bg:#0b0e13;--panel:#111620;--panel2:#151b26;--head:#0e131b;--line:#1f2733;--line2:#2b3543;
---text:#e6edf3;--muted:#8b98a9;--dim:#5f6c7d;--accent:#ff9c31;--teal:#39c2b4;--violet:#9b8cff;
---good:#52c07a;--bad:#e8695d;--grid:#1a222d;
---mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
---sans:'Inter','Helvetica Neue',Arial,sans-serif}
+--paper:#f4f1ea;--card:#ffffff;--card2:#fbfaf4;--ink:#1d201b;--muted:#68705f;
+--dim:#9aa08e;--line:#e4dfd1;--line2:#d5cfbc;
+--accent:#4d6b1c;--accent-ink:#3c5514;--accent-tint:#eef3dc;
+--good:#357a2b;--good-bg:#e9f4e2;--warn:#a86f08;--warn-bg:#faf0d7;--bad:#b23a2a;--bad-bg:#fae9e4;
+--slate:#6b7f9e;--amber:#c2691e;
+--mono:'SFMono-Regular',ui-monospace,Consolas,'Liberation Mono',Menlo,monospace;
+--sans:'Avenir Next','Helvetica Neue','Noto Sans CJK SC',Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.6 var(--mono);-webkit-font-smoothing:antialiased}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline}
 button,select{font:inherit;color:inherit}button{cursor:pointer}
-button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,a:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1,h2,h3,h4,p,table{margin:0}
 .num{font-variant-numeric:tabular-nums}
-.shell{max-width:1460px;margin:0 auto;padding:0 20px 56px}
+.shell{max-width:1180px;margin:0 auto;padding:0 32px 56px}
 .skip{position:absolute;top:-80px;left:16px;background:#fff;color:#000;padding:10px;z-index:9}.skip:focus{top:8px}
-.topbar{background:var(--head);border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:5}
-.topbar .shell{padding-block:0;display:flex;align-items:center;gap:16px;height:58px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font:700 13px var(--sans);letter-spacing:.04em}
+.topbar{background:var(--paper);border-bottom:2px solid var(--ink)}
+.topbar .shell{padding-block:0;display:flex;align-items:center;gap:14px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font:700 14px var(--sans);letter-spacing:.03em}
 .mark{display:flex;gap:3px;transform:skew(-16deg)}.mark i{width:5px;height:15px;background:var(--accent)}
-.mark i:last-child{height:10px;align-self:flex-end;background:var(--text)}
-.crumb{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
-.crumb b{color:var(--text);font-weight:400}
+.mark i:last-child{height:10px;align-self:flex-end;background:var(--ink)}
+.crumb{color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.crumb b{color:var(--ink);font-weight:400}
 .spacer{flex:1}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:2px;padding:4px 9px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.chip.ok{color:var(--good);border-color:#2a4636}.chip.warn{color:var(--accent);border-color:#4a3a22}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:20px;padding:3px 11px;font-size:11.5px;color:var(--muted);background:#fff;white-space:nowrap}
+.chip.ok{color:var(--good);border-color:#bcd6ae;background:var(--good-bg)}
+.chip.warn{color:var(--warn);border-color:#e3cf9a;background:var(--warn-bg)}
 .chip.dot:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
-.btn{border:1px solid var(--line2);background:var(--panel);color:var(--muted);padding:7px 13px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;min-height:30px;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{color:var(--text);border-color:var(--dim);text-decoration:none}
-.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:22px 0 14px}
-.pagehead h1{font:600 23px/1.25 var(--sans);letter-spacing:-.01em;overflow-wrap:anywhere;max-width:820px}
-.pagehead .sub{color:var(--muted);font-size:12px;margin-top:7px}
+.btn{border:1px solid var(--line2);background:#fff;color:var(--muted);padding:6px 13px;font-size:12px;border-radius:6px;min-height:34px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{color:var(--ink);border-color:var(--dim);text-decoration:none}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:26px 0 18px}
+.pagehead h1{font:650 25px/1.3 var(--sans);letter-spacing:-.01em;overflow-wrap:anywhere;max-width:840px}
+.pagehead .sub{color:var(--muted);font-size:12.5px;margin-top:7px}
 .pagehead .meta{display:flex;gap:8px;flex-wrap:wrap}
-.hint{color:var(--dim);font-size:11.5px;letter-spacing:.02em}
-.grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:16px}
-.g6{grid-template-columns:repeat(6,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.hint{color:var(--dim);font-size:11.5px}
+.grid{display:grid;gap:16px;margin-bottom:18px}
+.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
-.stat{background:var(--panel);padding:15px 17px 16px;min-width:0;display:flex;flex-direction:column;gap:2px}
-.stat .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.stat .label>span:first-child,.stat .label{white-space:nowrap}
-.stat .value{font:600 31px/1.2 var(--sans);letter-spacing:-.02em;overflow-wrap:anywhere}
-.stat .value em{font:400 12.5px var(--mono);color:var(--dim);font-style:normal;margin-left:5px;letter-spacing:.04em}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.stat .label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.stat .value{font:500 27px/1.25 var(--mono);letter-spacing:-.02em;overflow-wrap:anywhere}
+.stat .value em{font:400 12px var(--mono);color:var(--dim);font-style:normal;margin-left:5px}
 .stat .sub{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
 .stat .spark{margin-top:9px;height:30px}
-.delta{font-size:11px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
-.delta.up:before{content:'▲ ';color:var(--muted)}.delta.down:before{content:'▼ ';color:var(--muted)}
-.panel{background:var(--panel);min-width:0;display:flex;flex-direction:column}
-.panel>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 17px;border-bottom:1px solid var(--line);background:var(--panel2)}
-.panel>header h3{font:600 12.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--text)}
-.panel>header .unit{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:right}
-.panel .body{padding:15px 17px 17px;min-width:0;flex:1}
-.panel .body.flush{padding:0}
-.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dotted var(--line2);color:var(--muted);font-size:12.5px}
+.delta{font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.delta.up:before{content:'▲ ';color:var(--dim)}.delta.down:before{content:'▼ ';color:var(--dim)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.panel>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 0}
+.panel>header h3{font:600 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.panel>header .unit{font-size:11px;color:var(--dim);text-align:right}
+.panel .body{padding:14px 20px 18px;min-width:0;flex:1}
+.panel .body.flush{padding:6px 0 0}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px dotted var(--line2);color:var(--muted);font-size:13px}
 .kv:last-child{border-bottom:0}.kv span,.kv b{min-width:0;overflow-wrap:anywhere}
-.kv b{color:var(--text);font-weight:400;text-align:right}
+.kv b{color:var(--ink);font:600 13px var(--mono);text-align:right}
+.kv b.good{color:var(--good)}.kv b.bad{color:var(--bad)}.kv b.warn{color:var(--warn)}
 .kv.none b{color:var(--dim)}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{text-align:left;color:var(--dim);font-weight:400;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--panel2)}
-.scroll thead th{position:sticky;top:0;z-index:1}
-td{padding:10px 13px;border-bottom:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}
-tr:hover td{background:var(--panel2)}
-td.key{color:var(--text)}td.r,th.r{text-align:right}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-weight:500;font-size:11.5px;padding:9px 14px;border-bottom:1.5px solid var(--line2)}
+.scroll thead th{position:sticky;top:0;z-index:1;background:var(--card)}
+td{padding:9px 14px;border-bottom:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere}
+tr:last-child td{border-bottom:0}
+td.key{color:var(--ink)}td.r,th.r{text-align:right}
 .bar{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-.bar i{display:block;height:6px;background:var(--accent);min-width:1px}
-.track{flex:1;max-width:120px;height:6px;background:var(--grid)}
+.bar i{display:block;height:6px;background:var(--accent);min-width:1px;border-radius:3px}
+.track{flex:1;max-width:120px;height:6px;background:#efead9;border-radius:3px;overflow:hidden}
 .scroll{max-height:360px;overflow:auto}
 .tree{font:12.5px/1.8 var(--mono);color:var(--muted);white-space:pre;overflow:auto;max-height:210px;margin:0}
-.tree b{color:var(--accent);font-weight:400}
-.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:11px;margin-top:10px}
-.legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px}
+.tree b{color:var(--accent-ink);font-weight:400}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:11.5px;margin-top:10px}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px;border-radius:2px}
 svg{display:block}
 .axis{fill:var(--dim);font:11px var(--mono)}
-.note{color:var(--dim);font-size:11.5px;margin-top:10px;line-height:1.7}
-.prov{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}
-.prov div{background:var(--panel);padding:13px 15px 15px}
+.note{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.7}
+.prov{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.prov div{border:1px solid var(--line);border-radius:10px;padding:13px 15px 15px;background:var(--card2)}
 .prov h4{font:600 11.5px var(--sans);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
-.prov ul{margin:0;padding-left:16px;color:var(--muted);font-size:12px;line-height:1.85}
-.prov .obs{color:var(--teal)}.prov .der{color:var(--accent)}.prov .inf{color:var(--violet)}
-.checks{display:flex;flex-wrap:wrap;gap:7px}
+.prov ul{margin:0;padding-left:16px;color:var(--muted);font-size:12.5px;line-height:1.85}
+.prov .obs{color:var(--accent-ink)}.prov .der{color:var(--warn)}.prov .inf{color:var(--slate)}
+.checks{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
 .big-total{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
-.big-total b{font:600 46px/1 var(--sans);letter-spacing:-.03em}
-.pattern b{font:600 24px var(--sans);letter-spacing:-.01em;display:block;margin-bottom:4px}
-.lvl{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:6px 12px;padding:8px 0;border-bottom:1px dotted var(--line2);font-size:12.5px;color:var(--muted)}
+.big-total b{font:500 42px/1 var(--mono);letter-spacing:-.03em}
+.pattern b{font:600 22px var(--sans);letter-spacing:-.01em;display:block;margin-bottom:4px}
+.lvl{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:6px 12px;padding:8px 0;border-bottom:1px dotted var(--line2);font-size:13px;color:var(--muted)}
 .lvl:last-child{border-bottom:0}
-.lvl .tag{text-align:right;font-size:11px;letter-spacing:.1em}
-.lvl .tag.high{color:var(--accent)}.lvl .tag.low{color:var(--teal)}.lvl .tag.medium{color:var(--muted)}
+.lvl .tag{text-align:right;font:600 11px var(--mono);letter-spacing:.06em}
+.lvl .tag.high{color:var(--warn)}.lvl .tag.low{color:var(--good)}.lvl .tag.medium{color:var(--muted)}
 .lvl .why{grid-column:1/3;color:var(--dim);font-size:11.5px}
-.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:11px;border-top:1px solid var(--line);padding-top:14px;margin-top:26px}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:11.5px;border-top:1px solid var(--line2);padding-top:14px;margin-top:26px}
+/* Score hero: the number, its grade band, and the anchors that judge it. */
+.score-hero{display:grid;grid-template-columns:1.15fr 1fr;border:1px solid var(--line2);border-radius:14px;background:var(--card);overflow:hidden;margin-bottom:20px}
+.score-main{padding:28px 32px}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;color:var(--accent-ink);margin-bottom:12px;font-weight:600}
+.score-label{font-size:18px;font-weight:550}
+.score-value{display:block;font:500 clamp(68px,7.5vw,96px)/1.1 var(--mono);letter-spacing:-.045em;color:var(--ink);margin:8px 0 2px}
+.score-value small{font-size:20px;letter-spacing:0;color:var(--dim);margin-left:10px}
+.score-value .grade{display:inline-block;background:var(--accent);color:#fff;font:700 16px var(--mono);border-radius:6px;padding:2px 10px;vertical-align:super;margin-left:10px;letter-spacing:0}
+.score-caption{color:var(--muted);font-size:12.5px;max-width:460px;line-height:1.75}
+.band{display:flex;gap:3px;margin:16px 0 6px;max-width:460px}
+.band div{flex:1;text-align:center;font:600 10.5px var(--mono);color:var(--dim);padding-top:6px;position:relative}
+.band div:before{content:'';position:absolute;top:0;left:0;right:0;height:6px;border-radius:3px;background:#e9e4d2}
+.band div.on{color:var(--accent-ink)}.band div.on:before{background:var(--accent)}
+.band-note{font-size:11.5px;color:var(--dim);max-width:460px}
+.score-aside{padding:26px 30px;border-left:1px solid var(--line);background:var(--card2);display:flex;flex-direction:column;justify-content:center}
+.score-aside h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+.score-aside .kv{padding:8px 0;font-size:13.5px}
+.score-track{height:5px;background:#efead9;margin-top:14px;border-radius:4px;overflow:hidden}
+.score-track i{display:block;height:100%;background:var(--accent)}
+.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:28px 0 14px}
+.section-heading h2{font-size:18px;font-weight:550}.section-heading p{color:var(--dim);font-size:12px}
+.detail-group{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.detail-group>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:16px;padding:18px 22px;font-size:15.5px;font-weight:550;min-height:60px}
+.detail-group>summary::-webkit-details-marker{display:none}
+.detail-group>summary:after{content:'+';margin-left:auto;color:var(--accent-ink);font:22px var(--mono)}
+.detail-group[open]>summary:after{content:'−'}
+.detail-group>summary span{font-size:12px;color:var(--dim);font-weight:400}
+.detail-group .grid{padding:0 14px}
+.detail-group .grid:last-child{margin-bottom:14px}
+.iterations{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.iterations td{padding:15px 18px}.iterations th{padding:12px 18px}
+.iterations .iteration-score{color:var(--ink);font:500 21px var(--mono);white-space:nowrap}
+.iterations .iteration-title{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+.iterations .scroll{max-height:490px}
+.iterations td:first-child{width:56%}
+.gchip{display:inline-block;min-width:23px;text-align:center;font:700 11px var(--mono);border-radius:5px;padding:1px 5px;color:#fff;margin-right:7px;vertical-align:2px}
+.comp-row{display:grid;grid-template-columns:180px 1fr 170px;gap:14px;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line2)}
+.comp-row:last-of-type{border-bottom:0}
+.comp-row .nm{font-weight:600;font-size:13.5px}.comp-row .nm span{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.comp-row .bar{height:8px;background:#efead9;border-radius:4px;overflow:hidden;display:block}
+.comp-row .bar i{height:100%;background:var(--accent);border-radius:4px}
+.comp-row .val{text-align:right;font:13px var(--mono)}
+.comp-row .val span{display:block;color:var(--dim);font-size:11px;margin-top:2px}
 @media(max-width:1180px){.g6{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}
 .g21,.g12,.g3{grid-template-columns:1fr}}
-@media(max-width:720px){.shell{padding:0 12px 40px}.g6,.g4,.g3,.g2{grid-template-columns:1fr}
-.prov{grid-template-columns:1fr}.scroll thead th{position:static}.topbar .shell{height:auto;padding-block:8px}
-.pagehead h1{font-size:17px}table.compact td.opt,table.compact th.opt{display:none}}
-@media print{body{background:#fff;color:#111}.topbar{position:static}.btn{display:none}
-.panel,.stat,.prov div{background:#fff}.grid,.prov{background:#d8dee6;border-color:#d8dee6}
-td,th{border-color:#e2e7ee}.kv,.note,.hint{color:#4b5563}}
-/* Score-led report: a quiet canvas, one dominant number, progressive detail. */
-:root{--bg:#0e1215;--panel:#151b1f;--panel2:#1a2227;--head:#0e1215;--line:#293238;--line2:#364249;--text:#f2f3ed;--muted:#b0bcbf;--dim:#91a1a6;--accent:#dbed9b;--teal:#83c8be;--sans:'Avenir Next','Trebuchet MS','Noto Sans CJK SC',sans-serif}
-body{font-family:var(--sans);font-size:14px}.shell{max-width:1180px;padding-inline:32px}
-.topbar{position:static}.topbar .shell{min-height:72px;height:auto;padding-block:16px}.chip{letter-spacing:0;text-transform:none;border-radius:30px}.btn{letter-spacing:0;text-transform:none;border-radius:6px;min-height:38px}
-.pagehead{margin:36px 0 24px}.pagehead h1{font-size:26px}.pagehead .sub{font-size:13px}.pagehead .meta{display:none}
-.score-hero{display:grid;grid-template-columns:1.25fr 1fr;border:1px solid var(--line2);border-radius:16px;background:var(--panel);overflow:hidden;margin-bottom:28px}
-.score-main{padding:32px 40px;background:radial-gradient(ellipse at 0 100%,#dbed9b0d,transparent 75%)}
-.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--accent);margin-bottom:14px}.score-label{font-size:19px;font-weight:500}.score-value{display:block;font:500 clamp(72px,8vw,112px)/1.15 var(--sans);letter-spacing:-.065em;color:var(--accent);font-variant-numeric:tabular-nums;margin:10px 0}.score-value small{font-size:22px;letter-spacing:0;color:var(--dim);margin-left:12px}.score-caption{color:var(--muted);font-size:13px;max-width:430px;line-height:1.8}
-.score-aside{padding:36px;border-left:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:20px}.score-aside h3{font-size:15px;font-weight:500}.score-aside .kv{padding:12px 0;font-size:14px}.score-aside .kv b{font:500 22px var(--sans)}.score-aside .note{margin:0}
-.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:30px 0 16px}.section-heading h2{font-size:19px;font-weight:500}.section-heading p{color:var(--dim);font-size:12px}
-.grid{gap:16px;background:transparent;border:0;margin-bottom:20px}.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.panel,.stat{border:1px solid var(--line);border-radius:10px;overflow:hidden}.panel>header{padding:16px 20px;background:transparent}.panel>header h3{letter-spacing:0;text-transform:none;font-size:14px}.panel .body{padding:20px}.panel .body.flush{padding:0}.stat{padding:20px}.stat .label{letter-spacing:0;text-transform:none}.stat .value{font-size:26px}.note,.hint{font-size:12px}
-.detail-group{border-top:1px solid var(--line);padding:0 0 4px}.detail-group>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:18px;padding:22px 0;font-size:16px;min-height:68px}.detail-group>summary::-webkit-details-marker{display:none}.detail-group>summary:after{content:'+';margin-left:auto;color:var(--accent);font:24px var(--mono)}.detail-group[open]>summary:after{content:'−'}.detail-group>summary span{font-size:12px;color:var(--dim)}summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-.iterations{border:1px solid var(--line);border-radius:10px;overflow:hidden}.iterations td{padding:18px 20px}.iterations th{padding:14px 20px;letter-spacing:0;text-transform:none}.iterations .iteration-score{color:var(--accent);font-size:23px;white-space:nowrap}.iterations .iteration-title{display:block;color:var(--text);font-size:14px;margin-bottom:5px}.iterations .scroll{max-height:490px}.iterations .hint{font-family:var(--mono);font-size:11px}.iterations td:first-child{width:64%}.score-track{height:5px;background:var(--line2);margin-top:14px;border-radius:4px;overflow:hidden}.score-track i{display:block;height:100%;background:var(--accent)}
-@media(max-width:720px){.shell{padding-inline:18px}.topbar .shell{gap:10px}.topbar #crumb{display:none}.topbar #chips{order:5;flex-basis:100%;flex-wrap:wrap;overflow:visible}.pagehead{margin-top:26px}.pagehead h1{font-size:22px}.score-hero{grid-template-columns:1fr}.score-main{padding:26px}.score-value{font-size:80px}.score-aside{border-left:0;border-top:1px solid var(--line);padding:24px;gap:12px}.score-aside .kv{padding:7px 0}.g6{grid-template-columns:1fr}.detail-group>summary{flex-wrap:wrap;gap:6px}.detail-group>summary span{flex-basis:75%;font-size:11px}.section-heading p{display:none}.iterations td,.iterations th{padding:13px 12px}.iterations .iteration-score{font-size:21px}.iterations .opt{display:none}.score-caption{font-size:12px}}
-@media print{.score-main{background:none}.score-value,.iterations .iteration-score{color:#314b16}.score-hero{break-inside:avoid}details>summary{display:none}.score-aside{border-color:#ccc}.score-caption{color:#444}}
-
-</style></head><body><a class="skip" href="#content">Skip to content</a><div class="topbar"><div class="shell"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW</span><span class="crumb" id="crumb"></span><span class="spacer"></span><span class="crumb" id="chips"></span><button class="btn" id="print">Print</button></div></div><main class="shell" id="content"></main><noscript>This page requires JavaScript to render its embedded data. Use the aipow CLI for the JSON form.</noscript><div class="shell"><div class="foot"><span>AI-PoW · ai-pow</span><span>Process record · not a measure of code quality</span></div></div><script id="report-data" type="application/json">{"project":"ai-pow","kind":"index","demo":true,"lifetime":{"events":1798,"prompts":279,"human_tokens":27624,"visible_events":151,"visible_tokens":12540,"model_calls":262,"input_tokens":1362400,"cached_input_tokens":471600,"output_tokens":235800,"reasoning_tokens":68120,"tool_calls":511,"failed_tool_calls":43,"skill_uses":28,"sub_agents":28,"sessions":16,"runs":16,"coverage_gaps":3,"span_ms":128165625,"operations":1813,"retained":1401,"task_attempts":150,"task_completed":116,"files_changed":96,"priced_calls":262,"unpriced_calls":0,"actual_priced_calls":262,"commits":7,"scored_commits":7,"timed_commits":7,"skills_used":4,"mcp_used":1,"algorithms":["retention-v2"],"reference_usd_known_subtotal":"53.031582","actual_usd_known_subtotal":"29.167390","reference_cost_complete":true,"artifact_operations":1813,"artifact_retained":1401,"artifact_survival":"0.7728","task_fulfillment":"0.7733","score_total":"453.6"},"history":[{"commit":"9dfa2fa4d6cb2cc5c590c7493d84b5940f20a64e","title":"Rebuild both pages as observability views led by rates","date":"2026-09-12T15:31:01+00:00","seq":7,"continues":true,"score":{"algorithm":"retention-v2","value":"71.8","grade":"B","confidence":"0.4145","status":"provisional","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.980000","quality":"0.975248","confidence":"0.495049","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.969697","quality":"0.918919","confidence":"0.445946","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":392,"operations":400,"checked_operations":400},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":32,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":19},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"453.6","span_ms":18793125,"human_tokens":4320,"prompts":40,"visible_tokens":1892,"awc":"2.400004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"1.320006","tasks":33,"operations":400,"retained":392},{"commit":"ccb75f3899d0bba507842ad3df3000f278ef13d3","title":"Keep every generated page inside the viewport at phone width","date":"2026-09-12T14:46:58+00:00","seq":6,"continues":true,"score":{"algorithm":"retention-v2","value":"77.3","grade":"B","confidence":"0.7249","status":"established","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.880000","quality":"0.851852","confidence":"0.925926","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.890000","quality":"0.854545","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.750000","confidence":"0.500000","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":44,"operations":50,"checked_operations":50},"human":{"retained_weight":"3560.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":4,"attempts":4,"declared":4,"basis":"declared-with-committed-evidence"},"scope":{"units":25,"files":11},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"381.8","span_ms":5238750,"human_tokens":4200,"prompts":40,"visible_tokens":1870,"awc":"3.999994","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":1,"failed_tool_calls":5,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.200010","tasks":4,"operations":50,"retained":44},{"commit":"44fa8b52e55692c3d5b50c6f1a080ad14eb0e0ab","title":"Split the report into a commit proof and a repository summary","date":"2026-09-12T14:43:51+00:00","seq":5,"continues":true,"score":{"algorithm":"retention-v2","value":"79.7","grade":"B","confidence":"0.8290","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.850000","quality":"0.846535","confidence":"0.990099","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.850000","quality":"0.818182","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.848485","quality":"0.810811","confidence":"0.891892","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":340,"operations":400,"checked_operations":400},"human":{"retained_weight":"3400.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":28,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":20},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"304.5","span_ms":14400000,"human_tokens":4080,"prompts":40,"visible_tokens":1848,"awc":"5.000002","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.749984","tasks":33,"operations":400,"retained":340},{"commit":"135c812f3ad6cfa5e5e164296f053771331f176f","title":"Record the interval, payment and agent facts the report was missing","date":"2026-09-12T14:19:31+00:00","seq":4,"continues":true,"score":{"algorithm":"retention-v2","value":"62.4","grade":"C","confidence":"0.4145","status":"provisional","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.760000","quality":"0.757426","confidence":"0.495049","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.760000","quality":"0.736364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.757576","quality":"0.729730","confidence":"0.445946","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":304,"operations":400,"checked_operations":400},"human":{"retained_weight":"3040.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":25,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":17},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"224.8","span_ms":11565000,"human_tokens":3960,"prompts":40,"visible_tokens":1826,"awc":"7.000018","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"3.850008","tasks":33,"operations":400,"retained":304},{"commit":"7daebd65277bc6e93aaeb197d6804bb95756c844","title":"Rebuild the report: one headline per view","date":"2026-09-12T13:56:59+00:00","seq":3,"continues":true,"score":{"algorithm":"retention-v2","value":"54.2","grade":"C","confidence":"0.8240","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.540785","quality":"0.540299","confidence":"0.988060","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.540000","quality":"0.536364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.555556","quality":"0.548387","confidence":"0.870968","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":179,"operations":331,"checked_operations":331},"human":{"retained_weight":"2160.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":15,"attempts":27,"declared":27,"basis":"declared-with-committed-evidence"},"scope":{"units":165,"files":10},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"162.4","span_ms":25241250,"human_tokens":3744,"prompts":39,"visible_tokens":1722,"awc":"11.368404","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":3,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"6.252624","tasks":27,"operations":331,"retained":179},{"commit":"a6b3c471f9178afdfe415ef1ba4b3e9bc52357c5","title":"Score retention only and make the proof vector the report body","date":"2026-09-12T13:32:57+00:00","seq":2,"continues":true,"score":{"algorithm":"retention-v2","value":"61.0","grade":"C","confidence":"0.8112","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.620536","quality":"0.618421","confidence":"0.982456","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.620000","quality":"0.609091","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.611111","quality":"0.590909","confidence":"0.818182","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":139,"operations":224,"checked_operations":224},"human":{"retained_weight":"2480.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":11,"attempts":18,"declared":18,"basis":"declared-with-committed-evidence"},"scope":{"units":112,"files":16},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"108.2","span_ms":20160000,"human_tokens":3720,"prompts":40,"visible_tokens":1782,"awc":"10.000004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"5.500006","tasks":18,"operations":224,"retained":139},{"commit":"8d4c45f5952572bd431d975e056946de8a6b14d4","title":"Use the masthead mark as the report favicon","date":"2026-09-12T12:56:16+00:00","seq":1,"continues":true,"score":{"algorithm":"retention-v2","value":"47.2","grade":"D","confidence":"0.2939","status":"provisional","cohort":"small","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.375000","quality":"0.416667","confidence":"0.333334","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.400000","quality":"0.409091","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.166666","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":3,"operations":8,"checked_operations":8},"human":{"retained_weight":"1600.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":1,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":4,"files":3},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"47.2","span_ms":32767500,"human_tokens":3600,"prompts":40,"visible_tokens":1600,"awc":"13.263156","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":4,"failed_tool_calls":8,"coverage_gaps":1,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"7.294752","tasks":2,"operations":8,"retained":3}],"iteration":{"algorithm":"commit-sum-v1","value":"453.6","previous":"381.8","delta":"71.8","rated_commits":7,"starting_rating":0},"commits_in_history":7,"chain_verified":true,"chain_length":7,"statistics":{"count":6,"average":63.6,"delta":-5.5,"peer_count":3,"peer_average":65.4,"percentile":66.7,"same_grade":2},"span":{"first":{"commit":"8d4c45f5952572bd431d975e056946de8a6b14d4","date":"2026-09-12T12:56:16+00:00"},"last":{"commit":"9dfa2fa4d6cb2cc5c590c7493d84b5940f20a64e","date":"2026-09-12T15:31:01+00:00"}},"links":{"commit":"reports/"}}</script><script>
+@media(max-width:720px){.shell{padding:0 14px 40px}
+.g6,.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2,.g21,.g12{grid-template-columns:1fr}
+.prov{grid-template-columns:1fr}.scroll thead th{position:static}
+.topbar .shell{gap:8px;padding-block:8px}.topbar #crumb{display:none}
+.topbar #chips{order:5;flex-basis:100%;flex-wrap:wrap;overflow:visible}
+.pagehead{margin-top:20px}.pagehead h1{font-size:20px}.pagehead .meta{display:none}
+.score-hero{grid-template-columns:1fr}.score-main{padding:22px}.score-value{font-size:60px}
+.score-aside{border-left:0;border-top:1px solid var(--line);padding:20px 22px}
+.detail-group>summary{flex-wrap:wrap;gap:4px;padding:15px 16px}.detail-group>summary span{flex-basis:75%}
+.detail-group .grid{padding:0 8px}
+.section-heading p{display:none}
+.iterations td,.iterations th{padding:12px}.iterations .opt{display:none}
+.comp-row{grid-template-columns:96px 1fr 84px;gap:8px}.comp-row .val span{display:none}
+.stat{padding:13px 14px}.stat .value{font-size:22px}.stat .label{font-size:11px}
+.stat .sub{font-size:11px}.band div{font-size:9px}
+table.compact td.opt,table.compact th.opt{display:none}}
+@media print{body{background:#fff}.topbar{border-bottom:1.5px solid #111}.btn{display:none}
+.sheet,.card,.panel,.stat,.score-hero,.iterations,.detail-group{box-shadow:none}
+.score-hero,.panel,.stat{break-inside:avoid}
+details>summary{display:none}.foot{color:#666}}
+</style></head><body><a class="skip" href="#content">Skip to content</a><div class="topbar"><div class="shell"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span>AI-PoW</span><span class="crumb" id="crumb"></span><span class="spacer"></span><span class="crumb" id="chips"></span><button class="btn" id="print">Print</button></div></div><main class="shell" id="content"></main><noscript>This page requires JavaScript to render its embedded data. Use the aipow CLI for the JSON form.</noscript><div class="shell"><div class="foot"><span>AI-PoW · ai-pow</span><span>Process record · not a measure of code quality</span></div></div><script id="report-data" type="application/json">{"project":"ai-pow","kind":"index","demo":true,"lifetime":{"events":1798,"prompts":279,"human_tokens":27624,"visible_events":151,"visible_tokens":12540,"model_calls":262,"input_tokens":1362400,"cached_input_tokens":471600,"output_tokens":235800,"reasoning_tokens":68120,"tool_calls":511,"failed_tool_calls":43,"skill_uses":28,"sub_agents":28,"sessions":16,"runs":16,"coverage_gaps":3,"span_ms":128165625,"operations":1152,"retained":664,"task_attempts":95,"task_completed":54,"files_changed":73,"priced_calls":262,"unpriced_calls":0,"actual_priced_calls":262,"commits":7,"scored_commits":7,"timed_commits":7,"skills_used":4,"mcp_used":1,"algorithms":["retention-v2"],"reference_usd_known_subtotal":"53.031582","actual_usd_known_subtotal":"29.167390","reference_cost_complete":true,"artifact_operations":1152,"artifact_retained":664,"artifact_survival":"0.5764","task_fulfillment":"0.5684","score_total":"437.9"},"history":[{"commit":"56d5a358991bbf307d5de0cc865ffcd8cfe23a05","title":"Remove the Result axis: drop the open-code-review (ocr) integration","date":"2026-10-22T20:13:26+08:00","seq":7,"continues":true,"score":{"algorithm":"retention-v2","value":"68.6","grade":"B","confidence":"0.3703","status":"provisional","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.983333","quality":"0.953125","confidence":"0.468750","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.980000","quality":"0.936364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.777778","confidence":"0.277778","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":59,"operations":60,"checked_operations":60},"human":{"retained_weight":"3920.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":5,"attempts":5,"declared":5,"basis":"declared-with-committed-evidence"},"scope":{"units":30,"files":3},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"437.9","span_ms":18793125,"human_tokens":4320,"prompts":40,"visible_tokens":1892,"awc":"2.400004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"1.320006","tasks":5,"operations":60,"retained":59},{"commit":"9907b953217e0992771bbcfa12b1c860544733ed","title":"Sync proof-of-work protocol and CLI tests","date":"2026-10-10T13:57:51+00:00","seq":6,"continues":true,"score":{"algorithm":"retention-v2","value":"74.0","grade":"B","confidence":"0.6516","status":"established","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.894737","quality":"0.826087","confidence":"0.826087","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.890000","quality":"0.854545","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"1.000000","quality":"0.666667","confidence":"0.333333","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":17,"operations":19,"checked_operations":19},"human":{"retained_weight":"3560.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":2,"attempts":2,"declared":2,"basis":"declared-with-committed-evidence"},"scope":{"units":9,"files":3},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"369.3","span_ms":5238750,"human_tokens":4200,"prompts":40,"visible_tokens":1870,"awc":"3.999994","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":1,"failed_tool_calls":5,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.200010","tasks":2,"operations":19,"retained":17},{"commit":"65674ea913859988debfa7bccfa8b405b52c481f","title":"Add the Result axis: score commits from external review evidence (ocr)","date":"2026-09-16T00:44:18+00:00","seq":5,"continues":true,"score":{"algorithm":"retention-v2","value":"75.3","grade":"B","confidence":"0.7407","status":"established","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.850000","quality":"0.828125","confidence":"0.937500","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.850000","quality":"0.818182","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.800000","quality":"0.666667","confidence":"0.555556","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":51,"operations":60,"checked_operations":60},"human":{"retained_weight":"3400.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":4,"attempts":5,"declared":5,"basis":"declared-with-committed-evidence"},"scope":{"units":30,"files":3},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"295.3","span_ms":14400000,"human_tokens":4080,"prompts":40,"visible_tokens":1848,"awc":"5.000002","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"2.749984","tasks":5,"operations":60,"retained":51},{"commit":"d93db3b8ec8c3263302d0341072402e6525e173a","title":"Use English report text and refresh both README previews","date":"2026-09-12T17:15:20+00:00","seq":4,"continues":true,"score":{"algorithm":"retention-v2","value":"60.5","grade":"C","confidence":"0.3709","status":"provisional","cohort":"medium","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.761905","quality":"0.746269","confidence":"0.470149","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.760000","quality":"0.736364","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.800000","quality":"0.666667","confidence":"0.277778","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":48,"operations":63,"checked_operations":63},"human":{"retained_weight":"3040.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":4,"attempts":5,"declared":5,"basis":"declared-with-committed-evidence"},"scope":{"units":31,"files":11},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"220.0","span_ms":11565000,"human_tokens":3960,"prompts":40,"visible_tokens":1826,"awc":"7.000018","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":1,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"3.850008","tasks":5,"operations":63,"retained":48},{"commit":"ca39219baa1668b593a354feb1d46eaa821a4fc7","title":"Lead report pages with scores and group supporting data","date":"2026-09-12T17:06:43+00:00","seq":3,"continues":true,"score":{"algorithm":"retention-v2","value":"53.1","grade":"C","confidence":"0.7942","status":"established","cohort":"large","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.540000","quality":"0.538961","confidence":"0.974026","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.540000","quality":"0.536364","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.500000","quality":"0.500000","confidence":"0.750000","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":81,"operations":150,"checked_operations":150},"human":{"retained_weight":"2160.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":6,"attempts":12,"declared":12,"basis":"declared-with-committed-evidence"},"scope":{"units":75,"files":12},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"159.5","span_ms":25241250,"human_tokens":3744,"prompts":39,"visible_tokens":1722,"awc":"11.368404","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":3,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"6.252624","tasks":12,"operations":150,"retained":81},{"commit":"a81c52d7a4bb563254b40c4f003669ee7f6e1fa9","title":"Accumulate the history in an iteration chain, and make the type readable","date":"2026-09-12T15:54:29+00:00","seq":2,"continues":true,"score":{"algorithm":"retention-v2","value":"61.3","grade":"C","confidence":"0.8290","status":"established","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.620000","quality":"0.618812","confidence":"0.990099","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.620000","quality":"0.609091","confidence":"0.636364","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.606061","quality":"0.594595","confidence":"0.891892","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":248,"operations":400,"checked_operations":400},"human":{"retained_weight":"2480.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":20,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":22},"limited":false,"gaps":0},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"106.4","span_ms":20160000,"human_tokens":3720,"prompts":40,"visible_tokens":1782,"awc":"10.000004","model_calls":38,"tool_calls":73,"sub_agents":4,"sessions":2,"failed_tool_calls":6,"coverage_gaps":0,"input_tokens":197600,"cached_input_tokens":68400,"output_tokens":34200,"reasoning_tokens":9880,"actual_usd":"5.500006","tasks":33,"operations":400,"retained":248},{"commit":"9dfa2fa4d6cb2cc5c590c7493d84b5940f20a64e","title":"Rebuild both pages as observability views led by rates","date":"2026-09-12T15:31:01+00:00","seq":1,"continues":true,"score":{"algorithm":"retention-v2","value":"45.1","grade":"D","confidence":"0.4145","status":"provisional","cohort":"extensive","components":{"artifact":{"label":"Artifact survival","weight":"0.40","ratio":"0.400000","quality":"0.400990","confidence":"0.495049","effective_weight":"0.400000"},"human":{"label":"Input retention","weight":"0.40","ratio":"0.400000","quality":"0.409091","confidence":"0.318182","effective_weight":"0.400000"},"task":{"label":"Task fulfillment","weight":"0.20","ratio":"0.393939","quality":"0.405405","confidence":"0.445946","effective_weight":"0.200000"}},"evidence":{"artifact":{"retained":160,"operations":400,"checked_operations":400},"human":{"retained_weight":"1600.0","observed_weight":4000,"linked_prompts":40,"prompts":40,"attribution":"temporal-proxy"},"task":{"completed":13,"attempts":33,"declared":33,"basis":"declared-with-committed-evidence"},"scope":{"units":200,"files":19},"limited":false,"gaps":1},"dimensions":{"scored":["artifact","human","task"],"unscored":[]},"meaning":"process-retention-score","quality_verified":false},"total":"45.1","span_ms":32767500,"human_tokens":3600,"prompts":40,"visible_tokens":1600,"awc":"13.263156","model_calls":36,"tool_calls":73,"sub_agents":4,"sessions":4,"failed_tool_calls":8,"coverage_gaps":1,"input_tokens":187200,"cached_input_tokens":64800,"output_tokens":32400,"reasoning_tokens":9360,"actual_usd":"7.294752","tasks":33,"operations":400,"retained":160}],"iteration":{"algorithm":"commit-sum-v1","value":"437.9","previous":"369.3","delta":"68.6","rated_commits":7,"starting_rating":0},"commits_in_history":7,"chain_verified":true,"chain_length":7,"statistics":{"count":6,"average":61.6,"delta":-5.4,"peer_count":3,"peer_average":69.9,"percentile":33.3,"same_grade":2},"span":{"first":{"commit":"9dfa2fa4d6cb2cc5c590c7493d84b5940f20a64e","date":"2026-09-12T15:31:01+00:00"},"last":{"commit":"56d5a358991bbf307d5de0cc865ffcd8cfe23a05","date":"2026-10-22T20:13:26+08:00"}},"links":{"commit":"reports/"}}</script><script>
 const data=JSON.parse(document.getElementById('report-data').textContent);
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -130,6 +174,7 @@ const dayOf=x=>new Date(x).toISOString().slice(0,10);
 const hhmm=x=>new Date(x).toISOString().slice(11,19)+'Z';
 const chip=(text,kind)=>`<span class="chip${kind?' '+kind:''}">${esc(text)}</span>`;
 const kv=(k,v,cls)=>`<div class="kv${isNum(v)||typeof v==='string'?'':' none'}${cls?' '+cls:''}"><span>${esc(k)}</span><b>${v===null||v===undefined?NA:esc(v)}</b></div>`;
+const kvx=(k,html,cls)=>`<div class="kv${cls?' '+cls:''}"><span>${esc(k)}</span><b>${html}</b></div>`;
 const panel=(title,unit,body,cls)=>`<section class="panel${cls?' '+cls:''}"><header><h3>${esc(title)}</h3><span class="unit">${esc(unit||'')}</span></header><div class="body${cls&&cls.includes('flush')?' flush':''}">${body}</div></section>`;
 const stat=(label,value,unit,sub,extra,sparkId)=>`<div class="stat"><span class="label"><span>${esc(label)}</span>${extra||''}</span>
   <span class="value num">${esc(value)}${unit?`<em>${esc(unit)}</em>`:''}</span><span class="sub">${esc(sub||'')}</span>${sparkId?`<div class="spark" id="${esc(sparkId)}"></div>`:''}</div>`;
@@ -138,16 +183,25 @@ const disclosure=(title,subtitle,nodes)=>{
   el.innerHTML=`<summary>${esc(title)}<span>${esc(subtitle)}</span></summary>`;
   nodes.forEach(node=>el.append(node));return el;
 };
-function scoreLayout(hero,groups,featured){
+function scoreLayout(hero,groups,featured,lead){
   const content=$('#content'),head=content.querySelector('.pagehead');
   content.replaceChildren(head);
   content.insertAdjacentHTML('beforeend',hero);
+  (lead||[]).forEach(node=>content.append(node));
   if(featured)content.insertAdjacentHTML('beforeend',featured);
   content.insertAdjacentHTML('beforeend','<div class="section-heading"><h2>Data & evidence</h2><p>Expand a section to explore the full record</p></div>');
   groups.forEach(([title,subtitle,nodes])=>content.append(disclosure(title,subtitle,nodes)));
   if(data.demo)$('#chips').insertAdjacentHTML('afterbegin',chip('Demo data','warn'));
 }
-const scoreHero=(label,value,unit,caption,aside)=>`<section class="score-hero" aria-label="${esc(label)}"><div class="score-main"><p class="eyebrow">AI-POW / SCORE REPORT</p><h2 class="score-label">${esc(label)}</h2><strong class="score-value">${n(value,1)}${unit?`<small>${esc(unit)}</small>`:''}</strong><p class="score-caption">${esc(caption)}</p></div><div class="score-aside">${aside}</div></section>`;
+const GRADES=[['E','<35','#b23a2a'],['D','35','#bd6a1e'],['C','50','#a86f08'],['B','65','#7a9a2e'],['A','80','#4d6b1c'],['S','90+','#357a2b']];
+const gradeColor=g=>(GRADES.find(([x])=>x===g)||[])[2]||'#68705f';
+const gradeBand=grade=>`<div class="band">${GRADES.map(([g,t])=>`<div class="${g===grade?'on':''}">${g} · ${t}</div>`).join('')}</div><p class="band-note">Grade bands: S ≥ 90 · A ≥ 80 · B ≥ 65 · C ≥ 50 · D ≥ 35 · E &lt; 35. A score of 50 means uncertain, not average: it is where missing evidence lands.</p>`;
+const scoreHero=(label,value,unit,caption,aside,grade)=>`<section class="score-hero" aria-label="${esc(label)}"><div class="score-main"><p class="eyebrow">AI-POW / SCORE REPORT</p><h2 class="score-label">${esc(label)}</h2><strong class="score-value">${n(value,1)}${grade?`<span class="grade" style="background:${gradeColor(grade)}">${esc(grade)}</span>`:''}${unit?`<small>${esc(unit)}</small>`:''}</strong>${grade?gradeBand(grade):''}<p class="score-caption">${esc(caption)}</p></div><div class="score-aside">${aside}</div></section>`;
+const diffKv=(label,value,reference,unit)=>{
+  if(!isNum(value)||!isNum(reference))return kv(label,NA);
+  const d=Number(value)-Number(reference),cls=Math.abs(d)<1e-9?'':(d>0?'good':'bad');
+  return kvx(label,`<span class="${cls}">${d>0?'+':''}${n(d,1)}${unit||''}</span>`);
+};
 
 function vsBase(value,reference){
   if(!isNum(value)||!isNum(reference)||!Number(reference))return '';
@@ -165,8 +219,8 @@ function spark(values,host,color){
   const x=i=>pad+(w-2*pad)*i/Math.max(1,clean.length-1),y=v=>h-pad-(h-2*pad)*(v-lo)/range;
   let d='';clean.forEach((v,i)=>{if(v===null)return;d+=(d?' L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
   const last=clean.reduce((a,v,i)=>v===null?a:i,-1);
-  host.innerHTML=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${color||'#ff9c31'}" stroke-width="1.5" opacity=".9"/>`
-    +(last>=0?`<circle cx="${x(last).toFixed(1)}" cy="${y(clean[last]).toFixed(1)}" r="2.2" fill="${color||'#ff9c31'}"/>`:'')+'</svg>';
+  host.innerHTML=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${color||'#4d6b1c'}" stroke-width="1.5" opacity=".9"/>`
+    +(last>=0?`<circle cx="${x(last).toFixed(1)}" cy="${y(clean[last]).toFixed(1)}" r="2.2" fill="${color||'#4d6b1c'}"/>`:'')+'</svg>';
 }
 
 const lt=data.lifetime,total=data.iteration,rows=data.history,stats=data.statistics||{};
@@ -180,6 +234,7 @@ const survival=series.map(p=>p.operations?p.retained/p.operations:null);
 const durations=series.map(p=>isNum(p.span_ms)?p.span_ms/3600000:null);
 const cacheShare=series.map(p=>p.input_tokens?p.cached_input_tokens/p.input_tokens:null);
 const failShare=series.map(p=>p.tool_calls?p.failed_tool_calls/p.tool_calls:null);
+const scoreSeries=series.map(p=>p.score?Number(p.score.value):null);
 const lastOf=values=>{for(let i=values.length-1;i>=0;i--)if(isNum(values[i]))return values[i];return null};
 const prevOf=values=>{let found=0;for(let i=values.length-1;i>=0;i--)if(isNum(values[i])&&++found===2)return values[i];return null};
 function delta(values,invert){
@@ -219,12 +274,15 @@ $('#content').innerHTML=`
   ${stat('Failed tools',pct(lastOf(failShare),1),'of calls','total '+n(lt.failed_tool_calls,0)+' failures',delta(failShare))}
   ${stat('Paid',lt.actual_priced_calls?usd(lt.actual_usd_known_subtotal):NA,'actual','reference '+(lt.priced_calls?Number(lt.reference_usd_known_subtotal).toFixed(2)+' AWC':NA))}
 </div>
+<div class="grid">
+  ${panel('Commit scores','one point per recorded commit · grey line is the history average','<div id="chart-scores"></div>')}
+</div>
 <div class="grid g2">
   ${panel('Human tokens per surviving edit','oldest → newest','<div id="chart-effort"></div>')}
   ${panel('AWC per surviving edit','oldest → newest','<div id="chart-cost"></div>')}
 </div>
 <div class="grid g2">
-  ${panel('Retention and rework','share of observed edits','<div id="chart-retention"></div><div class="legend"><span><i style="background:#39c2b4"></i>survived</span><span><i style="background:#ff9c31"></i>reworked</span></div>')}
+  ${panel('Retention and rework','share of observed edits','<div id="chart-retention"></div><div class="legend"><span><i style="background:#4d6b1c"></i>survived</span><span><i style="background:#c2691e"></i>reworked</span></div>')}
   ${panel('Surviving edits per commit','volume','<div id="chart-volume"></div>')}
 </div>
 <div class="grid">
@@ -278,7 +336,7 @@ function line(host,sets,opts){
   const x=i=>left+(w-left-right)*i/Math.max(1,count-1),y=v=>top+(h-top-bottom)*(1-(v-lo)/(hi-lo||1));
   let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(opts&&opts.label||'')}">`;
   for(let i=0;i<=2;i++){const v=hi*i/2;
-    svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#1a222d"/>`
+    svg+=`<line x1="${left}" x2="${w-right}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#e7e2d2"/>`
       +`<text class="axis" x="0" y="${(y(v)+3).toFixed(1)}">${esc(opts&&opts.fmt?opts.fmt(v):n(v,1))}</text>`}
   for(const set of sets){
     let d='';set.values.forEach((v,i)=>{if(!isNum(v))return;d+=(d?' L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)});
@@ -295,31 +353,37 @@ function bars(host,values,labels){
   const slot=(w-left-right)/Math.max(1,values.length),width=Math.max(3,Math.min(26,slot*.62));
   let svg=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Surviving edits per commit">`;
   for(let i=0;i<=2;i++){const v=hi*i/2,y=top+(h-top-bottom)*(1-v/hi);
-    svg+=`<line x1="${left}" x2="${w-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1a222d"/><text class="axis" x="0" y="${(y+3).toFixed(1)}">${short(v)}</text>`}
+    svg+=`<line x1="${left}" x2="${w-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e7e2d2"/><text class="axis" x="0" y="${(y+3).toFixed(1)}">${short(v)}</text>`}
   values.forEach((v,i)=>{if(!isNum(v))return;const bh=(h-top-bottom)*v/hi,x=left+slot*i+(slot-width)/2;
-    svg+=`<rect x="${x.toFixed(1)}" y="${(h-bottom-bh).toFixed(1)}" width="${width.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${i===values.length-1?'#ff9c31':'#39c2b4'}" opacity="${i===values.length-1?1:.65}"><title>${esc(labels[i])}</title></rect>`});
+    svg+=`<rect x="${x.toFixed(1)}" y="${(h-bottom-bh).toFixed(1)}" width="${width.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${i===values.length-1?'#4d6b1c':'#7a9a2e'}" opacity="${i===values.length-1?1:.65}"><title>${esc(labels[i])}</title></rect>`});
   el.innerHTML=svg+'</svg>';
 }
 function draw(){
-  line('#chart-effort',[{name:'human tokens / edit',values:ratesHuman,color:'#ff9c31'}],
+  line('#chart-scores',[{name:'commit score',values:scoreSeries,color:'#4d6b1c'},
+    ...(isNum(stats.average)?[{name:'history average',values:scoreSeries.map(()=>stats.average),color:'#9aa08e'}]:[])],
+    {max:100,fmt:v=>Math.round(v),label:'Score per recorded commit'});
+  line('#chart-effort',[{name:'human tokens / edit',values:ratesHuman,color:'#a86f08'}],
     {label:'Human tokens per surviving edit',fmt:v=>short(v)});
-  line('#chart-cost',[{name:'AWC / edit',values:ratesCost,color:'#39c2b4'}],
+  line('#chart-cost',[{name:'AWC / edit',values:ratesCost,color:'#4d6b1c'}],
     {label:'AWC per surviving edit',fmt:v=>v>=1?v.toFixed(1):v.toFixed(3)});
-  line('#chart-retention',[{name:'survived',values:survival.map(v=>isNum(v)?v*100:null),color:'#39c2b4'},
-    {name:'reworked',values:survival.map(v=>isNum(v)?(1-v)*100:null),color:'#ff9c31'}],{max:100,fmt:v=>Math.round(v)+'%',label:'Retention and rework'});
+  line('#chart-retention',[{name:'survived',values:survival.map(v=>isNum(v)?v*100:null),color:'#4d6b1c'},
+    {name:'reworked',values:survival.map(v=>isNum(v)?(1-v)*100:null),color:'#c2691e'}],{max:100,fmt:v=>Math.round(v)+'%',label:'Retention and rework'});
   bars('#chart-volume',series.map(p=>p.retained),series.map(p=>p.commit.slice(0,7)+' · '+n(p.retained,0)+' surviving edits'));
 }
 
 const indexGrids=[...$('#content').querySelectorAll(':scope > .grid')];
-const historyView=`<div class="section-heading"><h2>Iteration history</h2><p>Newest first · Select a change to view its score</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>Version / change</th><th class="r">Iteration score</th><th class="r opt">Running total</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="3">No iterations recorded</td></tr>'}</tbody></table></div></section>`;
+const latestScore=rows.length&&rows[0].score?rows[0].score:null;
+const historyView=`<div class="section-heading"><h2>Iteration history</h2><p>Newest first · Select a change to view its score</p></div><section class="iterations"><div class="scroll"><table><thead><tr><th>Version / change</th><th class="r">Iteration score</th><th class="r opt">Survival</th><th class="r opt">Steering</th><th class="r opt">Running total</th></tr></thead><tbody>${rows.map(p=>`<tr><td><a class="iteration-title" href="${esc((data.links&&data.links.commit)||'reports/')}${esc(p.commit)}.html">${esc(p.title)}</a><span class="hint">${esc(p.commit.slice(0,7))} · ${esc(dayOf(p.date))}</span></td><td class="r iteration-score num">${p.score?`<span class="gchip" style="background:${gradeColor(p.score.grade)}">${esc(p.score.grade)}</span>`:''}${n(p.score?p.score.value:null,1)}</td><td class="r opt num">${p.operations?pct(p.retained/p.operations,0):NA}</td><td class="r opt num">${p.retained?n(p.human_tokens/p.retained,0):NA}</td><td class="r opt num">${n(p.total,1)}</td></tr>`).join('')||'<tr><td colspan="5">No iterations recorded</td></tr>'}</tbody></table></div></section>`;
 scoreLayout(scoreHero('Total score',total?total.value:null,'','The cumulative score of all rated iterations through the current version.',
   '<h3>How the total changed</h3>'+kv('Previous total',n(total?total.previous:null,1))+
   kv('This iteration adds',isNum(total&&total.delta)?'+'+n(total.delta,1):NA)+kv('Rated iterations',n(total?total.rated_commits:lt.scored_commits,0))+
+  (isNum(stats.average)?kv('Average commit score',n(stats.average,1)):'')+
+  (latestScore?kv('Latest commit',latestScore.value+' · grade '+latestScore.grade):'')+
   '<p class="note">Total = previous total + this iteration score. The total grows with recorded work; it does not measure code quality.</p>'),[
-  ['Efficiency & trends','Human input, cost, retention and execution',indexGrids.slice(0,4)],
-  ['Usage & development style','Models, tools, artifacts and development patterns',[indexGrids[4],indexGrids[6]]],
-  ['Scoring & accumulation','Algorithms, accumulation rules and chain verification',indexGrids.slice(7)]
-],historyView);
+  ['Efficiency & trends','Human input, cost, retention and execution',indexGrids.slice(3,5)],
+  ['Usage & development style','Models, tools, artifacts and development patterns',[indexGrids[5],indexGrids[7]]],
+  ['Scoring & accumulation','Algorithms, accumulation rules and chain verification',indexGrids.slice(8)]
+],historyView,[indexGrids[0],indexGrids[1],indexGrids[2]]);
 $('#content').addEventListener('toggle',()=>requestAnimationFrame(draw),true);
 draw();
 let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(draw,150)});

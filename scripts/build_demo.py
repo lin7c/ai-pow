@@ -204,6 +204,8 @@ def main():
                 "derived": row["derived"], "diff": row["diff"], "links": {"index": "../index.html"}}
         index = rows.index(row)
         page["trend"] = [item["contribution"] for item in chain[max(0, index - 11):index + 1]]
+        priors = [{"score": r["score"]} for r in reversed(rows[:index])]
+        page["statistics"] = history_stats(row["score"], priors) if priors else None
         if index:
             page["current"]["parent"] = rows[index - 1]["commit"]
             page["baseline"] = {"commit": rows[index - 1]["commit"],

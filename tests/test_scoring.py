@@ -201,12 +201,18 @@ class ReportTests(unittest.TestCase):
         second = self.commit("second")
         proof = self.rec.seal()
         commit_page = self.rec.report_data()
-        # The commit page knows only this commit: no history, no cumulative total.
+        # The commit page carries no history list, cumulative total or lifetime
+        # pools, but it does carry summary statistics over prior commits: the
+        # redesigned proof page judges its score against the project's own
+        # history (average, previous, same-scope peers) without listing it.
         self.assertEqual(commit_page["current"]["commit"], second)
         self.assertEqual(commit_page["current"]["parent"], first)
         self.assertEqual(commit_page["kind"], "commit")
-        for absent in ("history", "iteration", "lifetime", "statistics"):
+        for absent in ("history", "iteration", "lifetime"):
             self.assertNotIn(absent, commit_page)
+        self.assertEqual(commit_page["statistics"]["count"], 1)
+        self.assertIsNone(commit_page["statistics"]["percentile"],
+                          "a percentile needs at least three same-scope priors")
         self.assertIn("files", commit_page["derived"])
         index = self.rec.index_data()
         self.assertEqual(index["kind"], "index")

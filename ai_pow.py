@@ -776,8 +776,17 @@ class Recorder:
                                 "totals": cumulative_view(body["cumulative"])}
             trend = [json.loads(body)["contribution"] for body, in db.execute(
                 "SELECT body FROM iterations ORDER BY seq DESC LIMIT 12")][::-1]
+            statistics = None
+            if chain and current.get("score"):
+                from ai_pow_scoring import history_stats
+                priors = [{"score": body["contribution"].get("score")}
+                          for body in (json.loads(raw) for (raw,) in db.execute(
+                              "SELECT body FROM iterations ORDER BY seq DESC"))
+                          if body["seq"] < chain["seq"] and body["contribution"].get("score")]
+                if priors:
+                    statistics = history_stats(current["score"], priors)
         return {"project": self.root.name, "kind": "commit", "demo": False,
-                "baseline": baseline, "trend": trend,
+                "baseline": baseline, "trend": trend, "statistics": statistics,
                 "current": {**self.commit_meta_row(current["commit"]), "score": current.get("score"),
                             "summary": current["summary"], "proof_hash": current["proof_hash"],
                             "parent": parents[0] if parents else None, "tree": current.get("tree"),
